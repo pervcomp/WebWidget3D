@@ -10,10 +10,10 @@ var pictureDisplay = undefined;
 var WIDTH = 824;
 var HEIGHT = 668;
 
-var pictures = ["img/kitten1.jpg", "img/bunny1.jpg", "img/rat1.jpg", "img/bunny2.jpg", "img/duc1.jpg",
-  "img/kitten2.jpg", "img/mouse1.jpg", "img/bunny3.jpg", "img/hedgehog1.png", "img/hamster1.jpg",
-  "img/kitten3.jpg", "img/penguin1.jpg", "img/lemur1.jpg", "img/hamster2.jpg", "img/kitten4.jpg",
-  "img/penguin2.jpg", "img/hamster3.jpg", "img/hedgehog2.jpg"];
+var pictures = ["img/jp1.jpg", "img/jp2.jpg", "img/jp3.jpg", "img/jp4.jpg", "img/jp5.jpg",
+  "img/jp6.jpg", "img/jp7.jpg", "img/jp8.jpg", "img/jp9.jpg", "img/jp10.jpg",
+  "img/jp11.jpg", "img/jp12.jpg", "img/jp13.jpg", "img/jp14.jpg", "img/jp15.jpg",
+  "img/jp16.jpg", "img/jp17.jpg", "img/jp18.jpg"];
 
 var lastTime = 0;
 var elapsed = 0;

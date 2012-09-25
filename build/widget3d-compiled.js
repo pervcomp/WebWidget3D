@@ -1609,9 +1609,7 @@ THREEJS_WIDGET3D.GridIcon.prototype.setToPlace = function(){
     var lastIcon = this.parent_.children_[this.parent_.children_.length-2];
     var lastIconLoc = lastIcon.getLocation();
     
-    //somehow this isn't wirking properly. the modulo is never 0 which is weird..
-    if((this.parent_.children_.length-1 % this.parent_.density_) == 0 ||
-      this.parent_.children_.length-1 == this.parent_.density_)
+    if(((this.parent_.children_.length-1) % this.parent_.density_) == 0)
     {  
       var x = parentLeft + slotCenterX;
       var y = lastIconLoc.y - stepY;

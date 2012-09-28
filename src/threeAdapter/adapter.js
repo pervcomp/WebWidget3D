@@ -44,13 +44,18 @@ THREEJS_WIDGET3D.init = function(parameters){
       var width = parameters.width !== undefined ? parameters.width : window.innerWidth;
       var height = parameters.height !== undefined ? parameters.height : window.innerHeight;
       
-      THREEJS_WIDGET3D.renderer = new THREE.WebGLRenderer();
+      var antialias = parameters.antialias !== undefined ? parameters.antialias : true;
+      var domParent = parameters.domParent !== undefined ? parameters.domParent : document.body;
+      
+      THREEJS_WIDGET3D.renderer = new THREE.WebGLRenderer({antialias: antialias});
       THREEJS_WIDGET3D.renderer.setSize( width, height );
       
       var clearColor = parameters.clearColor !== undefined ? parameters.clearColor : 0x333333;
-      THREEJS_WIDGET3D.renderer.setClearColorHex( clearColor, 1 );
+      var opacity = parameters.opacity !== undefined ? parameters.opacity : 1;
       
-      document.body.appendChild(THREEJS_WIDGET3D.renderer.domElement);
+      THREEJS_WIDGET3D.renderer.setClearColorHex( clearColor, opacity );
+      
+      domParent.appendChild(THREEJS_WIDGET3D.renderer.domElement);
     }
     
     THREEJS_WIDGET3D.camera = parameters.camera !== undefined ? parameters.camera  : 

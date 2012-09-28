@@ -62,11 +62,8 @@ THREEJS_WIDGET3D.GridWindow = function(parameters){
       color: color,
       opacity: 0.5,
       wireframe: true,
+      side : THREE.DoubleSide,
       wireframeLinewidth : lineWidth}) );
-  
-  mesh.doubleSided = true;
-  mesh.flipSided = true;
-  mesh.rotation.x = Math.PI/2;
   
   this.setMesh(mesh);
   
@@ -127,7 +124,17 @@ THREEJS_WIDGET3D.GridIcon = function(parameters){
   
   var parameters = parameters || {};
   
-  var parent = parameters.parent !== undefined ? parameters.parent : WIDGET3D.getMainWindow();
+  var parent = parameters.parent;
+  if(parent == undefined){
+    console.log("GridIcon needs to have grid window as parent!");
+    console.log("Parent has to be given in parameters.");
+    return false;
+  }
+  
+  var parameters = parameters || {};
+  
+  var color = parameters.color !== undefined ? parameters.color : 0xFFFFFF;
+  var picture = parameters.picture !== undefined ? parameters.picture : false;
   
   this.width_ = parent.width_/(parent.density_ + 3.3);
   this.height_ = parent.height_/(parent.density_ + 3.3);
@@ -135,13 +142,13 @@ THREEJS_WIDGET3D.GridIcon = function(parameters){
   
   var geometry = new THREE.CubeGeometry(this.width_, this.height_, this.depth_);
   
-  var color = parameters.color;
-  var picture = parameters.picture;
-  
   var texture;
   
   if(picture){
     texture = THREE.ImageUtils.loadTexture(picture);
+  }
+  else{
+    texture = false;
   }
   var material = new THREE.MeshBasicMaterial({map : texture, color: color});
   

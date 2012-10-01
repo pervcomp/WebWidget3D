@@ -55,13 +55,9 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
   
   var color = parameters.color !== undefined ? parameters.color : 0x808080;
   var texture = parameters.texture;
-  var material = parameters.material !== undefined ? parameters.material :  new THREE.MeshBasicMaterial({color : color, map : texture});
+  var material = parameters.material !== undefined ? parameters.material :  new THREE.MeshBasicMaterial({color : color, map : texture, side : THREE.DoubleSide});
   
   var mesh =  new THREE.Mesh( new THREE.PlaneGeometry( this.width_, this.height_ ), material);
-  
-  mesh.doubleSided = true;
-  mesh.flipSided = true;
-  mesh.rotation.x = Math.PI/2;
   
   this.setMesh(mesh);
   
@@ -79,11 +75,7 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
   this.closeButton_ = new WIDGET3D.Basic();
   
   var buttonMesh = new THREE.Mesh( new THREE.PlaneGeometry( this.width_/10.0, this.height_/10.0 ),
-    new THREE.MeshBasicMaterial( { color: 0xAA0000} ) );
-  
-  buttonMesh.doubleSided = true;
-  buttonMesh.flipSided = true;
-  buttonMesh.rotation.x = Math.PI/2;
+    new THREE.MeshBasicMaterial( { color: 0xAA0000, side : this.mesh_.material.side} ) );
   
   this.closeButton_.setMesh(buttonMesh);
   this.closeButton_.setLocation(((this.width_/2.0)-(this.width_/20.0)), ((this.height_/2.0)+(this.height_/20.0)), 0);
@@ -106,7 +98,9 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
   
   this.addChild(this.title_);
   
-  if(parameters.defaultControls){
+  this.defaultControls_ = parameters.defaultControls !== undefined ? parameters.defaultControls : false;
+  
+  if(this.defaultControls_){
     this.title_.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler, this);
     this.title_.addEventListener(WIDGET3D.EventType.onmouseup, this.mouseupHandler, this);
     this.title_.addEventListener(WIDGET3D.EventType.onmousemove, this.mousemoveHandler, this);
@@ -116,20 +110,22 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
 THREEJS_WIDGET3D.TitledWindow.prototype = WIDGET3D.Window.prototype.inheritance();
 
 
-//TODO: FIX DRAG CONTROLLS TO TAKE ROTATIONS ON COUNT AND FIX THE MOUSE POSITION THING TOO
+//TODO: FIX (DOESN'T WORK PROPERLY)
 THREEJS_WIDGET3D.TitledWindow.prototype.update = function(){
   
-  var point = new THREE.Vector3( this.modelLocationX_, this.modelLocationY_, 1.0);
+  if(this.defaultControls_){
+    var point = new THREE.Vector3( this.modelLocationX_, this.modelLocationY_, 1.0);
 
-  THREEJS_WIDGET3D.projector.unprojectVector( point, THREEJS_WIDGET3D.camera ).normalize();
-  
-  point.x = point.x * WIDGET3D.getRealWidth();
-  point.y = point.y * WIDGET3D.getRealHeight();
-  
-  var loc = this.getLocation();
-  this.setY(loc.y + (point.y - loc.y ));
-  this.setX(loc.x + (point.x - loc.x ));
+    THREEJS_WIDGET3D.projector.unprojectVector( point, THREEJS_WIDGET3D.camera ).normalize();
     
+    point.x = point.x * WIDGET3D.getRealWidth();
+    point.y = point.y * WIDGET3D.getRealHeight();
+    
+    var loc = this.getLocation();
+    this.setY(loc.y + (point.y - loc.y ));
+    this.setX(loc.x + (point.x - loc.x ));
+  }
+  
   if(this.updateCallback_){
     this.updateCallback_.callback(this.updateCallback_.arguments);
   }
@@ -150,13 +146,9 @@ THREEJS_WIDGET3D.TitledWindow.prototype.setTitle = function(title){
   this.titleContext_.fillText(title, 10, this.textureCanvas_.height/2);
   var texture = new THREE.Texture(this.textureCanvas_);
   
-  var material = new THREE.MeshBasicMaterial({ map: texture });
+  var material = new THREE.MeshBasicMaterial({ map: texture, side : this.mesh_.material.side });
   
   var mesh = new THREE.Mesh( new THREE.PlaneGeometry(this.width_ - this.width_/10.0, this.height_/10.0), material);
-  
-  mesh.doubleSided = true;
-  mesh.flipSided = true;
-  mesh.rotation.x = Math.PI/2;
   
   this.title_.setMesh(mesh);
   

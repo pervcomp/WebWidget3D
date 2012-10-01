@@ -1,0 +1,31 @@
+<html>
+  <head>
+    <title>TitledWindow Example</title>
+    <style>
+      body{
+        margin:0%;
+        padding:0px;
+        text-align:center;
+        background-color:#B6C5BE;
+      }
+      
+      canvas{
+        outline:0;
+        margin: 0;
+        padding:0;
+      }
+    </style>
+    
+    
+    <script type="text/javascript" src="../externals/threeJS_r51/build/Three.js"></script>
+    <script type="text/javascript" src="../build/widget3d-compiled.js"></script>
+    <script type="text/javascript" src="videoWindow.js"></script>
+    
+    
+  </head>
+  <body onload="init();">
+    <video id="video" autoplay loop style="display:none">
+      <source src="video/sintel.ogv" type='video/ogg; codecs="theora, vorbis"'>
+    </video>
+  </boby>
+</html>

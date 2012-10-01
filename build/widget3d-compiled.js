@@ -2210,7 +2210,6 @@ THREEJS_WIDGET3D.SelectDialog.prototype.createText = function(){
   var mesh = new THREE.Mesh(new THREE.CubeGeometry(this.width_, this.choiceHeight_, 10), material);
 
   mesh.position.y = this.height_*0.5 - this.choiceHeight_*0.5;
-  console.log(this.choiceHeight_);
   
   this.setMesh(mesh);
 }

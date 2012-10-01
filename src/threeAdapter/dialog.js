@@ -42,8 +42,8 @@ THREEJS_WIDGET3D.Dialog = function(parameters){
 
   this.width_ = parameters.width !== undefined ? parameters.width : 1000;
   this.height_ = parameters.height !== undefined ? parameters.height : 1000;
-  this.color_ = parameters.color !== undefined ? parameters.color : 0xFFFFFF;
-  this.opacity_ = parameters.opacity !== undefined ? parameters.opacity : 0.7;
+  this.color_ = parameters.color !== undefined ? parameters.color : 0xC0D0D0;
+  this.opacity_ = parameters.opacity !== undefined ? parameters.opacity : 0.9;
   this.text_ = parameters.text !== undefined ? parameters.text : "This is a dialog";
   this.buttonText_ = parameters.buttonText !== undefined ? parameters.buttonText : "submit";
   this.maxTextLength = parameters.maxTextLength !== undefined ? parameters.maxTextLength : undefined;
@@ -58,10 +58,6 @@ THREEJS_WIDGET3D.Dialog = function(parameters){
   this.material_ = this.createDialogText(this.text_);
   
   var mesh = new THREE.Mesh(new THREE.PlaneGeometry(this.width_, this.height_), this.material_);
-  
-  mesh.doubleSided = true;
-  mesh.flipSided = true;
-  mesh.rotation.x = Math.PI/2;
   
   this.setMesh(mesh);
   

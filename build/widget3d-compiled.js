@@ -1914,8 +1914,8 @@ THREEJS_WIDGET3D.Dialog = function(parameters){
 
   this.width_ = parameters.width !== undefined ? parameters.width : 1000;
   this.height_ = parameters.height !== undefined ? parameters.height : 1000;
-  this.color_ = parameters.color !== undefined ? parameters.color : 0xFFFFFF;
-  this.opacity_ = parameters.opacity !== undefined ? parameters.opacity : 0.7;
+  this.color_ = parameters.color !== undefined ? parameters.color : 0xC0D0D0;
+  this.opacity_ = parameters.opacity !== undefined ? parameters.opacity : 0.9;
   this.text_ = parameters.text !== undefined ? parameters.text : "This is a dialog";
   this.buttonText_ = parameters.buttonText !== undefined ? parameters.buttonText : "submit";
   this.maxTextLength = parameters.maxTextLength !== undefined ? parameters.maxTextLength : undefined;
@@ -1930,10 +1930,6 @@ THREEJS_WIDGET3D.Dialog = function(parameters){
   this.material_ = this.createDialogText(this.text_);
   
   var mesh = new THREE.Mesh(new THREE.PlaneGeometry(this.width_, this.height_), this.material_);
-  
-  mesh.doubleSided = true;
-  mesh.flipSided = true;
-  mesh.rotation.x = Math.PI/2;
   
   this.setMesh(mesh);
   
@@ -2041,9 +2037,6 @@ THREEJS_WIDGET3D.Dialog.prototype.createTextBox = function(){
   var texture = new THREE.Texture(this.textCanvas_);
   var material = new THREE.MeshBasicMaterial({ map: texture });
   var mesh = new THREE.Mesh( new THREE.PlaneGeometry(this.width_/1.5, this.height_/10.0), material);
-  mesh.doubleSided = true;
-  mesh.flipSided = true;
-  mesh.rotation.x = Math.PI/2;
   
   this.textBox_.setMesh(mesh);
   
@@ -2179,8 +2172,8 @@ THREEJS_WIDGET3D.SelectDialog = function(parameters){
 
   this.width_ = parameters.width !== undefined ? parameters.width : 1000;
   this.height_ = parameters.height !== undefined ? parameters.height : 1000;
-  this.color_ = parameters.color !== undefined ? parameters.color : 0xFFFFFF;
-  this.opacity_ = parameters.opacity !== undefined ? parameters.opacity : 0.7;
+  this.color_ = parameters.color !== undefined ? parameters.color : 0xC0D0D0;
+  this.opacity_ = parameters.opacity !== undefined ? parameters.opacity : 0.9;
   this.choices_ = parameters.choices !== undefined ? parameters.choices : [];
   this.hasCancel_ = parameters.hasCancel !== undefined ? parameters.hasCancel : false;
   this.text_ = parameters.text !== undefined ? parameters.text : false;
@@ -2192,6 +2185,9 @@ THREEJS_WIDGET3D.SelectDialog = function(parameters){
   
   if(this.text_){
     this.createText();
+  }
+  else{
+    this.choiceHeight_ = this.height_/((this.choices_.length)*1.2);
   }
   
   //CREATING CHOICEBUTTONS
@@ -2212,17 +2208,12 @@ THREEJS_WIDGET3D.SelectDialog.prototype.createText = function(){
   
   var material = this.createTitleMaterial(this.text_, context, this.textCanvas_);
   
-  if(!this.hasCancel_){
-    var height = this.height_/((this.choices_.length+1)*1.2);
-  }
-  else{
-    var height = this.height_/(((this.choices_.length+2)*1.2)+0.7);
-  }
+  this.choiceHeight_ = this.height_/((this.choices_.length+1)*1.2);
   
-  
-  var mesh = new THREE.Mesh(new THREE.CubeGeometry(this.width_, height, 10), material);
+  var mesh = new THREE.Mesh(new THREE.CubeGeometry(this.width_, this.choiceHeight_, 10), material);
 
-  mesh.position.y = this.height_ - height*0.5;
+  mesh.position.y = this.height_*0.5 - this.choiceHeight_*0.5;
+  console.log(this.choiceHeight_);
   
   this.setMesh(mesh);
 }
@@ -2243,18 +2234,7 @@ THREEJS_WIDGET3D.SelectDialog.prototype.createChoises = function(){
     
     var material = this.createButtonMaterial(this.choices_[i].string, choiceContext, choiceCanvas);
     var width = this.width_/1.2;
-    if(!this.hasCancel_ && !this.text_){
-      var height = this.height_/((this.choices_.length)*1.2);
-    }
-    else if(this.hasCancel_ && !this.text_){
-      var height = this.height_/(((this.choices_.length+1)*1.2)+0.7);
-    }
-    else if(!this.hasCancel_ && this.text_){
-      var height = this.height_/((this.choices_.length+1)*1.2);
-    }
-    else{
-      var height = this.height_/(((this.choices_.length+2)*1.2)+0.7);
-    }
+    var height = this.choiceHeight_;
     var mesh = new THREE.Mesh( new THREE.CubeGeometry(width, height, 10), material);
     
     choice.setMesh(mesh);
@@ -2263,14 +2243,11 @@ THREEJS_WIDGET3D.SelectDialog.prototype.createChoises = function(){
     var y = 0;
     if(i == 0){
       if(this.text_){
-        y = this.height_ - height*1.7;
+        y = this.height_*0.5 - height*1.7;
       }
       else{
-        y = this.height_ - height*0.5;
+        y = this.height_*0.5 - height*0.5;
       }
-    }
-    else if(this.hasCancel_ && i > 1 && i == this.choices_.length-1){
-      y = lastY - 1.7*height;
     }
     else{
       y = lastY - 1.2*height;

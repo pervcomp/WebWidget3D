@@ -65,9 +65,6 @@ THREEJS_WIDGET3D.init = function(parameters){
     
     THREEJS_WIDGET3D.scene = parameters.scene !== undefined ? parameters.scene : new THREE.Scene();
     
-    //NOT NEEDED IN three.js r50!
-    THREEJS_WIDGET3D.scene.add(THREEJS_WIDGET3D.camera);
-    
     var mainWindow = false;
     
     if(!WIDGET3D.isInitialized()){

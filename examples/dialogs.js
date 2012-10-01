@@ -23,32 +23,46 @@ var init = function(){
     clearColor : 0xf9f9f9
   });
   
-  THREEJS_WIDGET3D.camera.position.z = 2000;
+  THREEJS_WIDGET3D.camera.position.z = 1500;
   
   //--------------------------------------------
   // Example dialog
   //--------------------------------------------
   
   //styled window
-  var dialog = new THREEJS_WIDGET3D.Dialog({width : 480*7,
-    height : 204*7,
-    title : "video",
-    texture : texture});
-  
-  //CALLBACK FOR UPDATING TEXTURE
-  videoWindow.addUpdateCallback(function(texture){texture.needsUpdate = true}, texture);
+  var dialog = new THREEJS_WIDGET3D.Dialog({height : 1500, width : 1500});
   
   //ONCLICK EVENT LISTENER FOR CLOSE BUTTON
-  videoWindow.closeButton_.addEventListener(WIDGET3D.EventType.onclick,
-    function(event, p){p.video.pause(); p.window.remove()},
-    {video : video, window : videoWindow});
+  dialog.button_.addEventListener(WIDGET3D.EventType.onclick,
+    function(event, dialog){dialog.remove()}, dialog);
+    
+  dialog.setX(-800);
   
-  mainWindow.addChild(videoWindow);
+  mainWindow.addChild(dialog);
+  
+  var choices = [
+    {string : "choice1", onclick : {}},
+    {string : "choice2", onclick : {}},
+    {string : "choice3", onclick : {}},
+    {string : "choice4", onclick : {}},
+    {string : "choice5", onclick : {}},
+    {string : "choice6", onclick : {}}
+  ];
+  
+  var select = new THREEJS_WIDGET3D.SelectDialog({text : "Menu",
+    choices: choices,
+    hasCancel : true,
+    width : 1500,
+    height : 1500});
+  
+  select.setX(800);
+  
+  mainWindow.addChild(select);
   
   var mainLoop = function(){
     requestAnimationFrame( mainLoop );
 
-    videoWindow.update();
+    dialog.update();
     
     THREEJS_WIDGET3D.render();
   };

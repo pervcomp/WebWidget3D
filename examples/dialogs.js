@@ -26,20 +26,11 @@ var init = function(){
   THREEJS_WIDGET3D.camera.position.z = 2000;
   
   //--------------------------------------------
-  // TITLED WINDOW WHERE WE SHOW THE VIDEO
+  // Example dialog
   //--------------------------------------------
   
-  //Video texture for video display
-  var video = document.getElementById( 'video' );
-  var texture = texture = new THREE.Texture( video );
-  texture.minFilter = THREE.LinearFilter;
-  texture.magFilter = THREE.LinearFilter;
-  texture.format = THREE.RGBFormat;
-  texture.generateMipmaps = false;
-  
-  
   //styled window
-  var videoWindow = new THREEJS_WIDGET3D.TitledWindow({width : 480*7,
+  var dialog = new THREEJS_WIDGET3D.Dialog({width : 480*7,
     height : 204*7,
     title : "video",
     texture : texture});

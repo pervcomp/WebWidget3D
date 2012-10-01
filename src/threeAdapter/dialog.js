@@ -169,9 +169,6 @@ THREEJS_WIDGET3D.Dialog.prototype.createTextBox = function(){
   var texture = new THREE.Texture(this.textCanvas_);
   var material = new THREE.MeshBasicMaterial({ map: texture });
   var mesh = new THREE.Mesh( new THREE.PlaneGeometry(this.width_/1.5, this.height_/10.0), material);
-  mesh.doubleSided = true;
-  mesh.flipSided = true;
-  mesh.rotation.x = Math.PI/2;
   
   this.textBox_.setMesh(mesh);
   

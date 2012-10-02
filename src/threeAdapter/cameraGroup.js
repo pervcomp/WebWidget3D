@@ -53,7 +53,7 @@ THREEJS_WIDGET3D.CameraGroup.prototype = WIDGET3D.Window.prototype.inheritance()
 
 //Adds the object to cameragroup.
 //objects place is its offset from camera (camera is in origo when component is added)
-THREEJS_WIDGET3D.prototype.addChild = function(object){
+THREEJS_WIDGET3D.CameraGroup.prototype.addChild = function(object){
   var rot = this.getRot();
   var loc = this.getLocation();
   

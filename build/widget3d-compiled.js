@@ -1701,14 +1701,6 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
   
   this.setMesh(mesh);
   
-  //drag controlls
-  this.clickLocation_;
-  this.locationOnMouseDownY_;
-  this.locationOnMousedownX_;
-  this.modelLocationY_ = this.getLocation().y;
-  this.modelLocationX_ = this.getLocation().x;
-  this.drag_ = false;
-  
   //---------------------------------------------------
   //CLOSE BUTTON
   //---------------------------------------------------
@@ -1740,6 +1732,13 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
   
   this.defaultControls_ = parameters.defaultControls !== undefined ? parameters.defaultControls : false;
   
+  //drag controlls
+  this.clickStart_ = 0;
+  this.clickEnd_ = 0;
+  this.deltaY_ = 0.0;
+  this.deltaX_ = 0.0;
+  this.drag_ = false;
+  
   if(this.defaultControls_){
     this.title_.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler, this);
     this.title_.addEventListener(WIDGET3D.EventType.onmouseup, this.mouseupHandler, this);
@@ -1754,16 +1753,9 @@ THREEJS_WIDGET3D.TitledWindow.prototype = WIDGET3D.Window.prototype.inheritance(
 THREEJS_WIDGET3D.TitledWindow.prototype.update = function(){
   
   if(this.defaultControls_){
-    var point = new THREE.Vector3( this.modelLocationX_, this.modelLocationY_, 1.0);
-
-    THREEJS_WIDGET3D.projector.unprojectVector( point, THREEJS_WIDGET3D.camera ).normalize();
-    
-    point.x = point.x * WIDGET3D.getRealWidth();
-    point.y = point.y * WIDGET3D.getRealHeight();
-    
     var loc = this.getLocation();
-    this.setY(loc.y + (point.y - loc.y ));
-    this.setX(loc.x + (point.x - loc.x ));
+    this.setY(loc.y + this.deltaY_);
+    this.setX(loc.x + this.deltaX_);
   }
   
   if(this.updateCallback_){
@@ -1805,24 +1797,34 @@ THREEJS_WIDGET3D.TitledWindow.prototype.mousedownHandler = function(event, windo
   
   window.drag_ = true;
   
-  window.clickLocation_ = WIDGET3D.normalizedMouseCoordinates(event);
-  
-  window.locationOnMouseDownY_ = window.modelLocationY_;
-  window.locationOnMouseDownX_ = window.modelLocationX_;
-  
+  var mouse = WIDGET3D.normalizedMouseCoordinates(event);
+  var point = new THREE.Vector3( mouse.x, mouse.y, 1.0);
+    
+  window.clickStart_ = THREEJS_WIDGET3D.projector.unprojectVector( point, THREEJS_WIDGET3D.camera );
+  window.clickEnd_ = window.clickStart_;
 };
 
-THREEJS_WIDGET3D.TitledWindow.prototype.mouseupHandler = function(event, window){
+THREEJS_WIDGET3D.TitledWindow.prototype.mouseupHandler = function(event, window){  
   window.drag_ = false;
+  window.deltaY_ = 0.0;
+  window.deltaX_ = 0.0;
 };
 
 THREEJS_WIDGET3D.TitledWindow.prototype.mousemoveHandler = function(event, window){
   if (window.drag_){
-  
-    var mouse = WIDGET3D.normalizedMouseCoordinates(event);
     
-    window.modelLocationY_ = window.locationOnMouseDownY_ + ( mouse.y - window.clickLocation_.y );
-    window.modelLocationX_ = window.locationOnMouseDownX_ + ( mouse.x - window.clickLocation_.x );
+    var mouse = WIDGET3D.normalizedMouseCoordinates(event);
+    var point = new THREE.Vector3( mouse.x, mouse.y, 1.0);
+    var wPoint = THREEJS_WIDGET3D.projector.unprojectVector( point, THREEJS_WIDGET3D.camera );
+    
+    window.deltaY_ = wPoint.y - window.clickStart_.y;
+    window.deltaX_ = wPoint.x - window.clickStart_.x;
+    
+    window.clickEnd_ = wPoint;
+    console.log("----------------");
+    console.log("x: "+window.deltaX_);
+    console.log("y: "+window.deltaY_);
+    console.log("----------------");
   }
 };
 

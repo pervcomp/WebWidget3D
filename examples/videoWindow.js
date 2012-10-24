@@ -42,7 +42,8 @@ var init = function(){
   var videoWindow = new THREEJS_WIDGET3D.TitledWindow({width : 480*7,
     height : 204*7,
     title : "video",
-    texture : texture});
+    texture : texture,
+    defaultControls : true});
   
   //CALLBACK FOR UPDATING TEXTURE
   videoWindow.addUpdateCallback(function(texture){texture.needsUpdate = true}, texture);
@@ -51,8 +52,10 @@ var init = function(){
   videoWindow.closeButton_.addEventListener(WIDGET3D.EventType.onclick,
     function(event, p){p.video.pause(); p.window.remove()},
     {video : video, window : videoWindow});
-  
+    
+
   mainWindow.addChild(videoWindow);
+  
   
   var mainLoop = function(){
     requestAnimationFrame( mainLoop );

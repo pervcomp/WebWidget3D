@@ -91,11 +91,14 @@ THREEJS_WIDGET3D.GridWindow.prototype.update = function(){
 };
 
 THREEJS_WIDGET3D.GridWindow.prototype.mousedownHandler = function(event, window){
-  window.rotate_ = true;
-  
-  window.clickLocation_ = WIDGET3D.normalizedMouseCoordinates(event);
-  window.rotationOnMouseDownY_ = window.modelRotationY_;
-  window.rotationOnMouseDownX_ = window.modelRotationX_;
+  window.focus();
+  if(!window.rotate_){
+    window.rotate_ = true;
+    
+    window.clickLocation_ = WIDGET3D.normalizedMouseCoordinates(event);
+    window.rotationOnMouseDownY_ = window.modelRotationY_;
+    window.rotationOnMouseDownX_ = window.modelRotationX_;
+  }
   
   return false;
 };

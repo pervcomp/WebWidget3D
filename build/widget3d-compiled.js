@@ -1758,8 +1758,10 @@ THREEJS_WIDGET3D.TitledWindow.prototype = WIDGET3D.Window.prototype.inheritance(
 THREEJS_WIDGET3D.TitledWindow.prototype.update = function(){
   
   if(this.defaultControls_){
-    this.setY(this.newPos_.y);
-    this.setX(this.newPos_.x);
+    //this.setY(this.newPos_.y);
+    //this.setX(this.newPos_.x);
+    
+    this.setLocation(this.newPos_.x, this.newPos_.y, this.newPos_.z);
   }
   
   if(this.updateCallback_){
@@ -1817,13 +1819,19 @@ THREEJS_WIDGET3D.TitledWindow.prototype.mouseupHandler = function(event, window)
 THREEJS_WIDGET3D.TitledWindow.prototype.mousemoveHandler = function(event, window){
   if (window.drag_){
     var point = event.objectCoordinates;
-    
+    var rotation = THREEJS_WIDGET3D.camera.rotation;
+
     var dy = point.y - window.clickStart_.y;
     var dx = point.x - window.clickStart_.x;
     
     var pos = window.getLocation();
-    window.newPos_.y = pos.y + dy;
-    window.newPos_.x = pos.x + dx;
+    //window.newPos_.y = pos.y + dy;
+    //window.newPos_.x = pos.x + dx;
+    
+    window.newPos_.y = pos.y - (dy * Math.cos(Math.PI * rotation.x));
+    window.newPos_.z = pos.z + (dy * Math.sin(Math.PI * rotation.x));// * Math.sin(Math.PI * rotation.y)));// + (pos.z + (dx * Math.sin(Math.PI * rotation.y)));
+    //window.newPos_.x = (pos.x + (dy * Math.sin(Math.PI * rotation.x) * Math.sin(Math.PI * rotation.y)));// + (pos.x + (dx * Math.cos(Math.PI * rotation.y)));
+    
   }
 };
 

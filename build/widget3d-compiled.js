@@ -1693,6 +1693,8 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
   
   WIDGET3D.Window.call( this );
   
+  var that = this;
+  
   var parameters = parameters || {};
   
   this.width_ = parameters.width !== undefined ? parameters.width : 2000;
@@ -1741,14 +1743,50 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
   
   //drag controlls
   this.clickStart_ = undefined;
+  this.timeNow_ = 0;
+  this.clickStartTime_ = undefined;
   this.newPos_ = this.getLocation();
+  this.lastDs_ = {x : 0.0, y : 0.0};
   this.drag_ = false;
   
   if(this.defaultControls_){
     this.title_.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler, this);
-    this.title_.addEventListener(WIDGET3D.EventType.onmouseup, this.mouseupHandler, this);
-    this.title_.addEventListener(WIDGET3D.EventType.onmousemove, this.mousemoveHandler, this);
   }
+  
+  this.mouseupHandler = function(event){  
+    that.drag_ = false;
+    that.clickStart_ = undefined;
+    delete THREEJS_WIDGET3D.renderer.domElement.onmousemove;
+    delete THREEJS_WIDGET3D.renderer.domElement.onmouseup;
+  };
+  
+  this.mousemoveHandler = function(event){
+    if(that.drag_){
+      
+      var point = WIDGET3D.mouseCoordinates(event);
+      
+      var dy = -(point.y - that.clickStart_.y);
+      var dx = (point.x - that.clickStart_.x);
+      
+      var dtime = (new Date().getTime() - that.clickStartTime_)/100.0;
+      
+      var vy = dy/dtime;
+      var vx = dx/dtime;
+      
+      console.log("vy: "+vy);
+      console.log("vx: "+vx);
+      
+      var pos = that.getLocation();
+      var rotation = that.getRot();
+      
+      var tmpX = pos.x + (vx * Math.cos(Math.PI * rotation.y));
+      var tmpZ = pos.z + (vx * Math.sin(Math.PI * rotation.y));
+      
+      that.newPos_.y = pos.y + (vy * Math.cos(Math.PI * rotation.x));
+      that.newPos_.z = tmpZ - (vy * Math.sin(Math.PI * rotation.x) * Math.cos(Math.PI * rotation.y));
+      that.newPos_.x = tmpX + (vy * Math.sin(Math.PI * rotation.x) * Math.sin(Math.PI * rotation.y));
+    }
+  };
 };
 
 THREEJS_WIDGET3D.TitledWindow.prototype = WIDGET3D.Window.prototype.inheritance();
@@ -1757,10 +1795,7 @@ THREEJS_WIDGET3D.TitledWindow.prototype = WIDGET3D.Window.prototype.inheritance(
 //TODO: AT THE MOMENT DRAGING DOESN'T TAKE COUNT ON THE ROTATIONS.
 THREEJS_WIDGET3D.TitledWindow.prototype.update = function(){
   
-  if(this.defaultControls_){
-    //this.setY(this.newPos_.y);
-    //this.setX(this.newPos_.x);
-    
+  if(this.defaultControls_){    
     this.setLocation(this.newPos_.x, this.newPos_.y, this.newPos_.z);
   }
   
@@ -1805,34 +1840,16 @@ THREEJS_WIDGET3D.TitledWindow.prototype.mousedownHandler = function(event, windo
   
   if(!window.drag_){
     window.drag_ = true;
-    window.clickStart_ = event.objectCoordinates;
+    //window.clickStart_ = event.objectCoordinates;
+    //window.clickStart_ = event.worldCoordinates;
+    
+    window.clickStart_ = WIDGET3D.mouseCoordinates(event);
+    window.clickStartTime_ = new Date().getTime();
+    
+    THREEJS_WIDGET3D.renderer.domElement.onmousemove = window.mousemoveHandler;
+    THREEJS_WIDGET3D.renderer.domElement.onmouseup = window.mouseupHandler;
   }
   return false;
-};
-
-THREEJS_WIDGET3D.TitledWindow.prototype.mouseupHandler = function(event, window){  
-  window.drag_ = false;
-  window.clickStart_ = undefined;
-  
-};
-
-THREEJS_WIDGET3D.TitledWindow.prototype.mousemoveHandler = function(event, window){
-  if (window.drag_){
-    var point = event.objectCoordinates;
-    var rotation = THREEJS_WIDGET3D.camera.rotation;
-
-    var dy = point.y - window.clickStart_.y;
-    var dx = point.x - window.clickStart_.x;
-    
-    var pos = window.getLocation();
-    //window.newPos_.y = pos.y + dy;
-    //window.newPos_.x = pos.x + dx;
-    
-    window.newPos_.y = pos.y - (dy * Math.cos(Math.PI * rotation.x));
-    window.newPos_.z = pos.z + (dy * Math.sin(Math.PI * rotation.x));// * Math.sin(Math.PI * rotation.y)));// + (pos.z + (dx * Math.sin(Math.PI * rotation.y)));
-    //window.newPos_.x = (pos.x + (dy * Math.sin(Math.PI * rotation.x) * Math.sin(Math.PI * rotation.y)));// + (pos.x + (dx * Math.cos(Math.PI * rotation.y)));
-    
-  }
 };
 
 THREEJS_WIDGET3D.TitledWindow.prototype.remove = function(){
@@ -1873,7 +1890,7 @@ THREEJS_WIDGET3D.TitledWindow.prototype.remove = function(){
     console.log(this);
     console.log("removed object was wrong! " + obj);
   }
-}
+};
 
 
 /*

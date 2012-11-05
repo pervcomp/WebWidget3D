@@ -563,7 +563,6 @@ WIDGET3D.Basic.prototype.inheritance = function(){
 
 WIDGET3D.WindowInterface = function(){
   this.children_ = [];
-  //this.objects_ = [];
   this.container_ = new WIDGET3D.Container();
   
 };
@@ -1212,55 +1211,55 @@ WIDGET3D.DomEvents.prototype.enableEvent = function(event){
 
 // Disables event
 WIDGET3D.DomEvents.prototype.disableEvent = function(event){
-  
+  console.log("Disabling events!");
   switch(event){
     case WIDGET3D.EventType.onclick:
-      delete this.domElement_.onclick;
+      this.domElement_.onclick = null;
       this.enabled_[event] = false;
       break;
       
     case WIDGET3D.EventType.ondblclick:
-      delete this.domElement_.ondblclick;
+      this.domElement_.ondblclick = null;
       this.enabled_[event] = false;
       break;
       
     case WIDGET3D.EventType.onmousemove:
-      delete this.domElement_.onmousemove;
+      this.domElement_.onmousemove = null;
       this.enabled_[event] = false;
       break;
       
     case WIDGET3D.EventType.onmousedown:
-      delete this.domElement_.onmousedown;
+      this.domElement_.onmousedown = null;
       this.enabled_[event] = false;
       break;
       
     case WIDGET3D.EventType.onmouseup:
-      delete this.domElement_.onmouseup;
+      this.domElement_.onmouseup = null;
       this.enabled_[event] = false;
       break;
       
     case WIDGET3D.EventType.onmouseover:
-      delete this.domElement_.onmouseover;
+      this.domElement_.onmouseover = null;
       this.enabled_[event] = false;
       break;
       
     case WIDGET3D.EventType.onmouseout:
-      delete this.domElement_.onmouseout;
+      this.domElement_.onmouseout = null;
       this.enabled_[event] = false;
       break;
       
     case WIDGET3D.EventType.onkeydown:
-      delete document.onkeydown;
+      document.onkeydown = null;
       this.enabled_[event] = false;
       break;
     
     case WIDGET3D.EventType.onkeyup:
-      delete document.onkeyup;
+      document.onkeyup = null;
       this.enabled_[event] = false;
       break;
     
     case WIDGET3D.EventType.onkeypress:
-      delete document.onkeypress;
+      document.onkeypress = null;
       this.enabled_[event] = false;
       break;
       
@@ -1743,10 +1742,7 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
   
   //drag controlls
   this.clickStart_ = undefined;
-  this.timeNow_ = 0;
-  this.clickStartTime_ = undefined;
   this.newPos_ = this.getLocation();
-  this.lastDs_ = {x : 0.0, y : 0.0};
   this.drag_ = false;
   
   if(this.defaultControls_){
@@ -1756,36 +1752,8 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
   this.mouseupHandler = function(event){  
     that.drag_ = false;
     that.clickStart_ = undefined;
-    delete THREEJS_WIDGET3D.renderer.domElement.onmousemove;
-    delete THREEJS_WIDGET3D.renderer.domElement.onmouseup;
-  };
-  
-  this.mousemoveHandler = function(event){
-    if(that.drag_){
-      
-      var point = WIDGET3D.mouseCoordinates(event);
-      
-      var dy = -(point.y - that.clickStart_.y);
-      var dx = (point.x - that.clickStart_.x);
-      
-      var dtime = (new Date().getTime() - that.clickStartTime_)/100.0;
-      
-      var vy = dy/dtime;
-      var vx = dx/dtime;
-      
-      console.log("vy: "+vy);
-      console.log("vx: "+vx);
-      
-      var pos = that.getLocation();
-      var rotation = that.getRot();
-      
-      var tmpX = pos.x + (vx * Math.cos(Math.PI * rotation.y));
-      var tmpZ = pos.z + (vx * Math.sin(Math.PI * rotation.y));
-      
-      that.newPos_.y = pos.y + (vy * Math.cos(Math.PI * rotation.x));
-      that.newPos_.z = tmpZ - (vy * Math.sin(Math.PI * rotation.x) * Math.cos(Math.PI * rotation.y));
-      that.newPos_.x = tmpX + (vy * Math.sin(Math.PI * rotation.x) * Math.sin(Math.PI * rotation.y));
-    }
+    that.title_.removeEventListener(WIDGET3D.EventType.onmousemove);
+    //THREEJS_WIDGET3D.renderer.domElement.onmouseup = null;
   };
 };
 
@@ -1840,17 +1808,39 @@ THREEJS_WIDGET3D.TitledWindow.prototype.mousedownHandler = function(event, windo
   
   if(!window.drag_){
     window.drag_ = true;
-    //window.clickStart_ = event.objectCoordinates;
+    window.clickStart_ = event.objectCoordinates;
     //window.clickStart_ = event.worldCoordinates;
     
-    window.clickStart_ = WIDGET3D.mouseCoordinates(event);
-    window.clickStartTime_ = new Date().getTime();
+    //window.clickStart_ = WIDGET3D.mouseCoordinates(event);
+    //window.clickStartTime_ = new Date().getTime();
     
-    THREEJS_WIDGET3D.renderer.domElement.onmousemove = window.mousemoveHandler;
+    //THREEJS_WIDGET3D.renderer.domElement.onmousemove = window.mousemoveHandler;
+    window.title_.addEventListener(WIDGET3D.EventType.onmousemove, window.mousemoveHandler, window);
     THREEJS_WIDGET3D.renderer.domElement.onmouseup = window.mouseupHandler;
   }
   return false;
 };
+
+THREEJS_WIDGET3D.TitledWindow.prototype.mousemoveHandler = function(event, window){
+  if(window.drag_){
+    
+    var point = event.objectCoordinates;
+    
+    var dy = (point.y - window.clickStart_.y);
+    var dx = (point.x - window.clickStart_.x);
+    
+    var pos = window.getLocation();
+    var rotation = window.getRot();
+    
+    var tmpX = pos.x + (dx * Math.cos(Math.PI * rotation.y));
+    var tmpZ = pos.z + (dx * Math.sin(Math.PI * rotation.y));
+    
+    window.newPos_.y = pos.y + (dy * Math.cos(Math.PI * rotation.x));
+    window.newPos_.z = tmpZ - (dy * Math.sin(Math.PI * rotation.x) * Math.cos(Math.PI * rotation.y));
+    window.newPos_.x = tmpX + (dy * Math.sin(Math.PI * rotation.x) * Math.sin(Math.PI * rotation.y));
+  }
+};
+
 
 THREEJS_WIDGET3D.TitledWindow.prototype.remove = function(){
   //children needs to be removed
@@ -2464,4 +2454,70 @@ THREEJS_WIDGET3D.CameraGroup.prototype.addChild = function(object){
   return object;
 };
 
+//setters for location and rotation
 
+//LOCATION
+THREEJS_WIDGET3D.CameraGroup.prototype.setLocation = function(x, y, z){
+  this.container_.position.x = x;
+  this.container_.position.y = y;
+  this.container_.position.z = z;
+  
+  this.camera_.position.x = x;
+  this.camera_.position.y = y;
+  this.camera_.position.z = z;
+  
+  WIDGET3D.mainWindow.needsUpdate();
+};
+
+THREEJS_WIDGET3D.CameraGroup.prototype.setX = function(x){
+  this.container_.position.x = x;
+  this.camera_.position.x = x;
+  
+  WIDGET3D.mainWindow.needsUpdate();
+};
+
+THREEJS_WIDGET3D.CameraGroup.prototype.setY = function(y){
+  this.container_.position.y = y;
+  this.camera_.position.y = y;
+  WIDGET3D.mainWindow.needsUpdate();
+};
+
+THREEJS_WIDGET3D.CameraGroup.prototype.setZ = function(z){
+  this.container_.position.z = z;
+  this.camera_.position.z = z;
+  WIDGET3D.mainWindow.needsUpdate();
+};
+
+//ROTATION
+THREEJS_WIDGET3D.CameraGroup.prototype.setRot = function(rotX, rotY, rotZ){
+  this.container_.rotation.x = rotX;
+  this.container_.rotation.y = rotY;
+  this.container_.rotation.z = rotZ;
+  
+  this.camera_.rotation.x = rotX;
+  this.camera_.rotation.y = rotY;
+  this.camera_.rotation.z = rotZ;
+  
+  WIDGET3D.mainWindow.needsUpdate();
+};
+
+THREEJS_WIDGET3D.CameraGroup.prototype.setRotX = function(rotX){
+  this.container_.rotation.x = rotX;
+  this.camera_.rotation.x = rotX;
+  
+  WIDGET3D.mainWindow.needsUpdate();
+};
+
+THREEJS_WIDGET3D.CameraGroup.prototype.setRotY = function(rotY){
+  this.container_.rotation.y = rotY;
+  this.camera_.rotation.y = rotY;
+  
+  WIDGET3D.mainWindow.needsUpdate();
+};
+
+THREEJS_WIDGET3D.CameraGroup.prototype.setRotZ = function(rotZ){
+  this.container_.rotation.z = rotZ;
+  this.camera_.rotation.z = rotZ;
+  
+  WIDGET3D.mainWindow.needsUpdate();
+};

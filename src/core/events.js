@@ -207,55 +207,55 @@ WIDGET3D.DomEvents.prototype.enableEvent = function(event){
 
 // Disables event
 WIDGET3D.DomEvents.prototype.disableEvent = function(event){
-  
+  console.log("Disabling events!");
   switch(event){
     case WIDGET3D.EventType.onclick:
-      delete this.domElement_.onclick;
+      this.domElement_.onclick = null;
       this.enabled_[event] = false;
       break;
       
     case WIDGET3D.EventType.ondblclick:
-      delete this.domElement_.ondblclick;
+      this.domElement_.ondblclick = null;
       this.enabled_[event] = false;
       break;
       
     case WIDGET3D.EventType.onmousemove:
-      delete this.domElement_.onmousemove;
+      this.domElement_.onmousemove = null;
       this.enabled_[event] = false;
       break;
       
     case WIDGET3D.EventType.onmousedown:
-      delete this.domElement_.onmousedown;
+      this.domElement_.onmousedown = null;
       this.enabled_[event] = false;
       break;
       
     case WIDGET3D.EventType.onmouseup:
-      delete this.domElement_.onmouseup;
+      this.domElement_.onmouseup = null;
       this.enabled_[event] = false;
       break;
       
     case WIDGET3D.EventType.onmouseover:
-      delete this.domElement_.onmouseover;
+      this.domElement_.onmouseover = null;
       this.enabled_[event] = false;
       break;
       
     case WIDGET3D.EventType.onmouseout:
-      delete this.domElement_.onmouseout;
+      this.domElement_.onmouseout = null;
       this.enabled_[event] = false;
       break;
       
     case WIDGET3D.EventType.onkeydown:
-      delete document.onkeydown;
+      document.onkeydown = null;
       this.enabled_[event] = false;
       break;
     
     case WIDGET3D.EventType.onkeyup:
-      delete document.onkeyup;
+      document.onkeyup = null;
       this.enabled_[event] = false;
       break;
     
     case WIDGET3D.EventType.onkeypress:
-      delete document.onkeypress;
+      document.onkeypress = null;
       this.enabled_[event] = false;
       break;
       

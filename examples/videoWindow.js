@@ -24,7 +24,6 @@ var init = function(){
   });
   
   THREEJS_WIDGET3D.camera.position.z = 2000;
-  //THREEJS_WIDGET3D.camera.rotation.x = Math.PI/10.0;
   
   //--------------------------------------------
   // TITLED WINDOW WHERE WE SHOW THE VIDEO
@@ -53,9 +52,6 @@ var init = function(){
   videoWindow.closeButton_.addEventListener(WIDGET3D.EventType.onclick,
     function(event, p){p.video.pause(); p.window.remove()},
     {video : video, window : videoWindow});
-  
-  //videoWindow.setRotX(Math.PI/10.0);
-  //videoWindow.setRotY(-Math.PI/10.0);
 
   mainWindow.addChild(videoWindow);
   

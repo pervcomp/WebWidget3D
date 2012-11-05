@@ -563,7 +563,6 @@ WIDGET3D.Basic.prototype.inheritance = function(){
 
 WIDGET3D.WindowInterface = function(){
   this.children_ = [];
-  //this.objects_ = [];
   this.container_ = new WIDGET3D.Container();
   
 };

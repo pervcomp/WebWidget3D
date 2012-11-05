@@ -1212,7 +1212,7 @@ WIDGET3D.DomEvents.prototype.enableEvent = function(event){
 // Disables event
 WIDGET3D.DomEvents.prototype.disableEvent = function(event){
   console.log("Disabling events!");
-  switch(event){
+  /*switch(event){
     case WIDGET3D.EventType.onclick:
       this.domElement_.onclick = null;
       this.enabled_[event] = false;
@@ -1267,7 +1267,7 @@ WIDGET3D.DomEvents.prototype.disableEvent = function(event){
       console.log("event types supported: ");
       console.log(WIDGET3D.EventType);
       return;
-  }
+  }*/
 };
 
 
@@ -1753,7 +1753,6 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
     that.drag_ = false;
     that.clickStart_ = undefined;
     that.title_.removeEventListener(WIDGET3D.EventType.onmousemove);
-    //THREEJS_WIDGET3D.renderer.domElement.onmouseup = null;
   };
 };
 
@@ -2443,13 +2442,22 @@ THREEJS_WIDGET3D.CameraGroup.prototype.addChild = function(object){
   var rot = this.getRot();
   var loc = this.getLocation();
   
-  this.setLocation(0, 0, 0);
-  this.setRot(0, 0, 0);
+  var locO = object.getLocation();
+  
+  var newX = loc.x + locO.x;
+  var newY = loc.y + locO.y;
+  var newZ = loc.z + locO.z;
+  
+  console.log("CameraGroup location: ");
+  console.log(loc);
+  console.log("--------------------");
   
   object.setParent(this);
+  object.setLocation(newX, newY, newZ);
   
-  this.setLocation(loc.x, loc.y, loc.z);
-  this.setRot(rot.x, rot.y, rot.z);
+  console.log("New object location: ");
+  console.log(object.getLocation());
+  console.log("--------------------");
   
   return object;
 };
@@ -2458,14 +2466,9 @@ THREEJS_WIDGET3D.CameraGroup.prototype.addChild = function(object){
 
 //LOCATION
 THREEJS_WIDGET3D.CameraGroup.prototype.setLocation = function(x, y, z){
-  this.container_.position.x = x;
-  this.container_.position.y = y;
-  this.container_.position.z = z;
-  
-  this.camera_.position.x = x;
-  this.camera_.position.y = y;
-  this.camera_.position.z = z;
-  
+
+  this.container_.position.set({x: x, y: y, z: z});
+  this.camera_.position.set({x: x, y: y, z: z});
   WIDGET3D.mainWindow.needsUpdate();
 };
 
@@ -2490,13 +2493,16 @@ THREEJS_WIDGET3D.CameraGroup.prototype.setZ = function(z){
 
 //ROTATION
 THREEJS_WIDGET3D.CameraGroup.prototype.setRot = function(rotX, rotY, rotZ){
-  this.container_.rotation.x = rotX;
+  /*this.container_.rotation.x = rotX;
   this.container_.rotation.y = rotY;
   this.container_.rotation.z = rotZ;
   
   this.camera_.rotation.x = rotX;
   this.camera_.rotation.y = rotY;
-  this.camera_.rotation.z = rotZ;
+  this.camera_.rotation.z = rotZ;*/
+  
+  this.container_.rotation.set({x: rotX, y: rotY, z: rotZ});
+  this.camera_.rotation.set({x: rotX, y: rotY, z: rotZ});
   
   WIDGET3D.mainWindow.needsUpdate();
 };

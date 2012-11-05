@@ -208,7 +208,7 @@ WIDGET3D.DomEvents.prototype.enableEvent = function(event){
 // Disables event
 WIDGET3D.DomEvents.prototype.disableEvent = function(event){
   console.log("Disabling events!");
-  switch(event){
+  /*switch(event){
     case WIDGET3D.EventType.onclick:
       this.domElement_.onclick = null;
       this.enabled_[event] = false;
@@ -263,7 +263,7 @@ WIDGET3D.DomEvents.prototype.disableEvent = function(event){
       console.log("event types supported: ");
       console.log(WIDGET3D.EventType);
       return;
-  }
+  }*/
 };
 
 

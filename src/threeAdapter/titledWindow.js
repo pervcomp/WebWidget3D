@@ -107,7 +107,6 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
     that.drag_ = false;
     that.clickStart_ = undefined;
     that.title_.removeEventListener(WIDGET3D.EventType.onmousemove);
-    //THREEJS_WIDGET3D.renderer.domElement.onmouseup = null;
   };
 };
 

@@ -303,11 +303,6 @@ WIDGET3D.GuiObject.prototype.removeEventListener = function(event){
     WIDGET3D.mainWindow.childEvents_[event][i].setNewEventIndex(event,i);
   }
   this.events_[event].index = undefined;
-  
-  //event can be disabled
-  if(WIDGET3D.mainWindow.childEvents_[event].length == 0){
-    WIDGET3D.events.disableEvent(event);
-  }
 };
 
 WIDGET3D.GuiObject.prototype.setNewEventIndex = function(event, index){
@@ -1036,6 +1031,25 @@ WIDGET3D.EventType = {"onclick":0, "ondblclick":1, "onmousemove":2,
   
 WIDGET3D.NUMBER_OF_EVENTS = 10;
 
+WIDGET3D.EventTable = {
+
+  addEvent : function(name){
+    if(!this.name){
+      this.name = [];
+      return true;
+    }
+    return false;
+  },
+  
+  addCallback : function(event, callback, arguments, object){
+    if(this.event){
+      this.event.push({callback : callback, arguments : arguments, object : object});
+      return (this.event.length-1);
+    }
+    return false;
+  }
+};
+
 //Eventhandler abstraction for WIDGET3D's objects
 // needs the gui's main window (root window)
 //For mouse events uses mainwindows renderer as domElement!
@@ -1102,6 +1116,15 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
     }
   };
   
+  _that_.onEvent = function(event){
+    if(event.button){
+      _that_.mouseEvent(event);
+    }
+    else{
+      _that_.keyboardEvent(event);
+    }
+  }
+  
   // Event listeners chatches events from DOM element.
   _that_.onclick = function(domEvent){
     _that_.mouseEvent(domEvent, WIDGET3D.EventType.onclick);
@@ -1150,55 +1173,55 @@ WIDGET3D.DomEvents.prototype.enableEvent = function(event){
   switch(event){
   
     case WIDGET3D.EventType.onclick:
-      this.domElement_.onclick = this.onclick;
+      this.domElement_.addEventListener('click',this.onclick,false);
       this.enabled_[event] = true;
       break;
       
     case WIDGET3D.EventType.ondblclick:
-      this.domElement_.ondblclick = this.ondblclick;
+      this.domElement_.addEventListener('dblclick',this.ondblclick,false);
       this.enabled_[event] = true;
       break;
       
     case WIDGET3D.EventType.onmousemove:
-      this.domElement_.onmousemove = this.onmousemove;
+      this.domElement_.addEventListener('mousemove',this.onmousemove,false);
       this.enabled_[event] = true;
       break;
       
     case WIDGET3D.EventType.onmousedown:
-      this.domElement_.onmousedown = this.onmousedown;
+      this.domElement_.addEventListener('mousedown',this.onmousedown,false);
       this.enabled_[event] = true;
       break;
       
     case WIDGET3D.EventType.onmouseup:
-      this.domElement_.onmouseup = this.onmouseup;
+      this.domElement_.addEventListener('mouseup',this.onmouseup,true);
       this.enabled_[event] = true;
       break;
       
     case WIDGET3D.EventType.onmouseover:
-      this.domElement_.onmouseover = this.onmouseover;
+      this.domElement_.addEventListener('mouseover',this.onmouseover,false);
       this.enabled_[event] = true;
       break;
       
     case WIDGET3D.EventType.onmouseout:
-      this.domElement_.onmouseout = this.onmouseout;
+      this.domElement_.addEventListener('mouseout',this.onmouseout,false);
       this.enabled_[event] = true;
       break;
       
     case WIDGET3D.EventType.onkeydown:
       //keypress is allways detected in document
-      document.onkeydown = this.onkeydown;
+      document.addEventListener('keydown',this.onkeydown,false);
       this.enabled_[event] = true;
       break;
     
     case WIDGET3D.EventType.onkeyup:
       //keypress is allways detected in document
-      document.onkeyup = this.onkeyup;
+      document.addEventListener('keyup',this.onkeyup,false);
       this.enabled_[event] = true;
       break;
       
     case WIDGET3D.EventType.onkeypress:
       //keypress is allways detected in document
-      document.onkeypress = this.onkeypress;
+      document.addEventListener('keypress',this.onkeypress,false);
       this.enabled_[event] = true;
       break;
       
@@ -1207,67 +1230,6 @@ WIDGET3D.DomEvents.prototype.enableEvent = function(event){
       console.log(WIDGET3D.EventType);
       return;
   }
-};
-
-// Disables event
-WIDGET3D.DomEvents.prototype.disableEvent = function(event){
-  console.log("Disabling events!");
-  /*switch(event){
-    case WIDGET3D.EventType.onclick:
-      this.domElement_.onclick = null;
-      this.enabled_[event] = false;
-      break;
-      
-    case WIDGET3D.EventType.ondblclick:
-      this.domElement_.ondblclick = null;
-      this.enabled_[event] = false;
-      break;
-      
-    case WIDGET3D.EventType.onmousemove:
-      this.domElement_.onmousemove = null;
-      this.enabled_[event] = false;
-      break;
-      
-    case WIDGET3D.EventType.onmousedown:
-      this.domElement_.onmousedown = null;
-      this.enabled_[event] = false;
-      break;
-      
-    case WIDGET3D.EventType.onmouseup:
-      this.domElement_.onmouseup = null;
-      this.enabled_[event] = false;
-      break;
-      
-    case WIDGET3D.EventType.onmouseover:
-      this.domElement_.onmouseover = null;
-      this.enabled_[event] = false;
-      break;
-      
-    case WIDGET3D.EventType.onmouseout:
-      this.domElement_.onmouseout = null;
-      this.enabled_[event] = false;
-      break;
-      
-    case WIDGET3D.EventType.onkeydown:
-      document.onkeydown = null;
-      this.enabled_[event] = false;
-      break;
-    
-    case WIDGET3D.EventType.onkeyup:
-      document.onkeyup = null;
-      this.enabled_[event] = false;
-      break;
-    
-    case WIDGET3D.EventType.onkeypress:
-      document.onkeypress = null;
-      this.enabled_[event] = false;
-      break;
-      
-    default:
-      console.log("event types supported: ");
-      console.log(WIDGET3D.EventType);
-      return;
-  }*/
 };
 
 
@@ -1744,25 +1706,30 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
   this.clickStart_ = undefined;
   this.newPos_ = this.getLocation();
   this.drag_ = false;
+  this.firstEvent_ = false;
   
   if(this.defaultControls_){
     this.title_.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler, this);
+    this.title_.addEventListener(WIDGET3D.EventType.onmousemove, this.mousemoveHandler, this);
+    this.title_.addEventListener(WIDGET3D.EventType.onmouseup, this.mouseupHandler);
+    //THREEJS_WIDGET3D.renderer.domElement.addEventListener('mouseup',this.mouseupHandler, true);
   }
   
   this.mouseupHandler = function(event){  
     that.drag_ = false;
     that.clickStart_ = undefined;
-    that.title_.removeEventListener(WIDGET3D.EventType.onmousemove);
+    console.log("Hi!");
+    //THREEJS_WIDGET3D.renderer.domElement.removeEventListener('mouseup',this.mouseupHandler,false);
   };
 };
 
 THREEJS_WIDGET3D.TitledWindow.prototype = WIDGET3D.Window.prototype.inheritance();
 
 
-//TODO: AT THE MOMENT DRAGING DOESN'T TAKE COUNT ON THE ROTATIONS.
 THREEJS_WIDGET3D.TitledWindow.prototype.update = function(){
   
-  if(this.defaultControls_){    
+  if(this.defaultControls_ && this.firstEvent_){
+    
     this.setLocation(this.newPos_.x, this.newPos_.y, this.newPos_.z);
   }
   
@@ -1804,18 +1771,16 @@ THREEJS_WIDGET3D.TitledWindow.prototype.setTitle = function(title){
 
 THREEJS_WIDGET3D.TitledWindow.prototype.mousedownHandler = function(event, window){
   window.focus();
+  //If this is the first time the event is fired we need to update the
+  //objects position data because it might have changed after constructor.
+  if(!window.firstEvent_){
+    window.newPos_ = window.getLocation();
+    window.firstEvent_ = true;
+  }
   
   if(!window.drag_){
     window.drag_ = true;
     window.clickStart_ = event.objectCoordinates;
-    //window.clickStart_ = event.worldCoordinates;
-    
-    //window.clickStart_ = WIDGET3D.mouseCoordinates(event);
-    //window.clickStartTime_ = new Date().getTime();
-    
-    //THREEJS_WIDGET3D.renderer.domElement.onmousemove = window.mousemoveHandler;
-    window.title_.addEventListener(WIDGET3D.EventType.onmousemove, window.mousemoveHandler, window);
-    THREEJS_WIDGET3D.renderer.domElement.onmouseup = window.mouseupHandler;
   }
   return false;
 };
@@ -2438,22 +2403,26 @@ THREEJS_WIDGET3D.CameraGroup.prototype = WIDGET3D.Window.prototype.inheritance()
 
 //Adds the object to cameragroup.
 //objects place is its offset from camera (camera is in origo when component is added)
-THREEJS_WIDGET3D.CameraGroup.prototype.addChild = function(object){
+THREEJS_WIDGET3D.CameraGroup.prototype.addChild = function(object, distance){
   var rot = this.getRot();
   var loc = this.getLocation();
   
-  var locO = object.getLocation();
+  var distance = distance || {};
   
-  var newX = loc.x + locO.x;
-  var newY = loc.y + locO.y;
-  var newZ = loc.z + locO.z;
+  var x = distance.x !== undefined ? distance.x : 0;
+  var y = distance.y !== undefined ? distance.y : 0;
+  var z = distance.z !== undefined ? distance.z : 0;
   
+  var newX = loc.x + x;
+  var newY = loc.y + y;
+  var newZ = loc.z + z;
+    
   console.log("CameraGroup location: ");
   console.log(loc);
   console.log("--------------------");
   
-  object.setParent(this);
   object.setLocation(newX, newY, newZ);
+  object.setParent(this);
   
   console.log("New object location: ");
   console.log(object.getLocation());
@@ -2493,13 +2462,6 @@ THREEJS_WIDGET3D.CameraGroup.prototype.setZ = function(z){
 
 //ROTATION
 THREEJS_WIDGET3D.CameraGroup.prototype.setRot = function(rotX, rotY, rotZ){
-  /*this.container_.rotation.x = rotX;
-  this.container_.rotation.y = rotY;
-  this.container_.rotation.z = rotZ;
-  
-  this.camera_.rotation.x = rotX;
-  this.camera_.rotation.y = rotY;
-  this.camera_.rotation.z = rotZ;*/
   
   this.container_.rotation.set({x: rotX, y: rotY, z: rotZ});
   this.camera_.rotation.set({x: rotX, y: rotY, z: rotZ});

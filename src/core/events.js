@@ -32,6 +32,25 @@ WIDGET3D.EventType = {"onclick":0, "ondblclick":1, "onmousemove":2,
   
 WIDGET3D.NUMBER_OF_EVENTS = 10;
 
+WIDGET3D.EventTable = {
+
+  addEvent : function(name){
+    if(!this.name){
+      this.name = [];
+      return true;
+    }
+    return false;
+  },
+  
+  addCallback : function(event, callback, arguments, object){
+    if(this.event){
+      this.event.push({callback : callback, arguments : arguments, object : object});
+      return (this.event.length-1);
+    }
+    return false;
+  }
+};
+
 //Eventhandler abstraction for WIDGET3D's objects
 // needs the gui's main window (root window)
 //For mouse events uses mainwindows renderer as domElement!
@@ -98,6 +117,15 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
     }
   };
   
+  _that_.onEvent = function(event){
+    if(event.button){
+      _that_.mouseEvent(event);
+    }
+    else{
+      _that_.keyboardEvent(event);
+    }
+  }
+  
   // Event listeners chatches events from DOM element.
   _that_.onclick = function(domEvent){
     _that_.mouseEvent(domEvent, WIDGET3D.EventType.onclick);
@@ -146,55 +174,55 @@ WIDGET3D.DomEvents.prototype.enableEvent = function(event){
   switch(event){
   
     case WIDGET3D.EventType.onclick:
-      this.domElement_.onclick = this.onclick;
+      this.domElement_.addEventListener('click',this.onclick,false);
       this.enabled_[event] = true;
       break;
       
     case WIDGET3D.EventType.ondblclick:
-      this.domElement_.ondblclick = this.ondblclick;
+      this.domElement_.addEventListener('dblclick',this.ondblclick,false);
       this.enabled_[event] = true;
       break;
       
     case WIDGET3D.EventType.onmousemove:
-      this.domElement_.onmousemove = this.onmousemove;
+      this.domElement_.addEventListener('mousemove',this.onmousemove,false);
       this.enabled_[event] = true;
       break;
       
     case WIDGET3D.EventType.onmousedown:
-      this.domElement_.onmousedown = this.onmousedown;
+      this.domElement_.addEventListener('mousedown',this.onmousedown,false);
       this.enabled_[event] = true;
       break;
       
     case WIDGET3D.EventType.onmouseup:
-      this.domElement_.onmouseup = this.onmouseup;
+      this.domElement_.addEventListener('mouseup',this.onmouseup,true);
       this.enabled_[event] = true;
       break;
       
     case WIDGET3D.EventType.onmouseover:
-      this.domElement_.onmouseover = this.onmouseover;
+      this.domElement_.addEventListener('mouseover',this.onmouseover,false);
       this.enabled_[event] = true;
       break;
       
     case WIDGET3D.EventType.onmouseout:
-      this.domElement_.onmouseout = this.onmouseout;
+      this.domElement_.addEventListener('mouseout',this.onmouseout,false);
       this.enabled_[event] = true;
       break;
       
     case WIDGET3D.EventType.onkeydown:
       //keypress is allways detected in document
-      document.onkeydown = this.onkeydown;
+      document.addEventListener('keydown',this.onkeydown,false);
       this.enabled_[event] = true;
       break;
     
     case WIDGET3D.EventType.onkeyup:
       //keypress is allways detected in document
-      document.onkeyup = this.onkeyup;
+      document.addEventListener('keyup',this.onkeyup,false);
       this.enabled_[event] = true;
       break;
       
     case WIDGET3D.EventType.onkeypress:
       //keypress is allways detected in document
-      document.onkeypress = this.onkeypress;
+      document.addEventListener('keypress',this.onkeypress,false);
       this.enabled_[event] = true;
       break;
       
@@ -203,67 +231,6 @@ WIDGET3D.DomEvents.prototype.enableEvent = function(event){
       console.log(WIDGET3D.EventType);
       return;
   }
-};
-
-// Disables event
-WIDGET3D.DomEvents.prototype.disableEvent = function(event){
-  console.log("Disabling events!");
-  /*switch(event){
-    case WIDGET3D.EventType.onclick:
-      this.domElement_.onclick = null;
-      this.enabled_[event] = false;
-      break;
-      
-    case WIDGET3D.EventType.ondblclick:
-      this.domElement_.ondblclick = null;
-      this.enabled_[event] = false;
-      break;
-      
-    case WIDGET3D.EventType.onmousemove:
-      this.domElement_.onmousemove = null;
-      this.enabled_[event] = false;
-      break;
-      
-    case WIDGET3D.EventType.onmousedown:
-      this.domElement_.onmousedown = null;
-      this.enabled_[event] = false;
-      break;
-      
-    case WIDGET3D.EventType.onmouseup:
-      this.domElement_.onmouseup = null;
-      this.enabled_[event] = false;
-      break;
-      
-    case WIDGET3D.EventType.onmouseover:
-      this.domElement_.onmouseover = null;
-      this.enabled_[event] = false;
-      break;
-      
-    case WIDGET3D.EventType.onmouseout:
-      this.domElement_.onmouseout = null;
-      this.enabled_[event] = false;
-      break;
-      
-    case WIDGET3D.EventType.onkeydown:
-      document.onkeydown = null;
-      this.enabled_[event] = false;
-      break;
-    
-    case WIDGET3D.EventType.onkeyup:
-      document.onkeyup = null;
-      this.enabled_[event] = false;
-      break;
-    
-    case WIDGET3D.EventType.onkeypress:
-      document.onkeypress = null;
-      this.enabled_[event] = false;
-      break;
-      
-    default:
-      console.log("event types supported: ");
-      console.log(WIDGET3D.EventType);
-      return;
-  }*/
 };
 
 

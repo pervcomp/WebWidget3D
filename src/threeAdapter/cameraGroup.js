@@ -53,22 +53,26 @@ THREEJS_WIDGET3D.CameraGroup.prototype = WIDGET3D.Window.prototype.inheritance()
 
 //Adds the object to cameragroup.
 //objects place is its offset from camera (camera is in origo when component is added)
-THREEJS_WIDGET3D.CameraGroup.prototype.addChild = function(object){
+THREEJS_WIDGET3D.CameraGroup.prototype.addChild = function(object, distance){
   var rot = this.getRot();
   var loc = this.getLocation();
   
-  var locO = object.getLocation();
+  var distance = distance || {};
   
-  var newX = loc.x + locO.x;
-  var newY = loc.y + locO.y;
-  var newZ = loc.z + locO.z;
+  var x = distance.x !== undefined ? distance.x : 0;
+  var y = distance.y !== undefined ? distance.y : 0;
+  var z = distance.z !== undefined ? distance.z : 0;
   
+  var newX = loc.x + x;
+  var newY = loc.y + y;
+  var newZ = loc.z + z;
+    
   console.log("CameraGroup location: ");
   console.log(loc);
   console.log("--------------------");
   
-  object.setParent(this);
   object.setLocation(newX, newY, newZ);
+  object.setParent(this);
   
   console.log("New object location: ");
   console.log(object.getLocation());
@@ -108,13 +112,6 @@ THREEJS_WIDGET3D.CameraGroup.prototype.setZ = function(z){
 
 //ROTATION
 THREEJS_WIDGET3D.CameraGroup.prototype.setRot = function(rotX, rotY, rotZ){
-  /*this.container_.rotation.x = rotX;
-  this.container_.rotation.y = rotY;
-  this.container_.rotation.z = rotZ;
-  
-  this.camera_.rotation.x = rotX;
-  this.camera_.rotation.y = rotY;
-  this.camera_.rotation.z = rotZ;*/
   
   this.container_.rotation.set({x: rotX, y: rotY, z: rotZ});
   this.camera_.rotation.set({x: rotX, y: rotY, z: rotZ});

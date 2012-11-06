@@ -303,11 +303,6 @@ WIDGET3D.GuiObject.prototype.removeEventListener = function(event){
     WIDGET3D.mainWindow.childEvents_[event][i].setNewEventIndex(event,i);
   }
   this.events_[event].index = undefined;
-  
-  //event can be disabled
-  if(WIDGET3D.mainWindow.childEvents_[event].length == 0){
-    WIDGET3D.events.disableEvent(event);
-  }
 };
 
 WIDGET3D.GuiObject.prototype.setNewEventIndex = function(event, index){

@@ -98,25 +98,30 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
   this.clickStart_ = undefined;
   this.newPos_ = this.getLocation();
   this.drag_ = false;
+  this.firstEvent_ = false;
   
   if(this.defaultControls_){
     this.title_.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler, this);
+    this.title_.addEventListener(WIDGET3D.EventType.onmousemove, this.mousemoveHandler, this);
+    this.title_.addEventListener(WIDGET3D.EventType.onmouseup, this.mouseupHandler);
+    //THREEJS_WIDGET3D.renderer.domElement.addEventListener('mouseup',this.mouseupHandler, true);
   }
   
   this.mouseupHandler = function(event){  
     that.drag_ = false;
     that.clickStart_ = undefined;
-    that.title_.removeEventListener(WIDGET3D.EventType.onmousemove);
+    console.log("Hi!");
+    //THREEJS_WIDGET3D.renderer.domElement.removeEventListener('mouseup',this.mouseupHandler,false);
   };
 };
 
 THREEJS_WIDGET3D.TitledWindow.prototype = WIDGET3D.Window.prototype.inheritance();
 
 
-//TODO: AT THE MOMENT DRAGING DOESN'T TAKE COUNT ON THE ROTATIONS.
 THREEJS_WIDGET3D.TitledWindow.prototype.update = function(){
   
-  if(this.defaultControls_){    
+  if(this.defaultControls_ && this.firstEvent_){
+    
     this.setLocation(this.newPos_.x, this.newPos_.y, this.newPos_.z);
   }
   
@@ -158,18 +163,16 @@ THREEJS_WIDGET3D.TitledWindow.prototype.setTitle = function(title){
 
 THREEJS_WIDGET3D.TitledWindow.prototype.mousedownHandler = function(event, window){
   window.focus();
+  //If this is the first time the event is fired we need to update the
+  //objects position data because it might have changed after constructor.
+  if(!window.firstEvent_){
+    window.newPos_ = window.getLocation();
+    window.firstEvent_ = true;
+  }
   
   if(!window.drag_){
     window.drag_ = true;
     window.clickStart_ = event.objectCoordinates;
-    //window.clickStart_ = event.worldCoordinates;
-    
-    //window.clickStart_ = WIDGET3D.mouseCoordinates(event);
-    //window.clickStartTime_ = new Date().getTime();
-    
-    //THREEJS_WIDGET3D.renderer.domElement.onmousemove = window.mousemoveHandler;
-    window.title_.addEventListener(WIDGET3D.EventType.onmousemove, window.mousemoveHandler, window);
-    THREEJS_WIDGET3D.renderer.domElement.onmouseup = window.mouseupHandler;
   }
   return false;
 };

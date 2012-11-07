@@ -1712,8 +1712,7 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
     this.mouseupHandler = function(event){  
       that.drag_ = false;
       that.clickStart_ = undefined;
-      console.log("Hi!");
-      //THREEJS_WIDGET3D.renderer.domElement.removeEventListener('mouseup',this.mouseupHandler,false);
+
       THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup);
     };
     this.title_.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler, this);
@@ -1779,7 +1778,7 @@ THREEJS_WIDGET3D.TitledWindow.prototype.mousedownHandler = function(event, windo
   if(!window.drag_){
     window.drag_ = true;
     window.clickStart_ = event.objectCoordinates;
-    THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmouseup, window.mouseupHandler, window);
+    THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmouseup, window.mouseupHandler);
   }
   return false;
 };
@@ -2415,17 +2414,9 @@ THREEJS_WIDGET3D.CameraGroup.prototype.addChild = function(object, distance){
   var newX = loc.x + x;
   var newY = loc.y + y;
   var newZ = loc.z + z;
-    
-  console.log("CameraGroup location: ");
-  console.log(loc);
-  console.log("--------------------");
   
   object.setLocation(newX, newY, newZ);
   object.setParent(this);
-  
-  console.log("New object location: ");
-  console.log(object.getLocation());
-  console.log("--------------------");
   
   return object;
 };
@@ -2456,6 +2447,7 @@ THREEJS_WIDGET3D.CameraGroup.prototype.setY = function(y){
 THREEJS_WIDGET3D.CameraGroup.prototype.setZ = function(z){
   this.container_.position.z = z;
   this.camera_.position.z = z;
+  
   WIDGET3D.mainWindow.needsUpdate();
 };
 

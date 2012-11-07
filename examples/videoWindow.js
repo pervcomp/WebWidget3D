@@ -55,21 +55,10 @@ var init = function(){
 
   mainWindow.addChild(videoWindow);
   
-  
-  var grid = new THREEJS_WIDGET3D.GridWindow({width : 2000,
-    height : 2000,
-    color : 0x213D30,
-    defaultControls: true});
-  
-  grid.setLocation(-500, 100, -100);
-  
-  mainWindow.addChild(grid);
-  
   var mainLoop = function(){
     requestAnimationFrame( mainLoop );
 
     videoWindow.update();
-    grid.update();
     
     THREEJS_WIDGET3D.render();
   };

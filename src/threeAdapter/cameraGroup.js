@@ -66,17 +66,9 @@ THREEJS_WIDGET3D.CameraGroup.prototype.addChild = function(object, distance){
   var newX = loc.x + x;
   var newY = loc.y + y;
   var newZ = loc.z + z;
-    
-  console.log("CameraGroup location: ");
-  console.log(loc);
-  console.log("--------------------");
   
   object.setLocation(newX, newY, newZ);
   object.setParent(this);
-  
-  console.log("New object location: ");
-  console.log(object.getLocation());
-  console.log("--------------------");
   
   return object;
 };
@@ -107,6 +99,7 @@ THREEJS_WIDGET3D.CameraGroup.prototype.setY = function(y){
 THREEJS_WIDGET3D.CameraGroup.prototype.setZ = function(z){
   this.container_.position.z = z;
   this.camera_.position.z = z;
+  
   WIDGET3D.mainWindow.needsUpdate();
 };
 

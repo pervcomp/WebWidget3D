@@ -80,16 +80,16 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
     
     var hit = _that_.collisions_.callback(domEvent, eventType, _that_.collisions_.args);
     
-    //mainwindow click detected
-    if(!hit && WIDGET3D.mainWindow.events_[eventType].callback){
-
-      WIDGET3D.mainWindow.events_[eventType].callback(domEvent,
-        WIDGET3D.mainWindow.events_[eventType].arguments);
-    }
-    else if(hit && hit.events_[eventType].callback){
+    if(hit && hit.events_[eventType].callback){
       
       hit.events_[eventType].callback(domEvent,
         hit.events_[eventType].arguments);
+    }
+    //if mainwindow has eventlistener it is executed also
+    if(WIDGET3D.mainWindow.events_[eventType].callback){
+
+      WIDGET3D.mainWindow.events_[eventType].callback(domEvent,
+        WIDGET3D.mainWindow.events_[eventType].arguments);
     }
   };
   
@@ -194,7 +194,7 @@ WIDGET3D.DomEvents.prototype.enableEvent = function(event){
       break;
       
     case WIDGET3D.EventType.onmouseup:
-      this.domElement_.addEventListener('mouseup',this.onmouseup,true);
+      this.domElement_.addEventListener('mouseup',this.onmouseup,false);
       this.enabled_[event] = true;
       break;
       

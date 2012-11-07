@@ -1079,16 +1079,16 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
     
     var hit = _that_.collisions_.callback(domEvent, eventType, _that_.collisions_.args);
     
-    //mainwindow click detected
-    if(!hit && WIDGET3D.mainWindow.events_[eventType].callback){
-
-      WIDGET3D.mainWindow.events_[eventType].callback(domEvent,
-        WIDGET3D.mainWindow.events_[eventType].arguments);
-    }
-    else if(hit && hit.events_[eventType].callback){
+    if(hit && hit.events_[eventType].callback){
       
       hit.events_[eventType].callback(domEvent,
         hit.events_[eventType].arguments);
+    }
+    //if mainwindow has eventlistener it is executed also
+    if(WIDGET3D.mainWindow.events_[eventType].callback){
+
+      WIDGET3D.mainWindow.events_[eventType].callback(domEvent,
+        WIDGET3D.mainWindow.events_[eventType].arguments);
     }
   };
   
@@ -1193,7 +1193,7 @@ WIDGET3D.DomEvents.prototype.enableEvent = function(event){
       break;
       
     case WIDGET3D.EventType.onmouseup:
-      this.domElement_.addEventListener('mouseup',this.onmouseup,true);
+      this.domElement_.addEventListener('mouseup',this.onmouseup,false);
       this.enabled_[event] = true;
       break;
       
@@ -1709,18 +1709,16 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
   this.firstEvent_ = false;
   
   if(this.defaultControls_){
+    this.mouseupHandler = function(event){  
+      that.drag_ = false;
+      that.clickStart_ = undefined;
+      console.log("Hi!");
+      //THREEJS_WIDGET3D.renderer.domElement.removeEventListener('mouseup',this.mouseupHandler,false);
+      THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup);
+    };
     this.title_.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler, this);
     this.title_.addEventListener(WIDGET3D.EventType.onmousemove, this.mousemoveHandler, this);
-    this.title_.addEventListener(WIDGET3D.EventType.onmouseup, this.mouseupHandler);
-    //THREEJS_WIDGET3D.renderer.domElement.addEventListener('mouseup',this.mouseupHandler, true);
   }
-  
-  this.mouseupHandler = function(event){  
-    that.drag_ = false;
-    that.clickStart_ = undefined;
-    console.log("Hi!");
-    //THREEJS_WIDGET3D.renderer.domElement.removeEventListener('mouseup',this.mouseupHandler,false);
-  };
 };
 
 THREEJS_WIDGET3D.TitledWindow.prototype = WIDGET3D.Window.prototype.inheritance();
@@ -1781,6 +1779,7 @@ THREEJS_WIDGET3D.TitledWindow.prototype.mousedownHandler = function(event, windo
   if(!window.drag_){
     window.drag_ = true;
     window.clickStart_ = event.objectCoordinates;
+    THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmouseup, window.mouseupHandler, window);
   }
   return false;
 };

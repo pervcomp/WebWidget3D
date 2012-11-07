@@ -128,10 +128,7 @@ THREEJS_WIDGET3D.checkIfHits = function(event, eventType){
         
         var found = THREEJS_WIDGET3D.findObject(closest, eventType);
         
-        if(found){
-          //found.mousePosition_ = objPos;
-          //found.worldPosition_ = intersects[m].point;
-          
+        if(found){          
           event.objectCoordinates = objPos;
           event.worldCoordinates = intersects[m].point;
         }

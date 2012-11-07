@@ -37,15 +37,13 @@ WIDGET3D.ElementType = {"MAIN_WINDOW":0, "WINDOW":1, "BASIC":2, "TEXT":3, "UNDEF
 // This interface is mandatory!!!
 
 WIDGET3D.Container;
+WIDGET3D.focused = [];
+WIDGET3D.initialized = false;
+WIDGET3D.mainWindow;
+WIDGET3D.events;
+
 
 //WIDGET3D.Plug;
-
-WIDGET3D.initialized = false;
-
-WIDGET3D.events;
-WIDGET3D.mainWindow;
-
-WIDGET3D.focused = [];
 
 //Initializes gui
 //
@@ -67,8 +65,10 @@ WIDGET3D.focused = [];
 //  root window which is Window typed gui object.
 //
 WIDGET3D.init = function(parameters){
-
+  var that = this;
+  
   var parameters = parameters || {};
+  
 
   if(parameters.container != undefined){
     WIDGET3D.Container = parameters.container;
@@ -90,10 +90,10 @@ WIDGET3D.init = function(parameters){
     console.log("Initializing WIDGET3D failed!");
     return false;
   }
-  
   WIDGET3D.initialized = true;
   return WIDGET3D.mainWindow;
 };
+
 
 WIDGET3D.isInitialized = function(){
   return WIDGET3D.initialized;
@@ -114,7 +114,7 @@ WIDGET3D.unfocusFocused = function(){
   }
   
   WIDGET3D.focused = [];
-}
+};
 
 //------------------------------------------------------------
 // USEFUL HELPPER FUNCTIONS FOR MOUSE COORDINATE CALCULATIONS
@@ -184,12 +184,12 @@ WIDGET3D.mouseCoordinates = function(domEvent){
     maxY: CSSheight
   };
   
-  var mouse = WIDGET3D.scaledCoords(coords, limits);
+  var mouse = WIDGET3D.scaleCoordinates(coords, limits);
   return mouse;
 };
 
 //scales coordinates to range of -1..1
-WIDGET3D.scaledCoords = function(point, limits){
+WIDGET3D.scaleCoordinates = function(point, limits){
   var x = +((point.x - limits.minX) / limits.maxX) * 2 - 1;
   var y = -((point.y - limits.minY) / limits.maxY) * 2 + 1;
   
@@ -1312,10 +1312,7 @@ THREEJS_WIDGET3D.checkIfHits = function(event, eventType){
         
         var found = THREEJS_WIDGET3D.findObject(closest, eventType);
         
-        if(found){
-          //found.mousePosition_ = objPos;
-          //found.worldPosition_ = intersects[m].point;
-          
+        if(found){          
           event.objectCoordinates = objPos;
           event.worldCoordinates = intersects[m].point;
         }

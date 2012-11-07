@@ -126,8 +126,6 @@ THREEJS_WIDGET3D.TitledWindow.prototype.update = function(){
   if(this.updateCallback_){
     this.updateCallback_.callback(this.updateCallback_.arguments);
   }
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 //sets titlebar text

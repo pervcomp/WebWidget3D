@@ -86,8 +86,6 @@ THREEJS_WIDGET3D.GridWindow.prototype.update = function(){
   if(this.updateCallback_){
     this.updateCallback_.callback(this.updateCallback_.arguments);
   }
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 THREEJS_WIDGET3D.GridWindow.prototype.mousedownHandler = function(event, window){
@@ -95,7 +93,7 @@ THREEJS_WIDGET3D.GridWindow.prototype.mousedownHandler = function(event, window)
   if(!window.rotate_){
     window.rotate_ = true;
     
-    window.clickLocation_ = WIDGET3D.normalizedMouseCoordinates(event);
+    window.clickLocation_ = WIDGET3D.mouseCoordinates(event);
     window.rotationOnMouseDownY_ = window.modelRotationY_;
     window.rotationOnMouseDownX_ = window.modelRotationX_;
   }
@@ -110,7 +108,7 @@ THREEJS_WIDGET3D.GridWindow.prototype.mouseupHandler = function(event, window){
 THREEJS_WIDGET3D.GridWindow.prototype.mousemoveHandler = function(event, window){
   if (window.rotate_){
   
-    var mouse = WIDGET3D.normalizedMouseCoordinates(event);
+    var mouse = WIDGET3D.mouseCoordinates(event);
     
     window.modelRotationY_ = window.rotationOnMouseDownY_ + ( mouse.x - window.clickLocation_.x );
     window.modelRotationX_ = window.rotationOnMouseDownX_ + ( mouse.y - window.clickLocation_.y );

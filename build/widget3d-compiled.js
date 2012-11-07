@@ -137,8 +137,8 @@ WIDGET3D.getCanvasHeight = function(){
   return WIDGET3D.events.domElement_.height;
 };
 
-//calculates mouseCoordinates from domEvent
-WIDGET3D.mouseCoordinates = function(domEvent){
+//calculates mouseScreenCoordinates from domEvent
+WIDGET3D.mouseScreenCoordinates = function(domEvent){
   
   var coords = { x: 0, y: 0};
   if (!domEvent) {
@@ -164,9 +164,9 @@ WIDGET3D.mouseCoordinates = function(domEvent){
   return coords;
 };
 
-WIDGET3D.normalizedMouseCoordinates = function(domEvent){
+WIDGET3D.mouseCoordinates = function(domEvent){
 
-  var coords = WIDGET3D.mouseCoordinates(domEvent);
+  var coords = WIDGET3D.mouseScreenCoordinates(domEvent);
   
   //If canvas element size has been manipulated with CSS the domElement.width and domElement.height aren't the
   // values of the height and width used showing the canvas. In here we need the real screen coordinatelimits
@@ -184,12 +184,12 @@ WIDGET3D.normalizedMouseCoordinates = function(domEvent){
     maxY: CSSheight
   };
   
-  var mouse = WIDGET3D.normalizeCoords(coords, limits);
+  var mouse = WIDGET3D.scaledCoords(coords, limits);
   return mouse;
 };
 
-//normalizes coordinates to range of -1..1
-WIDGET3D.normalizeCoords = function(point, limits){
+//scales coordinates to range of -1..1
+WIDGET3D.scaledCoords = function(point, limits){
   var x = +((point.x - limits.minX) / limits.maxX) * 2 - 1;
   var y = -((point.y - limits.minY) / limits.maxY) * 2 + 1;
   
@@ -207,17 +207,6 @@ WIDGET3D.calculateLimits = function(position, width, height){
   
   return {minX: minX, maxX: maxX, minY: minY, maxY: maxY};
 }
-
-//transforms parent coordinate to child coordinate
-WIDGET3D.parentCoordToChildCoord = function(point, childLimits, parentLimits){
-  
-  var childX = ((point.x - parentLimits.minX)/parentLimits.maxX)*childLimits.maxX + childLimits.minX;
-  var childY = ((point.y - parentLimits.minY)/parentLimits.maxY)*childLimits.maxY + childLimits.minY;
-  
-  return {x: childX, y: childY};
-};
-
-
   
 //---------------------------------------------
 // GUI OBJECT : generic abstract object
@@ -281,6 +270,7 @@ WIDGET3D.GuiObject.prototype.addEventListener = function(event, callback, args){
     WIDGET3D.events.enableEvent(event);
   }
   
+  this.updateCallback_;
 };
 
 // Switches events handler callback to function that is given as parameter.
@@ -310,6 +300,18 @@ WIDGET3D.GuiObject.prototype.setNewEventIndex = function(event, index){
   WIDGET3D.mainWindow.childEvents_[event][index] = this;
 }
 
+WIDGET3D.GuiObject.prototype.addUpdateCallback = function(callback, args){
+  
+  this.updateCallback_ = {callback: callback, arguments: args};
+};
+
+WIDGET3D.GuiObject.prototype.update = function(){
+  if(this.updateCallback_){
+    this.updateCallback_.callback(this.updateCallback_.arguments);
+  }
+};
+
+
 //---------------------------------------------------------
 // PROTOTYPAL INHERITANCE FUNCTION FOR ABSTRACT GUI OBJECT
 //---------------------------------------------------------
@@ -334,29 +336,12 @@ WIDGET3D.Basic = function(){
   
   this.mesh_;
   this.parent_;
-  
-  this.updateCallback_;
 };
 
 // inheriting basic from GuiObject
 WIDGET3D.Basic.prototype = WIDGET3D.GuiObject.prototype.inheritance();
 
 WIDGET3D.Basic.prototype.type_ = WIDGET3D.ElementType.BASIC;
-
-WIDGET3D.Basic.prototype.addUpdateCallback = function(callback, args){
-  //this.updateCallback_.callback = callback;
-  //this.updateCallback_.arguments = args;
-  
-  this.updateCallback_ = {callback: callback, arguments: args};
-};
-
-WIDGET3D.Basic.prototype.update = function(){
-  if(this.updateCallback_){
-    this.updateCallback_.callback(this.updateCallback_.arguments);
-    WIDGET3D.mainWindow.needsUpdate();
-  }
-};
-
 
 //sets parent window for object
 WIDGET3D.Basic.prototype.setParent = function(window){
@@ -396,7 +381,6 @@ WIDGET3D.Basic.prototype.setMesh = function(mesh){
     
     if(this.isVisible_){
       this.parent_.container_.add(this.mesh_);
-      WIDGET3D.mainWindow.needsUpdate();
     }
   }
   else if(this.parent_){
@@ -405,7 +389,6 @@ WIDGET3D.Basic.prototype.setMesh = function(mesh){
     
     if(this.isVisible_){
      this.parent_.container_.add(this.mesh_);
-     WIDGET3D.mainWindow.needsUpdate();
     }
   }
   else{
@@ -425,7 +408,6 @@ WIDGET3D.Basic.prototype.show = function(){
     this.mesh_.visible = true;
     
     this.parent_.container_.add(this.mesh_);
-    WIDGET3D.mainWindow.needsUpdate();
   }
 };
 
@@ -442,7 +424,6 @@ WIDGET3D.Basic.prototype.hide = function(){
     }
 
     this.parent_.container_.remove(this.mesh_);
-    WIDGET3D.mainWindow.needsUpdate();
   }
 };
 
@@ -458,23 +439,18 @@ WIDGET3D.Basic.prototype.setLocation = function(x, y, z){
   this.mesh_.position.x = x;
   this.mesh_.position.y = y;
   this.mesh_.position.z = z;
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 WIDGET3D.Basic.prototype.setX = function(x){
   this.mesh_.position.x = x;
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 WIDGET3D.Basic.prototype.setY = function(y){
   this.mesh_.position.y = y;
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 WIDGET3D.Basic.prototype.setZ = function(z){
   this.mesh_.position.z = z;
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 WIDGET3D.Basic.prototype.getRot = function(){
@@ -487,23 +463,18 @@ WIDGET3D.Basic.prototype.setRot = function(rotX, rotY, rotZ){
   this.mesh_.rotation.x = rotX;
   this.mesh_.rotation.y = rotY;
   this.mesh_.rotation.z = rotZ;
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 WIDGET3D.Basic.prototype.setRotX = function(rotX){
   this.mesh_.rotation.x = rotX;
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 WIDGET3D.Basic.prototype.setRotY = function(rotY){
   this.mesh_.rotation.y = rotY;
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 WIDGET3D.Basic.prototype.setRotZ = function(rotZ){
   this.mesh_.rotation.z = rotZ;
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 //deletes object and removes it from it's parents object list
@@ -634,15 +605,6 @@ WIDGET3D.MainWindow.prototype.removeFromObjects = WIDGET3D.WindowInterface.proto
 WIDGET3D.MainWindow.prototype.type_ = WIDGET3D.ElementType.MAIN_WINDOW;
 //-----------------------------------------------------------------------------------------
 
-//Window content needs update
-WIDGET3D.MainWindow.prototype.needsUpdate = function(){
-  this.needsUpdate_ = true;
-};
-
-WIDGET3D.MainWindow.prototype.update = function(){
-  this.needsUpdate_ = false;
-};
-
 //removes mesh from mesh list
 WIDGET3D.MainWindow.prototype.removeMesh = function(mesh){
 
@@ -728,7 +690,6 @@ WIDGET3D.Window.prototype.setMesh = function(mesh){
     WIDGET3D.mainWindow.meshes_.push(this.mesh_);
     this.container_.add(this.mesh_);
   }
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 // shows window
@@ -744,7 +705,6 @@ WIDGET3D.Window.prototype.show = function(){
       this.mesh_.visible = true;
       this.container_.add(this.mesh_);
     }
-    WIDGET3D.mainWindow.needsUpdate();
   }
 };
 
@@ -765,7 +725,6 @@ WIDGET3D.Window.prototype.hide = function(){
       this.mesh_.visible = false;
       this.container_.remove(this.mesh_);
     }
-    WIDGET3D.mainWindow.needsUpdate();
   }
 };
 
@@ -781,23 +740,18 @@ WIDGET3D.Window.prototype.setLocation = function(x, y, z){
   this.container_.position.x = x;
   this.container_.position.y = y;
   this.container_.position.z = z;
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 WIDGET3D.Window.prototype.setX = function(x){
   this.container_.position.x = x;
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 WIDGET3D.Window.prototype.setY = function(y){
   this.container_.position.y = y;
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 WIDGET3D.Window.prototype.setZ = function(z){
   this.container_.position.z = z;
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 WIDGET3D.Window.prototype.getRot = function(){
@@ -810,23 +764,18 @@ WIDGET3D.Window.prototype.setRot = function(rotX, rotY, rotZ){
   this.container_.rotation.x = rotX;
   this.container_.rotation.y = rotY;
   this.container_.rotation.z = rotZ;
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 WIDGET3D.Window.prototype.setRotX = function(rotX){
   this.container_.rotation.x = rotX;
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 WIDGET3D.Window.prototype.setRotY = function(rotY){
   this.container_.rotation.y = rotY;
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 WIDGET3D.Window.prototype.setRotZ = function(rotZ){
   this.container_.rotation.z = rotZ;
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 WIDGET3D.Window.prototype.remove = function(){
@@ -1337,7 +1286,7 @@ THREEJS_WIDGET3D.checkIfHits = function(event, eventType){
     return false;
   }
 
-  var mouse = WIDGET3D.normalizedMouseCoordinates(event);
+  var mouse = WIDGET3D.mouseCoordinates(event);
   
   var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
   var ray = THREEJS_WIDGET3D.projector.pickingRay(vector, THREEJS_WIDGET3D.camera);
@@ -1488,8 +1437,6 @@ THREEJS_WIDGET3D.GridWindow.prototype.update = function(){
   if(this.updateCallback_){
     this.updateCallback_.callback(this.updateCallback_.arguments);
   }
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 THREEJS_WIDGET3D.GridWindow.prototype.mousedownHandler = function(event, window){
@@ -1497,7 +1444,7 @@ THREEJS_WIDGET3D.GridWindow.prototype.mousedownHandler = function(event, window)
   if(!window.rotate_){
     window.rotate_ = true;
     
-    window.clickLocation_ = WIDGET3D.normalizedMouseCoordinates(event);
+    window.clickLocation_ = WIDGET3D.mouseCoordinates(event);
     window.rotationOnMouseDownY_ = window.modelRotationY_;
     window.rotationOnMouseDownX_ = window.modelRotationX_;
   }
@@ -1512,7 +1459,7 @@ THREEJS_WIDGET3D.GridWindow.prototype.mouseupHandler = function(event, window){
 THREEJS_WIDGET3D.GridWindow.prototype.mousemoveHandler = function(event, window){
   if (window.rotate_){
   
-    var mouse = WIDGET3D.normalizedMouseCoordinates(event);
+    var mouse = WIDGET3D.mouseCoordinates(event);
     
     window.modelRotationY_ = window.rotationOnMouseDownY_ + ( mouse.x - window.clickLocation_.x );
     window.modelRotationX_ = window.rotationOnMouseDownX_ + ( mouse.y - window.clickLocation_.y );
@@ -1709,11 +1656,12 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
   this.firstEvent_ = false;
   
   if(this.defaultControls_){
-    this.mouseupHandler = function(event){  
-      that.drag_ = false;
-      that.clickStart_ = undefined;
-
-      THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup);
+    this.mouseupHandler = function(event){ 
+      if(that.drag_){
+        that.drag_ = false;
+        that.clickStart_ = undefined;
+        THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup);
+      }
     };
     this.title_.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler, this);
     this.title_.addEventListener(WIDGET3D.EventType.onmousemove, this.mousemoveHandler, this);
@@ -1733,8 +1681,6 @@ THREEJS_WIDGET3D.TitledWindow.prototype.update = function(){
   if(this.updateCallback_){
     this.updateCallback_.callback(this.updateCallback_.arguments);
   }
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 //sets titlebar text
@@ -2428,27 +2374,21 @@ THREEJS_WIDGET3D.CameraGroup.prototype.setLocation = function(x, y, z){
 
   this.container_.position.set({x: x, y: y, z: z});
   this.camera_.position.set({x: x, y: y, z: z});
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 THREEJS_WIDGET3D.CameraGroup.prototype.setX = function(x){
   this.container_.position.x = x;
   this.camera_.position.x = x;
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 THREEJS_WIDGET3D.CameraGroup.prototype.setY = function(y){
   this.container_.position.y = y;
   this.camera_.position.y = y;
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 THREEJS_WIDGET3D.CameraGroup.prototype.setZ = function(z){
   this.container_.position.z = z;
   this.camera_.position.z = z;
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 //ROTATION
@@ -2456,27 +2396,19 @@ THREEJS_WIDGET3D.CameraGroup.prototype.setRot = function(rotX, rotY, rotZ){
   
   this.container_.rotation.set({x: rotX, y: rotY, z: rotZ});
   this.camera_.rotation.set({x: rotX, y: rotY, z: rotZ});
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 THREEJS_WIDGET3D.CameraGroup.prototype.setRotX = function(rotX){
   this.container_.rotation.x = rotX;
   this.camera_.rotation.x = rotX;
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 THREEJS_WIDGET3D.CameraGroup.prototype.setRotY = function(rotY){
   this.container_.rotation.y = rotY;
   this.camera_.rotation.y = rotY;
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 THREEJS_WIDGET3D.CameraGroup.prototype.setRotZ = function(rotZ){
   this.container_.rotation.z = rotZ;
   this.camera_.rotation.z = rotZ;
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };

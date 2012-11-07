@@ -80,27 +80,21 @@ THREEJS_WIDGET3D.CameraGroup.prototype.setLocation = function(x, y, z){
 
   this.container_.position.set({x: x, y: y, z: z});
   this.camera_.position.set({x: x, y: y, z: z});
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 THREEJS_WIDGET3D.CameraGroup.prototype.setX = function(x){
   this.container_.position.x = x;
   this.camera_.position.x = x;
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 THREEJS_WIDGET3D.CameraGroup.prototype.setY = function(y){
   this.container_.position.y = y;
   this.camera_.position.y = y;
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 THREEJS_WIDGET3D.CameraGroup.prototype.setZ = function(z){
   this.container_.position.z = z;
   this.camera_.position.z = z;
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 //ROTATION
@@ -108,27 +102,19 @@ THREEJS_WIDGET3D.CameraGroup.prototype.setRot = function(rotX, rotY, rotZ){
   
   this.container_.rotation.set({x: rotX, y: rotY, z: rotZ});
   this.camera_.rotation.set({x: rotX, y: rotY, z: rotZ});
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 THREEJS_WIDGET3D.CameraGroup.prototype.setRotX = function(rotX){
   this.container_.rotation.x = rotX;
   this.camera_.rotation.x = rotX;
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 THREEJS_WIDGET3D.CameraGroup.prototype.setRotY = function(rotY){
   this.container_.rotation.y = rotY;
   this.camera_.rotation.y = rotY;
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };
 
 THREEJS_WIDGET3D.CameraGroup.prototype.setRotZ = function(rotZ){
   this.container_.rotation.z = rotZ;
   this.camera_.rotation.z = rotZ;
-  
-  WIDGET3D.mainWindow.needsUpdate();
 };

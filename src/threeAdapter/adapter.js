@@ -102,7 +102,7 @@ THREEJS_WIDGET3D.checkIfHits = function(event, eventType){
     return false;
   }
 
-  var mouse = WIDGET3D.normalizedMouseCoordinates(event);
+  var mouse = WIDGET3D.mouseCoordinates(event);
   
   var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
   var ray = THREEJS_WIDGET3D.projector.pickingRay(vector, THREEJS_WIDGET3D.camera);

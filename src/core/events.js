@@ -79,41 +79,48 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
   _that_.mouseEvent = function(domEvent, eventType){
     
     var hit = _that_.collisions_.callback(domEvent, eventType, _that_.collisions_.args);
-    
-    if(hit && hit.events_[eventType].callback){
-      
-      hit.events_[eventType].callback(domEvent,
-        hit.events_[eventType].arguments);
+
+    if(hit && hit.events_[eventType].length != 0){
+      for(var k = 0; k < hit.events_[eventType].length; ++k){
+        hit.events_[eventType][k].callback(domEvent,
+          hit.events_[eventType][k].arguments);
+      }
     }
     //if mainwindow has eventlistener it is executed also
-    if(WIDGET3D.mainWindow.events_[eventType].callback){
-
-      WIDGET3D.mainWindow.events_[eventType].callback(domEvent,
-        WIDGET3D.mainWindow.events_[eventType].arguments);
+    if(WIDGET3D.mainWindow.events_[eventType].length != 0){
+      for(var j = 0; j < WIDGET3D.mainWindow.events_[eventType].length; ++j){
+        WIDGET3D.mainWindow.events_[eventType][j].callback(domEvent,
+          WIDGET3D.mainWindow.events_[eventType][j].arguments);
+      }
     }
   };
   
   _that_.keyboardEvent = function(domEvent, eventType){
     
     //first we call main windows onkeydown callback if there is one
-    if(WIDGET3D.mainWindow.events_[eventType].callback){
+    if(WIDGET3D.mainWindow.events_[eventType].length != 0){
       console.log("mainwindow event!");
       
       if(WIDGET3D.mainWindow.inFocus_){
         
-        WIDGET3D.mainWindow.events_[eventType].callback(domEvent,
-          WIDGET3D.mainWindow.events_[eventType].arguments);
+        for(var l = 0; l < WIDGET3D.mainWindow.events_[eventType].length; ++l){
+          WIDGET3D.mainWindow.events_[eventType][l].callback(domEvent,
+            WIDGET3D.mainWindow.events_[eventType][l].arguments);
+        }
       }
     }
     
     //then we check other objects
-    for(var i = 0; i < WIDGET3D.mainWindow.childEvents_[eventType].length; ++i){
-      if(WIDGET3D.mainWindow.childEvents_[eventType][i].inFocus_){
-
-        WIDGET3D.mainWindow.childEvents_[eventType][i].events_[eventType].callback(domEvent,
-          WIDGET3D.mainWindow.childEvents_[eventType][i].events_[eventType].arguments);
-       }
-      
+    for(var k = 0; k < WIDGET3D.mainWindow.childEvents_[eventType].length; ++k){
+      if(WIDGET3D.mainWindow.childEvents_[eventType][k].inFocus_){
+        var object = WIDGET3D.mainWindow.childEvents_[eventType][k];
+        
+        for(var m = 0; m < object.events_[eventType].length; ++m){
+          object.events_[eventType][m].callback(domEvent,
+            object.events_[eventType][m].arguments);
+          
+        }
+      }
     }
   };
   

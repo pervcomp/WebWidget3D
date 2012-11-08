@@ -37,6 +37,8 @@ SOFTWARE.
 //
 THREEJS_WIDGET3D.GridWindow = function(parameters){
   
+  var that = this;
+  
   WIDGET3D.Window.call( this );
   
   var parameters = parameters || {};
@@ -68,10 +70,45 @@ THREEJS_WIDGET3D.GridWindow = function(parameters){
   this.setMesh(mesh);
   
   //default mouse controls in use
-  if(parameters.defaultControls){
-    this.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler, this);
-    this.addEventListener(WIDGET3D.EventType.onmouseup, this.mouseupHandler, this);
-    this.addEventListener(WIDGET3D.EventType.onmousemove, this.mousemoveHandler, this);
+  this.defaultControls_ = parameters.defaultControls !== undefined ? parameters.defaultControls : false;
+  
+  if(this.defaultControls_){
+  
+    this.mouseupHandler = function(event){
+      if(that.rotate_){
+        that.rotate_ = false;
+        THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
+        THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+      }
+    };
+    
+    this.mousedownHandler = function(event){
+      that.focus();
+      if(!that.rotate_){
+        that.rotate_ = true;
+        
+        that.clickLocation_ = WIDGET3D.mouseCoordinates(event);
+        that.rotationOnMouseDownY_ = that.modelRotationY_;
+        that.rotationOnMouseDownX_ = that.modelRotationX_;
+        
+        THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
+        THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+      }
+    };
+
+    this.mousemoveHandler = function(event){
+      if (that.rotate_){
+      
+        var mouse = WIDGET3D.mouseCoordinates(event);
+        
+        that.modelRotationY_ = that.rotationOnMouseDownY_ + ( mouse.x - that.clickLocation_.x );
+        that.modelRotationX_ = that.rotationOnMouseDownX_ + ( mouse.y - that.clickLocation_.y );
+      }
+    };
+    
+    
+    
+    this.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler);
   }
   
 };
@@ -79,39 +116,14 @@ THREEJS_WIDGET3D.GridWindow = function(parameters){
 THREEJS_WIDGET3D.GridWindow.prototype = WIDGET3D.Window.prototype.inheritance();
 
 THREEJS_WIDGET3D.GridWindow.prototype.update = function(){
-  var rot = this.getRot();
-  this.setRotY(rot.y + ((this.modelRotationY_ - rot.y)*0.03));
-  this.setRotX(rot.x + ((this.modelRotationX_ - rot.x)*0.03));
+  if(this.defaultControls_){
+    var rot = this.getRot();
+    this.setRotY(rot.y + ((this.modelRotationY_ - rot.y)*0.03));
+    this.setRotX(rot.x + ((this.modelRotationX_ - rot.x)*0.03));
+  }
   
   if(this.updateCallback_){
     this.updateCallback_.callback(this.updateCallback_.arguments);
-  }
-};
-
-THREEJS_WIDGET3D.GridWindow.prototype.mousedownHandler = function(event, window){
-  window.focus();
-  if(!window.rotate_){
-    window.rotate_ = true;
-    
-    window.clickLocation_ = WIDGET3D.mouseCoordinates(event);
-    window.rotationOnMouseDownY_ = window.modelRotationY_;
-    window.rotationOnMouseDownX_ = window.modelRotationX_;
-  }
-  
-  return false;
-};
-
-THREEJS_WIDGET3D.GridWindow.prototype.mouseupHandler = function(event, window){
-  window.rotate_ = false;
-};
-
-THREEJS_WIDGET3D.GridWindow.prototype.mousemoveHandler = function(event, window){
-  if (window.rotate_){
-  
-    var mouse = WIDGET3D.mouseCoordinates(event);
-    
-    window.modelRotationY_ = window.rotationOnMouseDownY_ + ( mouse.x - window.clickLocation_.x );
-    window.modelRotationX_ = window.rotationOnMouseDownX_ + ( mouse.y - window.clickLocation_.y );
   }
 };
 

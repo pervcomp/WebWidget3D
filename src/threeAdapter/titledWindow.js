@@ -101,15 +101,55 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
   this.firstEvent_ = false;
   
   if(this.defaultControls_){
-    this.mouseupHandler = function(event){ 
+  
+    this.mouseupHandler = function(event){
       if(that.drag_){
         that.drag_ = false;
         that.clickStart_ = undefined;
-        THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup);
+        that.title_.removeEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
+        THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
       }
     };
-    this.title_.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler, this);
-    this.title_.addEventListener(WIDGET3D.EventType.onmousemove, this.mousemoveHandler, this);
+    
+    this.mousedownHandler = function(event){
+      that.focus();
+      //If this is the first time the event is fired we need to update the
+      //objects position data because it might have changed after constructor.
+      if(!that.firstEvent_){
+        that.newPos_ = that.getLocation();
+        that.firstEvent_ = true;
+      }
+      
+      if(!that.drag_){
+        that.drag_ = true;
+        that.clickStart_ = event.objectCoordinates;
+        that.title_.addEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
+        THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+      }
+      return false;
+    };
+
+    this.mousemoveHandler = function(event){
+      if(that.drag_){
+        
+        var point = event.objectCoordinates;
+        
+        var dy = (point.y - that.clickStart_.y);
+        var dx = (point.x - that.clickStart_.x);
+        
+        var pos = that.getLocation();
+        var rotation = that.getRot();
+        
+        var tmpX = pos.x + (dx * Math.cos(Math.PI * rotation.y));
+        var tmpZ = pos.z + (dx * Math.sin(Math.PI * rotation.y));
+        
+        that.newPos_.y = pos.y + (dy * Math.cos(Math.PI * rotation.x));
+        that.newPos_.z = tmpZ - (dy * Math.sin(Math.PI * rotation.x) * Math.cos(Math.PI * rotation.y));
+        that.newPos_.x = tmpX + (dy * Math.sin(Math.PI * rotation.x) * Math.sin(Math.PI * rotation.y));
+      }
+    };
+    
+    this.title_.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler);
   }
 };
 
@@ -157,44 +197,6 @@ THREEJS_WIDGET3D.TitledWindow.prototype.setTitle = function(title){
 };
 
 
-THREEJS_WIDGET3D.TitledWindow.prototype.mousedownHandler = function(event, window){
-  window.focus();
-  //If this is the first time the event is fired we need to update the
-  //objects position data because it might have changed after constructor.
-  if(!window.firstEvent_){
-    window.newPos_ = window.getLocation();
-    window.firstEvent_ = true;
-  }
-  
-  if(!window.drag_){
-    window.drag_ = true;
-    window.clickStart_ = event.objectCoordinates;
-    THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmouseup, window.mouseupHandler);
-  }
-  return false;
-};
-
-THREEJS_WIDGET3D.TitledWindow.prototype.mousemoveHandler = function(event, window){
-  if(window.drag_){
-    
-    var point = event.objectCoordinates;
-    
-    var dy = (point.y - window.clickStart_.y);
-    var dx = (point.x - window.clickStart_.x);
-    
-    var pos = window.getLocation();
-    var rotation = window.getRot();
-    
-    var tmpX = pos.x + (dx * Math.cos(Math.PI * rotation.y));
-    var tmpZ = pos.z + (dx * Math.sin(Math.PI * rotation.y));
-    
-    window.newPos_.y = pos.y + (dy * Math.cos(Math.PI * rotation.x));
-    window.newPos_.z = tmpZ - (dy * Math.sin(Math.PI * rotation.x) * Math.cos(Math.PI * rotation.y));
-    window.newPos_.x = tmpX + (dy * Math.sin(Math.PI * rotation.x) * Math.sin(Math.PI * rotation.y));
-  }
-};
-
-
 THREEJS_WIDGET3D.TitledWindow.prototype.remove = function(){
   //children needs to be removed
   for(var k = 0; k < this.children_.length; ++k){
@@ -211,7 +213,7 @@ THREEJS_WIDGET3D.TitledWindow.prototype.remove = function(){
   //removing eventlisteners
   for(var i = 0; i < this.events_.length; ++i){
     if(this.events_[i].callback){
-      this.removeEventListener(i);
+      this.removeEventListeners(i);
     }
   }
   

@@ -230,7 +230,7 @@ THREEJS_WIDGET3D.Dialog.prototype.remove = function(){
   //removing eventlisteners
   for(var i = 0; i < this.events_.length; ++i){
     if(this.events_[i].callback){
-      this.removeEventListener(i);
+      this.removeEventListeners(i);
     }
   }
   

@@ -222,14 +222,16 @@ WIDGET3D.GuiObject = function(){
   
   this.events_ = [];
   this.setUpEvents();
+  
+  //this.events_ = new WIDGET3D.EventTable;
 };
 
 // this function is used to set up event structure
 // must be called at the constructor
 WIDGET3D.GuiObject.prototype.setUpEvents = function(){
   for(var i = 0; i < WIDGET3D.NUMBER_OF_EVENTS; ++i){
-    this.events_.push(
-      {callback: false, arguments: undefined, index: undefined});
+    //this.events_.push({callback: false, arguments: undefined, index: undefined});
+    this.events_.push([]);
   }
 };
 
@@ -260,43 +262,72 @@ WIDGET3D.GuiObject.prototype.unfocus = function(){
 // so don't include it to args!
 //
 WIDGET3D.GuiObject.prototype.addEventListener = function(event, callback, args){
-  this.events_[event].callback = callback;
-  this.events_[event].arguments = args;
-
-  WIDGET3D.mainWindow.childEvents_[event].push(this);
-  this.events_[event].index = WIDGET3D.mainWindow.childEvents_[event].length - 1;
   
+  var tmp = {callback : callback, arguments : args};
+  
+  if(this.events_[event].length == 0){
+    WIDGET3D.mainWindow.childEvents_[event].push(this);
+    
+    tmp.index = WIDGET3D.mainWindow.childEvents_[event].length - 1;
+  }
+  else{
+    tmp.index = this.events_[event][0].index;
+  }
+  
+  this.events_[event].push(tmp);
+
   if(!WIDGET3D.events.enabled_[event]){
     WIDGET3D.events.enableEvent(event);
   }
-  
-  this.updateCallback_;
-};
-
-// Switches events handler callback to function that is given as parameter.
-// This can be used only if there is a listner for the event allready.
-WIDGET3D.GuiObject.prototype.switchEventCallback = function(event, callback, args){
-  this.events_[event].callback = callback;
-  this.events_[event].arguments = args;
 };
 
 // Removes eventlistener from object
 // Parameters: event = WIDGET3D.EventType object
-WIDGET3D.GuiObject.prototype.removeEventListener = function(event){
-
-  this.events_[event].callback = false;
-  this.events_[event].arguments = undefined;
+//             callback = binded callbackfunction
+//             args = binded arguments for callback
+WIDGET3D.GuiObject.prototype.removeEventListener = function(event, callback, args){
   
-  WIDGET3D.mainWindow.childEvents_[event].splice(this.events_[event].index, 1);
+  //If there is just one event left we just check if the listener is the one that is
+  //binded to the event and if it is we call removeEventListeners.
+  if(this.events_[event].length == 1){
+    if(this.events_[event][0].callback === callback && this.events_[event][0].arguments === args){
+      this.removeEventListeners(event);
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
+  
+  for(var i = 0; i < this.events_[event].length; ++i){
+    if(this.events_[event][i].callback === callback && this.events_[event][i].arguments === args){
+      this.events_[event].splice(i, 1);
+      return true;
+    }
+  }
+  return false;
+};
+
+
+// Removes eventlisteners from object
+// Parameters: event = WIDGET3D.EventType object
+WIDGET3D.GuiObject.prototype.removeEventListeners = function(event){
+  
+  WIDGET3D.mainWindow.childEvents_[event].splice(this.events_[event][0].index, 1);
   
   for(var i = 0; i < WIDGET3D.mainWindow.childEvents_[event].length; ++i){
     WIDGET3D.mainWindow.childEvents_[event][i].setNewEventIndex(event,i);
   }
-  this.events_[event].index = undefined;
+  
+  this.events_[event] = [];
 };
 
 WIDGET3D.GuiObject.prototype.setNewEventIndex = function(event, index){
-  this.events_[event].index = index;
+  
+  for(var i = 0; i < this.events_[event].length; ++i){
+    this.events_[event][i].index = index;
+  }
+  
   WIDGET3D.mainWindow.childEvents_[event][index] = this;
 }
 
@@ -344,7 +375,7 @@ WIDGET3D.Basic.prototype = WIDGET3D.GuiObject.prototype.inheritance();
 WIDGET3D.Basic.prototype.type_ = WIDGET3D.ElementType.BASIC;
 
 //sets parent window for object
-WIDGET3D.Basic.prototype.setParent = function(window){
+WIDGET3D.Basic.prototype.setParent = function(widget){
   // if parent is allready set we have to do some things
   // to keep datastructures up to date.
   if(this.parent_ != undefined){
@@ -356,7 +387,7 @@ WIDGET3D.Basic.prototype.setParent = function(window){
     this.parent_.removeFromObjects(this);
   }
   
-  this.parent_ = window;
+  this.parent_ = widget;
   this.parent_.children_.push(this);
   
   if(this.isVisible_ && this.mesh_){
@@ -483,7 +514,7 @@ WIDGET3D.Basic.prototype.remove = function(){
   
   for(var i = 0; i < this.events_.length; ++i){
     if(this.events_[i].callback){
-      this.removeEventListener(i);
+      this.removeEventListeners(i);
     }
   }
   
@@ -647,7 +678,7 @@ WIDGET3D.Window.prototype.type_ = WIDGET3D.ElementType.WINDOW;
 //-----------------------------------------------------------------------------------------
 
 //sets parent window for object
-WIDGET3D.Window.prototype.setParent = function(window){
+WIDGET3D.Window.prototype.setParent = function(widget){
   
   // if parent is allready set we have to do some things
   // to keep datastructures up to date.
@@ -656,12 +687,12 @@ WIDGET3D.Window.prototype.setParent = function(window){
     this.parent_.container_.remove(this.container_);
     this.parent_.removeFromObjects(this);
     
-    this.parent_ = window;
+    this.parent_ = widget;
     this.parent_.children_.push(this);
     this.parent_.container_.add(this.container_);
   }
   else{
-    this.parent_ = window;
+    this.parent_ = widget;
     this.parent_.children_.push(this);
     this.parent_.container_.add(this.container_);
   }
@@ -791,7 +822,7 @@ WIDGET3D.Window.prototype.remove = function(){
   //removing eventlisteners
   for(var i = 0; i < this.events_.length; ++i){
     if(this.events_[i].callback){
-      this.removeEventListener(i);
+      this.removeEventListeners(i);
     }
   }
   
@@ -1027,41 +1058,48 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
   _that_.mouseEvent = function(domEvent, eventType){
     
     var hit = _that_.collisions_.callback(domEvent, eventType, _that_.collisions_.args);
-    
-    if(hit && hit.events_[eventType].callback){
-      
-      hit.events_[eventType].callback(domEvent,
-        hit.events_[eventType].arguments);
+
+    if(hit && hit.events_[eventType].length != 0){
+      for(var k = 0; k < hit.events_[eventType].length; ++k){
+        hit.events_[eventType][k].callback(domEvent,
+          hit.events_[eventType][k].arguments);
+      }
     }
     //if mainwindow has eventlistener it is executed also
-    if(WIDGET3D.mainWindow.events_[eventType].callback){
-
-      WIDGET3D.mainWindow.events_[eventType].callback(domEvent,
-        WIDGET3D.mainWindow.events_[eventType].arguments);
+    if(WIDGET3D.mainWindow.events_[eventType].length != 0){
+      for(var j = 0; j < WIDGET3D.mainWindow.events_[eventType].length; ++j){
+        WIDGET3D.mainWindow.events_[eventType][j].callback(domEvent,
+          WIDGET3D.mainWindow.events_[eventType][j].arguments);
+      }
     }
   };
   
   _that_.keyboardEvent = function(domEvent, eventType){
     
     //first we call main windows onkeydown callback if there is one
-    if(WIDGET3D.mainWindow.events_[eventType].callback){
+    if(WIDGET3D.mainWindow.events_[eventType].length != 0){
       console.log("mainwindow event!");
       
       if(WIDGET3D.mainWindow.inFocus_){
         
-        WIDGET3D.mainWindow.events_[eventType].callback(domEvent,
-          WIDGET3D.mainWindow.events_[eventType].arguments);
+        for(var l = 0; l < WIDGET3D.mainWindow.events_[eventType].length; ++l){
+          WIDGET3D.mainWindow.events_[eventType][l].callback(domEvent,
+            WIDGET3D.mainWindow.events_[eventType][l].arguments);
+        }
       }
     }
     
     //then we check other objects
-    for(var i = 0; i < WIDGET3D.mainWindow.childEvents_[eventType].length; ++i){
-      if(WIDGET3D.mainWindow.childEvents_[eventType][i].inFocus_){
-
-        WIDGET3D.mainWindow.childEvents_[eventType][i].events_[eventType].callback(domEvent,
-          WIDGET3D.mainWindow.childEvents_[eventType][i].events_[eventType].arguments);
-       }
-      
+    for(var k = 0; k < WIDGET3D.mainWindow.childEvents_[eventType].length; ++k){
+      if(WIDGET3D.mainWindow.childEvents_[eventType][k].inFocus_){
+        var object = WIDGET3D.mainWindow.childEvents_[eventType][k];
+        
+        for(var m = 0; m < object.events_[eventType].length; ++m){
+          object.events_[eventType][m].callback(domEvent,
+            object.events_[eventType][m].arguments);
+          
+        }
+      }
     }
   };
   
@@ -1385,6 +1423,8 @@ SOFTWARE.
 //
 THREEJS_WIDGET3D.GridWindow = function(parameters){
   
+  var that = this;
+  
   WIDGET3D.Window.call( this );
   
   var parameters = parameters || {};
@@ -1416,10 +1456,45 @@ THREEJS_WIDGET3D.GridWindow = function(parameters){
   this.setMesh(mesh);
   
   //default mouse controls in use
-  if(parameters.defaultControls){
-    this.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler, this);
-    this.addEventListener(WIDGET3D.EventType.onmouseup, this.mouseupHandler, this);
-    this.addEventListener(WIDGET3D.EventType.onmousemove, this.mousemoveHandler, this);
+  this.defaultControls_ = parameters.defaultControls !== undefined ? parameters.defaultControls : false;
+  
+  if(this.defaultControls_){
+  
+    this.mouseupHandler = function(event){
+      if(that.rotate_){
+        that.rotate_ = false;
+        THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
+        THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+      }
+    };
+    
+    this.mousedownHandler = function(event){
+      that.focus();
+      if(!that.rotate_){
+        that.rotate_ = true;
+        
+        that.clickLocation_ = WIDGET3D.mouseCoordinates(event);
+        that.rotationOnMouseDownY_ = that.modelRotationY_;
+        that.rotationOnMouseDownX_ = that.modelRotationX_;
+        
+        THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
+        THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+      }
+    };
+
+    this.mousemoveHandler = function(event){
+      if (that.rotate_){
+      
+        var mouse = WIDGET3D.mouseCoordinates(event);
+        
+        that.modelRotationY_ = that.rotationOnMouseDownY_ + ( mouse.x - that.clickLocation_.x );
+        that.modelRotationX_ = that.rotationOnMouseDownX_ + ( mouse.y - that.clickLocation_.y );
+      }
+    };
+    
+    
+    
+    this.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler);
   }
   
 };
@@ -1427,39 +1502,14 @@ THREEJS_WIDGET3D.GridWindow = function(parameters){
 THREEJS_WIDGET3D.GridWindow.prototype = WIDGET3D.Window.prototype.inheritance();
 
 THREEJS_WIDGET3D.GridWindow.prototype.update = function(){
-  var rot = this.getRot();
-  this.setRotY(rot.y + ((this.modelRotationY_ - rot.y)*0.03));
-  this.setRotX(rot.x + ((this.modelRotationX_ - rot.x)*0.03));
+  if(this.defaultControls_){
+    var rot = this.getRot();
+    this.setRotY(rot.y + ((this.modelRotationY_ - rot.y)*0.03));
+    this.setRotX(rot.x + ((this.modelRotationX_ - rot.x)*0.03));
+  }
   
   if(this.updateCallback_){
     this.updateCallback_.callback(this.updateCallback_.arguments);
-  }
-};
-
-THREEJS_WIDGET3D.GridWindow.prototype.mousedownHandler = function(event, window){
-  window.focus();
-  if(!window.rotate_){
-    window.rotate_ = true;
-    
-    window.clickLocation_ = WIDGET3D.mouseCoordinates(event);
-    window.rotationOnMouseDownY_ = window.modelRotationY_;
-    window.rotationOnMouseDownX_ = window.modelRotationX_;
-  }
-  
-  return false;
-};
-
-THREEJS_WIDGET3D.GridWindow.prototype.mouseupHandler = function(event, window){
-  window.rotate_ = false;
-};
-
-THREEJS_WIDGET3D.GridWindow.prototype.mousemoveHandler = function(event, window){
-  if (window.rotate_){
-  
-    var mouse = WIDGET3D.mouseCoordinates(event);
-    
-    window.modelRotationY_ = window.rotationOnMouseDownY_ + ( mouse.x - window.clickLocation_.x );
-    window.modelRotationX_ = window.rotationOnMouseDownX_ + ( mouse.y - window.clickLocation_.y );
   }
 };
 
@@ -1653,15 +1703,55 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
   this.firstEvent_ = false;
   
   if(this.defaultControls_){
-    this.mouseupHandler = function(event){ 
+  
+    this.mouseupHandler = function(event){
       if(that.drag_){
         that.drag_ = false;
         that.clickStart_ = undefined;
-        THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup);
+        that.title_.removeEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
+        THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
       }
     };
-    this.title_.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler, this);
-    this.title_.addEventListener(WIDGET3D.EventType.onmousemove, this.mousemoveHandler, this);
+    
+    this.mousedownHandler = function(event){
+      that.focus();
+      //If this is the first time the event is fired we need to update the
+      //objects position data because it might have changed after constructor.
+      if(!that.firstEvent_){
+        that.newPos_ = that.getLocation();
+        that.firstEvent_ = true;
+      }
+      
+      if(!that.drag_){
+        that.drag_ = true;
+        that.clickStart_ = event.objectCoordinates;
+        that.title_.addEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
+        THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+      }
+      return false;
+    };
+
+    this.mousemoveHandler = function(event){
+      if(that.drag_){
+        
+        var point = event.objectCoordinates;
+        
+        var dy = (point.y - that.clickStart_.y);
+        var dx = (point.x - that.clickStart_.x);
+        
+        var pos = that.getLocation();
+        var rotation = that.getRot();
+        
+        var tmpX = pos.x + (dx * Math.cos(Math.PI * rotation.y));
+        var tmpZ = pos.z + (dx * Math.sin(Math.PI * rotation.y));
+        
+        that.newPos_.y = pos.y + (dy * Math.cos(Math.PI * rotation.x));
+        that.newPos_.z = tmpZ - (dy * Math.sin(Math.PI * rotation.x) * Math.cos(Math.PI * rotation.y));
+        that.newPos_.x = tmpX + (dy * Math.sin(Math.PI * rotation.x) * Math.sin(Math.PI * rotation.y));
+      }
+    };
+    
+    this.title_.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler);
   }
 };
 
@@ -1709,44 +1799,6 @@ THREEJS_WIDGET3D.TitledWindow.prototype.setTitle = function(title){
 };
 
 
-THREEJS_WIDGET3D.TitledWindow.prototype.mousedownHandler = function(event, window){
-  window.focus();
-  //If this is the first time the event is fired we need to update the
-  //objects position data because it might have changed after constructor.
-  if(!window.firstEvent_){
-    window.newPos_ = window.getLocation();
-    window.firstEvent_ = true;
-  }
-  
-  if(!window.drag_){
-    window.drag_ = true;
-    window.clickStart_ = event.objectCoordinates;
-    THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmouseup, window.mouseupHandler);
-  }
-  return false;
-};
-
-THREEJS_WIDGET3D.TitledWindow.prototype.mousemoveHandler = function(event, window){
-  if(window.drag_){
-    
-    var point = event.objectCoordinates;
-    
-    var dy = (point.y - window.clickStart_.y);
-    var dx = (point.x - window.clickStart_.x);
-    
-    var pos = window.getLocation();
-    var rotation = window.getRot();
-    
-    var tmpX = pos.x + (dx * Math.cos(Math.PI * rotation.y));
-    var tmpZ = pos.z + (dx * Math.sin(Math.PI * rotation.y));
-    
-    window.newPos_.y = pos.y + (dy * Math.cos(Math.PI * rotation.x));
-    window.newPos_.z = tmpZ - (dy * Math.sin(Math.PI * rotation.x) * Math.cos(Math.PI * rotation.y));
-    window.newPos_.x = tmpX + (dy * Math.sin(Math.PI * rotation.x) * Math.sin(Math.PI * rotation.y));
-  }
-};
-
-
 THREEJS_WIDGET3D.TitledWindow.prototype.remove = function(){
   //children needs to be removed
   for(var k = 0; k < this.children_.length; ++k){
@@ -1763,7 +1815,7 @@ THREEJS_WIDGET3D.TitledWindow.prototype.remove = function(){
   //removing eventlisteners
   for(var i = 0; i < this.events_.length; ++i){
     if(this.events_[i].callback){
-      this.removeEventListener(i);
+      this.removeEventListeners(i);
     }
   }
   
@@ -2020,7 +2072,7 @@ THREEJS_WIDGET3D.Dialog.prototype.remove = function(){
   //removing eventlisteners
   for(var i = 0; i < this.events_.length; ++i){
     if(this.events_[i].callback){
-      this.removeEventListener(i);
+      this.removeEventListeners(i);
     }
   }
   
@@ -2098,7 +2150,7 @@ THREEJS_WIDGET3D.SelectDialog = function(parameters){
   
   if(this.hasCancel_){
     this.cancelText_ = parameters.cancelText !== undefined ? parameters.cancelText : "Cancel";
-    this.choices_.push({string: this.cancelText_, onclick : {handler : function(event, window){window.remove()}, parameters : this}});
+    this.choices_.push({string: this.cancelText_, onclick : {handler : function(event, that){that.remove()}, parameters : this}});
   }
   
   if(this.text_){
@@ -2264,7 +2316,7 @@ THREEJS_WIDGET3D.SelectDialog.prototype.remove = function(){
   //removing eventlisteners
   for(var i = 0; i < this.events_.length; ++i){
     if(this.events_[i].callback){
-      this.removeEventListener(i);
+      this.removeEventListeners(i);
     }
   }
   

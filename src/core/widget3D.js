@@ -222,14 +222,16 @@ WIDGET3D.GuiObject = function(){
   
   this.events_ = [];
   this.setUpEvents();
+  
+  //this.events_ = new WIDGET3D.EventTable;
 };
 
 // this function is used to set up event structure
 // must be called at the constructor
 WIDGET3D.GuiObject.prototype.setUpEvents = function(){
   for(var i = 0; i < WIDGET3D.NUMBER_OF_EVENTS; ++i){
-    this.events_.push(
-      {callback: false, arguments: undefined, index: undefined});
+    //this.events_.push({callback: false, arguments: undefined, index: undefined});
+    this.events_.push([]);
   }
 };
 
@@ -260,43 +262,72 @@ WIDGET3D.GuiObject.prototype.unfocus = function(){
 // so don't include it to args!
 //
 WIDGET3D.GuiObject.prototype.addEventListener = function(event, callback, args){
-  this.events_[event].callback = callback;
-  this.events_[event].arguments = args;
-
-  WIDGET3D.mainWindow.childEvents_[event].push(this);
-  this.events_[event].index = WIDGET3D.mainWindow.childEvents_[event].length - 1;
   
+  var tmp = {callback : callback, arguments : args};
+  
+  if(this.events_[event].length == 0){
+    WIDGET3D.mainWindow.childEvents_[event].push(this);
+    
+    tmp.index = WIDGET3D.mainWindow.childEvents_[event].length - 1;
+  }
+  else{
+    tmp.index = this.events_[event][0].index;
+  }
+  
+  this.events_[event].push(tmp);
+
   if(!WIDGET3D.events.enabled_[event]){
     WIDGET3D.events.enableEvent(event);
   }
-  
-  this.updateCallback_;
-};
-
-// Switches events handler callback to function that is given as parameter.
-// This can be used only if there is a listner for the event allready.
-WIDGET3D.GuiObject.prototype.switchEventCallback = function(event, callback, args){
-  this.events_[event].callback = callback;
-  this.events_[event].arguments = args;
 };
 
 // Removes eventlistener from object
 // Parameters: event = WIDGET3D.EventType object
-WIDGET3D.GuiObject.prototype.removeEventListener = function(event){
-
-  this.events_[event].callback = false;
-  this.events_[event].arguments = undefined;
+//             callback = binded callbackfunction
+//             args = binded arguments for callback
+WIDGET3D.GuiObject.prototype.removeEventListener = function(event, callback, args){
   
-  WIDGET3D.mainWindow.childEvents_[event].splice(this.events_[event].index, 1);
+  //If there is just one event left we just check if the listener is the one that is
+  //binded to the event and if it is we call removeEventListeners.
+  if(this.events_[event].length == 1){
+    if(this.events_[event][0].callback === callback && this.events_[event][0].arguments === args){
+      this.removeEventListeners(event);
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
+  
+  for(var i = 0; i < this.events_[event].length; ++i){
+    if(this.events_[event][i].callback === callback && this.events_[event][i].arguments === args){
+      this.events_[event].splice(i, 1);
+      return true;
+    }
+  }
+  return false;
+};
+
+
+// Removes eventlisteners from object
+// Parameters: event = WIDGET3D.EventType object
+WIDGET3D.GuiObject.prototype.removeEventListeners = function(event){
+  
+  WIDGET3D.mainWindow.childEvents_[event].splice(this.events_[event][0].index, 1);
   
   for(var i = 0; i < WIDGET3D.mainWindow.childEvents_[event].length; ++i){
     WIDGET3D.mainWindow.childEvents_[event][i].setNewEventIndex(event,i);
   }
-  this.events_[event].index = undefined;
+  
+  this.events_[event] = [];
 };
 
 WIDGET3D.GuiObject.prototype.setNewEventIndex = function(event, index){
-  this.events_[event].index = index;
+  
+  for(var i = 0; i < this.events_[event].length; ++i){
+    this.events_[event][i].index = index;
+  }
+  
   WIDGET3D.mainWindow.childEvents_[event][index] = this;
 }
 
@@ -344,7 +375,7 @@ WIDGET3D.Basic.prototype = WIDGET3D.GuiObject.prototype.inheritance();
 WIDGET3D.Basic.prototype.type_ = WIDGET3D.ElementType.BASIC;
 
 //sets parent window for object
-WIDGET3D.Basic.prototype.setParent = function(window){
+WIDGET3D.Basic.prototype.setParent = function(widget){
   // if parent is allready set we have to do some things
   // to keep datastructures up to date.
   if(this.parent_ != undefined){
@@ -356,7 +387,7 @@ WIDGET3D.Basic.prototype.setParent = function(window){
     this.parent_.removeFromObjects(this);
   }
   
-  this.parent_ = window;
+  this.parent_ = widget;
   this.parent_.children_.push(this);
   
   if(this.isVisible_ && this.mesh_){
@@ -483,7 +514,7 @@ WIDGET3D.Basic.prototype.remove = function(){
   
   for(var i = 0; i < this.events_.length; ++i){
     if(this.events_[i].callback){
-      this.removeEventListener(i);
+      this.removeEventListeners(i);
     }
   }
   
@@ -647,7 +678,7 @@ WIDGET3D.Window.prototype.type_ = WIDGET3D.ElementType.WINDOW;
 //-----------------------------------------------------------------------------------------
 
 //sets parent window for object
-WIDGET3D.Window.prototype.setParent = function(window){
+WIDGET3D.Window.prototype.setParent = function(widget){
   
   // if parent is allready set we have to do some things
   // to keep datastructures up to date.
@@ -656,12 +687,12 @@ WIDGET3D.Window.prototype.setParent = function(window){
     this.parent_.container_.remove(this.container_);
     this.parent_.removeFromObjects(this);
     
-    this.parent_ = window;
+    this.parent_ = widget;
     this.parent_.children_.push(this);
     this.parent_.container_.add(this.container_);
   }
   else{
-    this.parent_ = window;
+    this.parent_ = widget;
     this.parent_.children_.push(this);
     this.parent_.container_.add(this.container_);
   }
@@ -791,7 +822,7 @@ WIDGET3D.Window.prototype.remove = function(){
   //removing eventlisteners
   for(var i = 0; i < this.events_.length; ++i){
     if(this.events_[i].callback){
-      this.removeEventListener(i);
+      this.removeEventListeners(i);
     }
   }
   

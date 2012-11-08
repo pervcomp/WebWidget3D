@@ -51,7 +51,7 @@ THREEJS_WIDGET3D.SelectDialog = function(parameters){
   
   if(this.hasCancel_){
     this.cancelText_ = parameters.cancelText !== undefined ? parameters.cancelText : "Cancel";
-    this.choices_.push({string: this.cancelText_, onclick : {handler : function(event, window){window.remove()}, parameters : this}});
+    this.choices_.push({string: this.cancelText_, onclick : {handler : function(event, that){that.remove()}, parameters : this}});
   }
   
   if(this.text_){
@@ -217,7 +217,7 @@ THREEJS_WIDGET3D.SelectDialog.prototype.remove = function(){
   //removing eventlisteners
   for(var i = 0; i < this.events_.length; ++i){
     if(this.events_[i].callback){
-      this.removeEventListener(i);
+      this.removeEventListeners(i);
     }
   }
   

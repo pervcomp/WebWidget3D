@@ -35,3 +35,5 @@ TODO:
 * Event system needs to be redone in more generic way.
 * Drag controls for the TitledWindow component needs some work. At the moment drag works only along the objects xy-axis.
 This isn't intuitive if camera have rotation.
+* Adapters to other 3D engines
+* Updating Three.js to it's latest version.

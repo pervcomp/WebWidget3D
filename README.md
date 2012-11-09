@@ -21,7 +21,6 @@ Using the library:
 
 To use the library include widget3D-build-min.js or widget3D-build.js. The files can be found from build directory.
 This library also needs at the moment Three.js version 51 to work. So you have to include it too.
-Three.js is not included to the build.
 
 There isn't any formal documentation yet. Look at the examples from examples directory to get started.
 

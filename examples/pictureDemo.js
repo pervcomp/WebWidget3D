@@ -48,7 +48,8 @@ var init = function(){
   pictureDisplay.setMesh(display);
   mainWindow.addChild(pictureDisplay);
   
-  pictureDisplay.addEventListener(WIDGET3D.EventType.onclick, pictureclick, pictureDisplay);
+  //pictureDisplay.addEventListener(WIDGET3D.EventType.onclick, pictureclick, pictureDisplay);
+  pictureDisplay.addEventListener("click", pictureclick, pictureDisplay);
   pictureDisplay.hide();
   
   //creates small pictures
@@ -101,7 +102,8 @@ var displayPictures = function(subWindow, pictureDisplay){
   for (var i = 0; i < pictures.length; ++i){
 
     var button = new THREEJS_WIDGET3D.GridIcon({parent : subWindow, picture : pictures[i]});
-    button.addEventListener(WIDGET3D.EventType.onclick, mouseclickHandler, {button: button, pictureDisplay : pictureDisplay});
+    //button.addEventListener(WIDGET3D.EventType.onclick, mouseclickHandler, {button: button, pictureDisplay : pictureDisplay});
+    button.addEventListener("click", mouseclickHandler, {button: button, pictureDisplay : pictureDisplay});
     
   }
 }

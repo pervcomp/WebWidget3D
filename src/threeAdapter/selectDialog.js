@@ -126,7 +126,8 @@ THREEJS_WIDGET3D.SelectDialog.prototype.createChoises = function(){
     
     choice.setLocation(parentLoc.x, y ,parentLoc.z);
     
-    choice.addEventListener(WIDGET3D.EventType.onclick, this.choices_[i].onclick.handler, this.choices_[i].onclick.parameters);
+    //choice.addEventListener(WIDGET3D.EventType.onclick, this.choices_[i].onclick.handler, this.choices_[i].onclick.parameters);
+    choice.addEventListener("click", this.choices_[i].onclick.handler, this.choices_[i].onclick.parameters);
     choice.menuID_ = i;
     this.addChild(choice);
   }

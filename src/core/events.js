@@ -26,30 +26,6 @@ SOFTWARE.
 // DOM EVENTS
 //--------------------------------------------
 
-WIDGET3D.EventType = {"onclick":0, "ondblclick":1, "onmousemove":2,
-  "onmousedown":3, "onmouseup":4, "onmouseover":5, "onmouseout":6,
-  "onkeydown":7, "onkeyup":8, "onkeypress":9};
-  
-WIDGET3D.NUMBER_OF_EVENTS = 10;
-
-WIDGET3D.EventTable = {
-
-  addEvent : function(name){
-    if(!this.name){
-      this.name = [];
-      return true;
-    }
-    return false;
-  },
-  
-  addCallback : function(event, callback, arguments, object){
-    if(this.event){
-      this.event.push({callback : callback, arguments : arguments, object : object});
-      return (this.event.length-1);
-    }
-    return false;
-  }
-};
 
 //Eventhandler abstraction for WIDGET3D's objects
 // needs the gui's main window (root window)
@@ -70,54 +46,53 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
     args: collisionCallback.args
   };
   
-  _that_.enabled_ = [];
+  _that_.enabled_ = {};
   
-  for(var i = 0; i < WIDGET3D.NUMBER_OF_EVENTS; ++i){
-    _that_.enabled_.push(false);
-  }
-  
-  _that_.mouseEvent = function(domEvent, eventType){
+  _that_.mouseEvent = function(domEvent){
     
-    var hit = _that_.collisions_.callback(domEvent, eventType, _that_.collisions_.args);
+    var hit = _that_.collisions_.callback(domEvent, _that_.collisions_.args);
+    
+    var name = domEvent.type;
 
-    if(hit && hit.events_[eventType].length != 0){
-      for(var k = 0; k < hit.events_[eventType].length; ++k){
-        hit.events_[eventType][k].callback(domEvent,
-          hit.events_[eventType][k].arguments);
+    if(hit && hit.events_[name.toString()].length != 0){
+      for(var k = 0; k < hit.events_[name.toString()].length; ++k){
+        hit.events_[name.toString()][k].callback(domEvent,
+          hit.events_[name.toString()][k].arguments);
       }
     }
     //if mainwindow has eventlistener it is executed also
-    if(WIDGET3D.mainWindow.events_[eventType].length != 0){
-      for(var j = 0; j < WIDGET3D.mainWindow.events_[eventType].length; ++j){
-        WIDGET3D.mainWindow.events_[eventType][j].callback(domEvent,
-          WIDGET3D.mainWindow.events_[eventType][j].arguments);
+    if(WIDGET3D.mainWindow.events_[name.toString()].length != 0){
+      for(var j = 0; j < WIDGET3D.mainWindow.events_[name.toString()].length; ++j){
+        WIDGET3D.mainWindow.events_[name.toString()][j].callback(domEvent,
+          WIDGET3D.mainWindow.events_[name.toString()][j].arguments);
       }
     }
   };
   
-  _that_.keyboardEvent = function(domEvent, eventType){
+  _that_.keyboardEvent = function(domEvent){
     
+    var name = domEvent.type;
     //first we call main windows onkeydown callback if there is one
-    if(WIDGET3D.mainWindow.events_[eventType].length != 0){
+    if(WIDGET3D.mainWindow.events_[name.toString()].length != 0){
       console.log("mainwindow event!");
       
       if(WIDGET3D.mainWindow.inFocus_){
         
-        for(var l = 0; l < WIDGET3D.mainWindow.events_[eventType].length; ++l){
-          WIDGET3D.mainWindow.events_[eventType][l].callback(domEvent,
-            WIDGET3D.mainWindow.events_[eventType][l].arguments);
+        for(var l = 0; l < WIDGET3D.mainWindow.events_[name.toString()].length; ++l){
+          WIDGET3D.mainWindow.events_[name.toString()][l].callback(domEvent,
+            WIDGET3D.mainWindow.events_[name.toString()][l].arguments);
         }
       }
     }
     
     //then we check other objects
-    for(var k = 0; k < WIDGET3D.mainWindow.childEvents_[eventType].length; ++k){
-      if(WIDGET3D.mainWindow.childEvents_[eventType][k].inFocus_){
-        var object = WIDGET3D.mainWindow.childEvents_[eventType][k];
+    for(var k = 0; k < WIDGET3D.mainWindow.childEvents_[name.toString()].length; ++k){
+      if(WIDGET3D.mainWindow.childEvents_[name.toString()][k].inFocus_){
+        var object = WIDGET3D.mainWindow.childEvents_[name.toString()][k];
         
-        for(var m = 0; m < object.events_[eventType].length; ++m){
-          object.events_[eventType][m].callback(domEvent,
-            object.events_[eventType][m].arguments);
+        for(var m = 0; m < object.events_[name.toString()].length; ++m){
+          object.events_[name.toString()][m].callback(domEvent,
+            object.events_[name.toString()][m].arguments);
           
         }
       }
@@ -125,119 +100,25 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
   };
   
   _that_.onEvent = function(event){
-    if(event.button){
+    console.log(WIDGET3D.mainWindow.childEvents_);
+    if(event.type != "keyup" || event.type != "keydown" || event.type != "keypress"){
       _that_.mouseEvent(event);
     }
     else{
       _that_.keyboardEvent(event);
     }
   }
-  
-  // Event listeners chatches events from DOM element.
-  _that_.onclick = function(domEvent){
-    _that_.mouseEvent(domEvent, WIDGET3D.EventType.onclick);
-  };
-  
-  _that_.ondblclick = function(domEvent){
-    _that_.mouseEvent(domEvent, WIDGET3D.EventType.ondblclick);
-  };
-  
-  _that_.onmousemove = function(domEvent){
-    _that_.mouseEvent(domEvent, WIDGET3D.EventType.onmousemove);
-  };
-  
-  _that_.onmousedown = function(domEvent){
-    _that_.mouseEvent(domEvent, WIDGET3D.EventType.onmousedown);
-  };
-  
-  _that_.onmouseup = function(domEvent){
-    _that_.mouseEvent(domEvent, WIDGET3D.EventType.onmouseup);
-  };
-  
-  _that_.onmouseover = function(domEvent){
-    _that_.mouseEvent(domEvent, WIDGET3D.EventType.onmouseover);
-  };
-  
-  _that_.onmouseout = function(domEvent){
-    _that_.mouseEvent(domEvent, WIDGET3D.EventType.onmouseout);
-  };
-  
-  _that_.onkeydown = function(domEvent){
-    _that_.keyboardEvent(domEvent, WIDGET3D.EventType.onkeydown);
-  };
-  
-  _that_.onkeyup = function(domEvent){
-    _that_.keyboardEvent(domEvent, WIDGET3D.EventType.onkeyup);
-  };
-  
-  _that_.onkeypress = function(domEvent){
-    _that_.keyboardEvent(domEvent, WIDGET3D.EventType.onkeypress);
-  };
+
 };
 
-// Enables event
-WIDGET3D.DomEvents.prototype.enableEvent = function(event){
+//Enables event
+WIDGET3D.DomEvents.prototype.enableEvent = function(name){
+  this.domElement_.addEventListener(name, this.onEvent, false);
+  this.enabled_[name.toString()] = true;
+  console.log(this.enabled_);
+  WIDGET3D.mainWindow.childEvents_.addEvent(name);
+}
 
-  switch(event){
-  
-    case WIDGET3D.EventType.onclick:
-      this.domElement_.addEventListener('click',this.onclick,false);
-      this.enabled_[event] = true;
-      break;
-      
-    case WIDGET3D.EventType.ondblclick:
-      this.domElement_.addEventListener('dblclick',this.ondblclick,false);
-      this.enabled_[event] = true;
-      break;
-      
-    case WIDGET3D.EventType.onmousemove:
-      this.domElement_.addEventListener('mousemove',this.onmousemove,false);
-      this.enabled_[event] = true;
-      break;
-      
-    case WIDGET3D.EventType.onmousedown:
-      this.domElement_.addEventListener('mousedown',this.onmousedown,false);
-      this.enabled_[event] = true;
-      break;
-      
-    case WIDGET3D.EventType.onmouseup:
-      this.domElement_.addEventListener('mouseup',this.onmouseup,false);
-      this.enabled_[event] = true;
-      break;
-      
-    case WIDGET3D.EventType.onmouseover:
-      this.domElement_.addEventListener('mouseover',this.onmouseover,false);
-      this.enabled_[event] = true;
-      break;
-      
-    case WIDGET3D.EventType.onmouseout:
-      this.domElement_.addEventListener('mouseout',this.onmouseout,false);
-      this.enabled_[event] = true;
-      break;
-      
-    case WIDGET3D.EventType.onkeydown:
-      //keypress is allways detected in document
-      document.addEventListener('keydown',this.onkeydown,false);
-      this.enabled_[event] = true;
-      break;
-    
-    case WIDGET3D.EventType.onkeyup:
-      //keypress is allways detected in document
-      document.addEventListener('keyup',this.onkeyup,false);
-      this.enabled_[event] = true;
-      break;
-      
-    case WIDGET3D.EventType.onkeypress:
-      //keypress is allways detected in document
-      document.addEventListener('keypress',this.onkeypress,false);
-      this.enabled_[event] = true;
-      break;
-      
-    default:
-      console.log("event types supported: ");
-      console.log(WIDGET3D.EventType);
-      return;
-  }
-};
+//TODO: DISABLE EVENT
 
 

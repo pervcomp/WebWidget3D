@@ -106,8 +106,11 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
       if(that.drag_){
         that.drag_ = false;
         that.clickStart_ = undefined;
-        that.title_.removeEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
-        THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+        //that.title_.removeEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
+        //THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+        
+        that.title_.removeEventListener("mousemove", that.mousemoveHandler);
+        THREEJS_WIDGET3D.mainWindow.removeEventListener("mouseup", that.mouseupHandler);
       }
     };
     
@@ -123,8 +126,11 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
       if(!that.drag_){
         that.drag_ = true;
         that.clickStart_ = event.objectCoordinates;
-        that.title_.addEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
-        THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+        //that.title_.addEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
+        //THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+        
+        that.title_.addEventListener("mousemove", that.mousemoveHandler);
+        THREEJS_WIDGET3D.mainWindow.addEventListener("mouseup", that.mouseupHandler);
       }
       return false;
     };
@@ -149,7 +155,8 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
       }
     };
     
-    this.title_.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler);
+    //this.title_.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler);
+    this.title_.addEventListener("mousedown", this.mousedownHandler);
   }
 };
 

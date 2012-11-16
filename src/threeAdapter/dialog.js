@@ -94,9 +94,13 @@ THREEJS_WIDGET3D.Dialog = function(parameters){
   this.addChild(this.textBox_);
   this.textBox_.setText("");
   
-  this.textBox_.addEventListener(WIDGET3D.EventType.onclick, this.textBoxOnclick, this);
-  this.textBox_.addEventListener(WIDGET3D.EventType.onkeypress, this.textBoxOnkeypress, this);
-  this.textBox_.addEventListener(WIDGET3D.EventType.onkeydown, this.textBoxOnkeypress, this);
+  //this.textBox_.addEventListener(WIDGET3D.EventType.onclick, this.textBoxOnclick, this);
+  //this.textBox_.addEventListener(WIDGET3D.EventType.onkeypress, this.textBoxOnkeypress, this);
+  //this.textBox_.addEventListener(WIDGET3D.EventType.onkeydown, this.textBoxOnkeypress, this);
+  
+  this.textBox_.addEventListener("click", this.textBoxOnclick, this);
+  this.textBox_.addEventListener("keypress", this.textBoxOnkeypress, this);
+  this.textBox_.addEventListener("keydown", this.textBoxOnkeypress, this);
 };
 
 THREEJS_WIDGET3D.Dialog.prototype = WIDGET3D.Window.prototype.inheritance();

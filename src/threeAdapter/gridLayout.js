@@ -77,8 +77,11 @@ THREEJS_WIDGET3D.GridWindow = function(parameters){
     this.mouseupHandler = function(event){
       if(that.rotate_){
         that.rotate_ = false;
-        THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
-        THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+        //THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
+        //THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+        
+        THREEJS_WIDGET3D.mainWindow.removeEventListener("mousemove", that.mousemoveHandler);
+        THREEJS_WIDGET3D.mainWindow.removeEventListener("mouseup", that.mouseupHandler);
       }
     };
     
@@ -91,8 +94,11 @@ THREEJS_WIDGET3D.GridWindow = function(parameters){
         that.rotationOnMouseDownY_ = that.modelRotationY_;
         that.rotationOnMouseDownX_ = that.modelRotationX_;
         
-        THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
-        THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+        //THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
+        //THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+        
+        THREEJS_WIDGET3D.mainWindow.addEventListener("mousemove", that.mousemoveHandler);
+        THREEJS_WIDGET3D.mainWindow.addEventListener("mouseup", that.mouseupHandler);
       }
     };
 
@@ -106,9 +112,8 @@ THREEJS_WIDGET3D.GridWindow = function(parameters){
       }
     };
     
-    
-    
-    this.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler);
+    //this.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler);
+    this.addEventListener("mousedown", this.mousedownHandler);
   }
   
 };

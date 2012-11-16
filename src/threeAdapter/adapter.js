@@ -94,7 +94,7 @@ THREEJS_WIDGET3D.init = function(parameters){
   }
 };
 
-THREEJS_WIDGET3D.checkIfHits = function(event, eventType){
+THREEJS_WIDGET3D.checkIfHits = function(event){
 
   if(!THREEJS_WIDGET3D.initialized){
     console.log("THREEJS_WIDGET3D is not initialized!");
@@ -108,7 +108,7 @@ THREEJS_WIDGET3D.checkIfHits = function(event, eventType){
   var ray = THREEJS_WIDGET3D.projector.pickingRay(vector, THREEJS_WIDGET3D.camera);
   
   //intersects checks now all the meshes in scene. It might be good to construct
-  // a datastructure that contains meshes of mainWindow.childEvents_[eventType] arrays content
+  // a datastructure that contains meshes of mainWindow.childEvents_.event array content
   var intersects = ray.intersectObjects(THREEJS_WIDGET3D.mainWindow.meshes_);
   
   var closest = false;
@@ -126,7 +126,7 @@ THREEJS_WIDGET3D.checkIfHits = function(event, eventType){
         //position where the click happened in object coordinates
         var objPos = inv.multiplyVector3(intersects[m].point.clone());
         
-        var found = THREEJS_WIDGET3D.findObject(closest, eventType);
+        var found = THREEJS_WIDGET3D.findObject(closest, event.type);
         
         if(found){          
           event.objectCoordinates = objPos;
@@ -140,18 +140,18 @@ THREEJS_WIDGET3D.checkIfHits = function(event, eventType){
   return false;
 };
 
-THREEJS_WIDGET3D.findObject = function(mesh, eventType){
+THREEJS_WIDGET3D.findObject = function(mesh, name){
 
-  for(var i = 0; i < THREEJS_WIDGET3D.mainWindow.childEvents_[eventType].length; ++i){
+  for(var i = 0; i < THREEJS_WIDGET3D.mainWindow.childEvents_[name.toString()].length; ++i){
     
     // if the object is not visible it can be the object hit
     // because it's not in the scene.
-    if(THREEJS_WIDGET3D.mainWindow.childEvents_[eventType][i].isVisible_){
+    if(THREEJS_WIDGET3D.mainWindow.childEvents_[name.toString()][i].isVisible_){
       
       // If the object is the one we hit, we return the object
-      if(mesh === THREEJS_WIDGET3D.mainWindow.childEvents_[eventType][i].mesh_){
+      if(mesh === THREEJS_WIDGET3D.mainWindow.childEvents_[name.toString()][i].mesh_){
         
-        return THREEJS_WIDGET3D.mainWindow.childEvents_[eventType][i];
+        return THREEJS_WIDGET3D.mainWindow.childEvents_[name.toString()][i];
         
       }//if right object
       

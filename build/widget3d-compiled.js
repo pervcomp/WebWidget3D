@@ -220,19 +220,59 @@ WIDGET3D.GuiObject = function(){
   this.isVisible_ = true;
   this.inFocus_ = false;
   
-  this.events_ = [];
-  this.setUpEvents();
+  this.events_ = {
   
-  //this.events_ = new WIDGET3D.EventTable;
-};
-
-// this function is used to set up event structure
-// must be called at the constructor
-WIDGET3D.GuiObject.prototype.setUpEvents = function(){
-  for(var i = 0; i < WIDGET3D.NUMBER_OF_EVENTS; ++i){
-    //this.events_.push({callback: false, arguments: undefined, index: undefined});
-    this.events_.push([]);
-  }
+    checkEvent : function(name){
+      if(this.hasOwnProperty(name.toString())){
+        return true;
+      }
+      else{
+        return false;
+      }
+    },
+    
+    addCallback : function(name, callback, arguments, index){
+      if(!this.hasOwnProperty(name.toString())){
+        this[name.toString()] = [];
+        
+      }
+      this[name.toString()].push({callback : callback, arguments : arguments, index : index});
+    },
+    
+    //TODO: FIX
+    removeCallback : function(name, callback, arguments){
+      if(this.hasOwnProperty(name.toString()) &&
+      Object.prototype.toString.apply(this[name.toString()]) === '[object Array]'){
+      
+        for(var i = 0; i < this[name.toString()].length; ++i){
+          if(this[name.toString()].callback === callback && arguments === arguments){
+            var index = this[name.toString()][i].index;
+            this[name.toString()].splice(i, 1);
+            
+            if(this[name.toString()].length == 0){
+              this[name.toString()] = null;
+            }
+            return index;
+          }
+        }
+      }
+      return false;
+    },
+    
+    //TODO: FIX
+    removeAll : function(name){
+    
+      if(this.hasOwnProperty(name.toString()) &&
+      Object.prototype.toString.apply(this[name.toString()]) === '[object Array]'){
+        var index = this[name.toString()][0].index;
+        this[name.toString()] = null;
+        return index;
+      }
+      
+      return false;
+    }
+  };
+  
 };
 
 //set focus on object
@@ -261,74 +301,66 @@ WIDGET3D.GuiObject.prototype.unfocus = function(){
 // NOTE: domEvent IS ALLWAYS PASSED TO CALLBACKFUNCTION AS ITS FIRST ARGUMENT
 // so don't include it to args!
 //
-WIDGET3D.GuiObject.prototype.addEventListener = function(event, callback, args){
-  
-  var tmp = {callback : callback, arguments : args};
-  
-  if(this.events_[event].length == 0){
-    WIDGET3D.mainWindow.childEvents_[event].push(this);
-    
-    tmp.index = WIDGET3D.mainWindow.childEvents_[event].length - 1;
+WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, args){
+  if(!WIDGET3D.events.enabled_[name.toString()]){
+    WIDGET3D.events.enableEvent(name);
+  }
+  if(!this.events_.checkEvent(name)){    
+    var index = WIDGET3D.mainWindow.childEvents_.addObject(name, this);
   }
   else{
-    tmp.index = this.events_[event][0].index;
+    var index = this.events_[name.toString()][0].index;
   }
-  
-  this.events_[event].push(tmp);
-
-  if(!WIDGET3D.events.enabled_[event]){
-    WIDGET3D.events.enableEvent(event);
-  }
+  this.events_.addCallback(name, callback, args, index);
 };
 
+//TODO: FIX
 // Removes eventlistener from object
 // Parameters: event = WIDGET3D.EventType object
 //             callback = binded callbackfunction
 //             args = binded arguments for callback
-WIDGET3D.GuiObject.prototype.removeEventListener = function(event, callback, args){
-  
-  //If there is just one event left we just check if the listener is the one that is
-  //binded to the event and if it is we call removeEventListeners.
-  if(this.events_[event].length == 1){
-    if(this.events_[event][0].callback === callback && this.events_[event][0].arguments === args){
-      this.removeEventListeners(event);
-      return true;
-    }
-    else{
-      return false;
-    }
+WIDGET3D.GuiObject.prototype.removeEventListener = function(name, callback, args){  
+  var index = this.events_.removeCallback(name, callback, args);
+  if(index === false){
+    return false;
   }
-  
-  for(var i = 0; i < this.events_[event].length; ++i){
-    if(this.events_[event][i].callback === callback && this.events_[event][i].arguments === args){
-      this.events_[event].splice(i, 1);
-      return true;
+  if(this.events_[name.toString()].length == 0){
+    WIDGET3D.mainWindow.childEvents_[name.toString()].splice(index, 1);
+    for(var i = 0; i < WIDGET3D.mainWindow.childEvents_[name.toString()].length; ++i){
+      WIDGET3D.mainWindow.childEvents_[name.toString()][i].setNewEventIndex(name, i);
     }
+    
+    return true;
   }
-  return false;
 };
 
 
+//TODO: FIX
 // Removes eventlisteners from object
 // Parameters: event = WIDGET3D.EventType object
-WIDGET3D.GuiObject.prototype.removeEventListeners = function(event){
-  
-  WIDGET3D.mainWindow.childEvents_[event].splice(this.events_[event][0].index, 1);
-  
-  for(var i = 0; i < WIDGET3D.mainWindow.childEvents_[event].length; ++i){
-    WIDGET3D.mainWindow.childEvents_[event][i].setNewEventIndex(event,i);
+WIDGET3D.GuiObject.prototype.removeEventListeners = function(name){  
+  var index = this.events_.removeAll(name);
+  if(index === false){
+    return false;
   }
-  
-  this.events_[event] = [];
+  else{
+    WIDGET3D.mainWindow.childEvents_[name.toString()].splice(index, 1);
+    
+    for(var i = 0; i < WIDGET3D.mainWindow.childEvents_[name.toString()].length; ++i){
+      WIDGET3D.mainWindow.childEvents_[name.toString()][i].setNewEventIndex(name, i);
+    }
+    
+    return true;
+  }
 };
 
-WIDGET3D.GuiObject.prototype.setNewEventIndex = function(event, index){
+//TODO: FIX
+WIDGET3D.GuiObject.prototype.setNewEventIndex = function(name, index){
   
-  for(var i = 0; i < this.events_[event].length; ++i){
-    this.events_[event][i].index = index;
+  for(var i = 0; i < this.events_[name.toString()].length; ++i){
+    this.events_[name.toString()][i].index = index;
   }
-  
-  WIDGET3D.mainWindow.childEvents_[event][index] = this;
+  WIDGET3D.mainWindow.childEvents_[name.toString()][index] = this;
 }
 
 WIDGET3D.GuiObject.prototype.addUpdateCallback = function(callback, args){
@@ -610,10 +642,32 @@ WIDGET3D.MainWindow = function(){
   
   this.meshes_ = [];
   
-  this.childEvents_ = new Array(WIDGET3D.NUMBER_OF_EVENTS);
-  for(var k = 0; k < this.childEvents_.length; ++k){
-    this.childEvents_[k] = [];
-  }
+  this.childEvents_ = {
+    addEvent : function(name){
+      if(!this.hasOwnProperty(name.toString())){
+        this[name.toString()] = [];
+      }
+    },
+    
+    addObject : function(name, child){
+      if(!this.hasOwnProperty(name.toString())){
+        return false;
+      }
+      else{
+        this[name.toString()].push(child);
+        return (this[name.toString()].lenght-1);
+      }
+    },
+    
+    //TODO: FIX
+    removeEvent : function(name){
+      if(this.hasOwnProperty(name.toString()) && this[name.toString()].length == 0){
+        this[name.toString()] = null;
+        return true;
+      }
+      return false;
+    }
+  };
   
   this.needsUpdate_ = true;
   
@@ -1005,30 +1059,6 @@ SOFTWARE.
 // DOM EVENTS
 //--------------------------------------------
 
-WIDGET3D.EventType = {"onclick":0, "ondblclick":1, "onmousemove":2,
-  "onmousedown":3, "onmouseup":4, "onmouseover":5, "onmouseout":6,
-  "onkeydown":7, "onkeyup":8, "onkeypress":9};
-  
-WIDGET3D.NUMBER_OF_EVENTS = 10;
-
-WIDGET3D.EventTable = {
-
-  addEvent : function(name){
-    if(!this.name){
-      this.name = [];
-      return true;
-    }
-    return false;
-  },
-  
-  addCallback : function(event, callback, arguments, object){
-    if(this.event){
-      this.event.push({callback : callback, arguments : arguments, object : object});
-      return (this.event.length-1);
-    }
-    return false;
-  }
-};
 
 //Eventhandler abstraction for WIDGET3D's objects
 // needs the gui's main window (root window)
@@ -1049,54 +1079,53 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
     args: collisionCallback.args
   };
   
-  _that_.enabled_ = [];
+  _that_.enabled_ = {};
   
-  for(var i = 0; i < WIDGET3D.NUMBER_OF_EVENTS; ++i){
-    _that_.enabled_.push(false);
-  }
-  
-  _that_.mouseEvent = function(domEvent, eventType){
+  _that_.mouseEvent = function(domEvent){
     
-    var hit = _that_.collisions_.callback(domEvent, eventType, _that_.collisions_.args);
+    var hit = _that_.collisions_.callback(domEvent, _that_.collisions_.args);
+    
+    var name = domEvent.type;
 
-    if(hit && hit.events_[eventType].length != 0){
-      for(var k = 0; k < hit.events_[eventType].length; ++k){
-        hit.events_[eventType][k].callback(domEvent,
-          hit.events_[eventType][k].arguments);
+    if(hit && hit.events_[name.toString()].length != 0){
+      for(var k = 0; k < hit.events_[name.toString()].length; ++k){
+        hit.events_[name.toString()][k].callback(domEvent,
+          hit.events_[name.toString()][k].arguments);
       }
     }
     //if mainwindow has eventlistener it is executed also
-    if(WIDGET3D.mainWindow.events_[eventType].length != 0){
-      for(var j = 0; j < WIDGET3D.mainWindow.events_[eventType].length; ++j){
-        WIDGET3D.mainWindow.events_[eventType][j].callback(domEvent,
-          WIDGET3D.mainWindow.events_[eventType][j].arguments);
+    if(WIDGET3D.mainWindow.events_[name.toString()].length != 0){
+      for(var j = 0; j < WIDGET3D.mainWindow.events_[name.toString()].length; ++j){
+        WIDGET3D.mainWindow.events_[name.toString()][j].callback(domEvent,
+          WIDGET3D.mainWindow.events_[name.toString()][j].arguments);
       }
     }
   };
   
-  _that_.keyboardEvent = function(domEvent, eventType){
+  _that_.keyboardEvent = function(domEvent){
     
+    var name = domEvent.type;
     //first we call main windows onkeydown callback if there is one
-    if(WIDGET3D.mainWindow.events_[eventType].length != 0){
+    if(WIDGET3D.mainWindow.events_[name.toString()].length != 0){
       console.log("mainwindow event!");
       
       if(WIDGET3D.mainWindow.inFocus_){
         
-        for(var l = 0; l < WIDGET3D.mainWindow.events_[eventType].length; ++l){
-          WIDGET3D.mainWindow.events_[eventType][l].callback(domEvent,
-            WIDGET3D.mainWindow.events_[eventType][l].arguments);
+        for(var l = 0; l < WIDGET3D.mainWindow.events_[name.toString()].length; ++l){
+          WIDGET3D.mainWindow.events_[name.toString()][l].callback(domEvent,
+            WIDGET3D.mainWindow.events_[name.toString()][l].arguments);
         }
       }
     }
     
     //then we check other objects
-    for(var k = 0; k < WIDGET3D.mainWindow.childEvents_[eventType].length; ++k){
-      if(WIDGET3D.mainWindow.childEvents_[eventType][k].inFocus_){
-        var object = WIDGET3D.mainWindow.childEvents_[eventType][k];
+    for(var k = 0; k < WIDGET3D.mainWindow.childEvents_[name.toString()].length; ++k){
+      if(WIDGET3D.mainWindow.childEvents_[name.toString()][k].inFocus_){
+        var object = WIDGET3D.mainWindow.childEvents_[name.toString()][k];
         
-        for(var m = 0; m < object.events_[eventType].length; ++m){
-          object.events_[eventType][m].callback(domEvent,
-            object.events_[eventType][m].arguments);
+        for(var m = 0; m < object.events_[name.toString()].length; ++m){
+          object.events_[name.toString()][m].callback(domEvent,
+            object.events_[name.toString()][m].arguments);
           
         }
       }
@@ -1104,120 +1133,26 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
   };
   
   _that_.onEvent = function(event){
-    if(event.button){
+    console.log(WIDGET3D.mainWindow.childEvents_);
+    if(event.type != "keyup" || event.type != "keydown" || event.type != "keypress"){
       _that_.mouseEvent(event);
     }
     else{
       _that_.keyboardEvent(event);
     }
   }
-  
-  // Event listeners chatches events from DOM element.
-  _that_.onclick = function(domEvent){
-    _that_.mouseEvent(domEvent, WIDGET3D.EventType.onclick);
-  };
-  
-  _that_.ondblclick = function(domEvent){
-    _that_.mouseEvent(domEvent, WIDGET3D.EventType.ondblclick);
-  };
-  
-  _that_.onmousemove = function(domEvent){
-    _that_.mouseEvent(domEvent, WIDGET3D.EventType.onmousemove);
-  };
-  
-  _that_.onmousedown = function(domEvent){
-    _that_.mouseEvent(domEvent, WIDGET3D.EventType.onmousedown);
-  };
-  
-  _that_.onmouseup = function(domEvent){
-    _that_.mouseEvent(domEvent, WIDGET3D.EventType.onmouseup);
-  };
-  
-  _that_.onmouseover = function(domEvent){
-    _that_.mouseEvent(domEvent, WIDGET3D.EventType.onmouseover);
-  };
-  
-  _that_.onmouseout = function(domEvent){
-    _that_.mouseEvent(domEvent, WIDGET3D.EventType.onmouseout);
-  };
-  
-  _that_.onkeydown = function(domEvent){
-    _that_.keyboardEvent(domEvent, WIDGET3D.EventType.onkeydown);
-  };
-  
-  _that_.onkeyup = function(domEvent){
-    _that_.keyboardEvent(domEvent, WIDGET3D.EventType.onkeyup);
-  };
-  
-  _that_.onkeypress = function(domEvent){
-    _that_.keyboardEvent(domEvent, WIDGET3D.EventType.onkeypress);
-  };
+
 };
 
-// Enables event
-WIDGET3D.DomEvents.prototype.enableEvent = function(event){
+//Enables event
+WIDGET3D.DomEvents.prototype.enableEvent = function(name){
+  this.domElement_.addEventListener(name, this.onEvent, false);
+  this.enabled_[name.toString()] = true;
+  console.log(this.enabled_);
+  WIDGET3D.mainWindow.childEvents_.addEvent(name);
+}
 
-  switch(event){
-  
-    case WIDGET3D.EventType.onclick:
-      this.domElement_.addEventListener('click',this.onclick,false);
-      this.enabled_[event] = true;
-      break;
-      
-    case WIDGET3D.EventType.ondblclick:
-      this.domElement_.addEventListener('dblclick',this.ondblclick,false);
-      this.enabled_[event] = true;
-      break;
-      
-    case WIDGET3D.EventType.onmousemove:
-      this.domElement_.addEventListener('mousemove',this.onmousemove,false);
-      this.enabled_[event] = true;
-      break;
-      
-    case WIDGET3D.EventType.onmousedown:
-      this.domElement_.addEventListener('mousedown',this.onmousedown,false);
-      this.enabled_[event] = true;
-      break;
-      
-    case WIDGET3D.EventType.onmouseup:
-      this.domElement_.addEventListener('mouseup',this.onmouseup,false);
-      this.enabled_[event] = true;
-      break;
-      
-    case WIDGET3D.EventType.onmouseover:
-      this.domElement_.addEventListener('mouseover',this.onmouseover,false);
-      this.enabled_[event] = true;
-      break;
-      
-    case WIDGET3D.EventType.onmouseout:
-      this.domElement_.addEventListener('mouseout',this.onmouseout,false);
-      this.enabled_[event] = true;
-      break;
-      
-    case WIDGET3D.EventType.onkeydown:
-      //keypress is allways detected in document
-      document.addEventListener('keydown',this.onkeydown,false);
-      this.enabled_[event] = true;
-      break;
-    
-    case WIDGET3D.EventType.onkeyup:
-      //keypress is allways detected in document
-      document.addEventListener('keyup',this.onkeyup,false);
-      this.enabled_[event] = true;
-      break;
-      
-    case WIDGET3D.EventType.onkeypress:
-      //keypress is allways detected in document
-      document.addEventListener('keypress',this.onkeypress,false);
-      this.enabled_[event] = true;
-      break;
-      
-    default:
-      console.log("event types supported: ");
-      console.log(WIDGET3D.EventType);
-      return;
-  }
-};
+//TODO: DISABLE EVENT
 
 
 /*
@@ -1316,7 +1251,7 @@ THREEJS_WIDGET3D.init = function(parameters){
   }
 };
 
-THREEJS_WIDGET3D.checkIfHits = function(event, eventType){
+THREEJS_WIDGET3D.checkIfHits = function(event){
 
   if(!THREEJS_WIDGET3D.initialized){
     console.log("THREEJS_WIDGET3D is not initialized!");
@@ -1330,7 +1265,7 @@ THREEJS_WIDGET3D.checkIfHits = function(event, eventType){
   var ray = THREEJS_WIDGET3D.projector.pickingRay(vector, THREEJS_WIDGET3D.camera);
   
   //intersects checks now all the meshes in scene. It might be good to construct
-  // a datastructure that contains meshes of mainWindow.childEvents_[eventType] arrays content
+  // a datastructure that contains meshes of mainWindow.childEvents_.event array content
   var intersects = ray.intersectObjects(THREEJS_WIDGET3D.mainWindow.meshes_);
   
   var closest = false;
@@ -1348,7 +1283,7 @@ THREEJS_WIDGET3D.checkIfHits = function(event, eventType){
         //position where the click happened in object coordinates
         var objPos = inv.multiplyVector3(intersects[m].point.clone());
         
-        var found = THREEJS_WIDGET3D.findObject(closest, eventType);
+        var found = THREEJS_WIDGET3D.findObject(closest, event.type);
         
         if(found){          
           event.objectCoordinates = objPos;
@@ -1362,18 +1297,18 @@ THREEJS_WIDGET3D.checkIfHits = function(event, eventType){
   return false;
 };
 
-THREEJS_WIDGET3D.findObject = function(mesh, eventType){
+THREEJS_WIDGET3D.findObject = function(mesh, name){
 
-  for(var i = 0; i < THREEJS_WIDGET3D.mainWindow.childEvents_[eventType].length; ++i){
+  for(var i = 0; i < THREEJS_WIDGET3D.mainWindow.childEvents_[name.toString()].length; ++i){
     
     // if the object is not visible it can be the object hit
     // because it's not in the scene.
-    if(THREEJS_WIDGET3D.mainWindow.childEvents_[eventType][i].isVisible_){
+    if(THREEJS_WIDGET3D.mainWindow.childEvents_[name.toString()][i].isVisible_){
       
       // If the object is the one we hit, we return the object
-      if(mesh === THREEJS_WIDGET3D.mainWindow.childEvents_[eventType][i].mesh_){
+      if(mesh === THREEJS_WIDGET3D.mainWindow.childEvents_[name.toString()][i].mesh_){
         
-        return THREEJS_WIDGET3D.mainWindow.childEvents_[eventType][i];
+        return THREEJS_WIDGET3D.mainWindow.childEvents_[name.toString()][i];
         
       }//if right object
       
@@ -1463,8 +1398,11 @@ THREEJS_WIDGET3D.GridWindow = function(parameters){
     this.mouseupHandler = function(event){
       if(that.rotate_){
         that.rotate_ = false;
-        THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
-        THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+        //THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
+        //THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+        
+        THREEJS_WIDGET3D.mainWindow.removeEventListener("mousemove", that.mousemoveHandler);
+        THREEJS_WIDGET3D.mainWindow.removeEventListener("mouseup", that.mouseupHandler);
       }
     };
     
@@ -1477,8 +1415,11 @@ THREEJS_WIDGET3D.GridWindow = function(parameters){
         that.rotationOnMouseDownY_ = that.modelRotationY_;
         that.rotationOnMouseDownX_ = that.modelRotationX_;
         
-        THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
-        THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+        //THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
+        //THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+        
+        THREEJS_WIDGET3D.mainWindow.addEventListener("mousemove", that.mousemoveHandler);
+        THREEJS_WIDGET3D.mainWindow.addEventListener("mouseup", that.mouseupHandler);
       }
     };
 
@@ -1492,9 +1433,8 @@ THREEJS_WIDGET3D.GridWindow = function(parameters){
       }
     };
     
-    
-    
-    this.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler);
+    //this.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler);
+    this.addEventListener("mousedown", this.mousedownHandler);
   }
   
 };
@@ -1708,8 +1648,11 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
       if(that.drag_){
         that.drag_ = false;
         that.clickStart_ = undefined;
-        that.title_.removeEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
-        THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+        //that.title_.removeEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
+        //THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+        
+        that.title_.removeEventListener("mousemove", that.mousemoveHandler);
+        THREEJS_WIDGET3D.mainWindow.removeEventListener("mouseup", that.mouseupHandler);
       }
     };
     
@@ -1725,8 +1668,11 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
       if(!that.drag_){
         that.drag_ = true;
         that.clickStart_ = event.objectCoordinates;
-        that.title_.addEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
-        THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+        //that.title_.addEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
+        //THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
+        
+        that.title_.addEventListener("mousemove", that.mousemoveHandler);
+        THREEJS_WIDGET3D.mainWindow.addEventListener("mouseup", that.mouseupHandler);
       }
       return false;
     };
@@ -1751,7 +1697,8 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
       }
     };
     
-    this.title_.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler);
+    //this.title_.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler);
+    this.title_.addEventListener("mousedown", this.mousedownHandler);
   }
 };
 
@@ -1936,9 +1883,13 @@ THREEJS_WIDGET3D.Dialog = function(parameters){
   this.addChild(this.textBox_);
   this.textBox_.setText("");
   
-  this.textBox_.addEventListener(WIDGET3D.EventType.onclick, this.textBoxOnclick, this);
-  this.textBox_.addEventListener(WIDGET3D.EventType.onkeypress, this.textBoxOnkeypress, this);
-  this.textBox_.addEventListener(WIDGET3D.EventType.onkeydown, this.textBoxOnkeypress, this);
+  //this.textBox_.addEventListener(WIDGET3D.EventType.onclick, this.textBoxOnclick, this);
+  //this.textBox_.addEventListener(WIDGET3D.EventType.onkeypress, this.textBoxOnkeypress, this);
+  //this.textBox_.addEventListener(WIDGET3D.EventType.onkeydown, this.textBoxOnkeypress, this);
+  
+  this.textBox_.addEventListener("click", this.textBoxOnclick, this);
+  this.textBox_.addEventListener("keypress", this.textBoxOnkeypress, this);
+  this.textBox_.addEventListener("keydown", this.textBoxOnkeypress, this);
 };
 
 THREEJS_WIDGET3D.Dialog.prototype = WIDGET3D.Window.prototype.inheritance();
@@ -2225,7 +2176,8 @@ THREEJS_WIDGET3D.SelectDialog.prototype.createChoises = function(){
     
     choice.setLocation(parentLoc.x, y ,parentLoc.z);
     
-    choice.addEventListener(WIDGET3D.EventType.onclick, this.choices_[i].onclick.handler, this.choices_[i].onclick.parameters);
+    //choice.addEventListener(WIDGET3D.EventType.onclick, this.choices_[i].onclick.handler, this.choices_[i].onclick.parameters);
+    choice.addEventListener("click", this.choices_[i].onclick.handler, this.choices_[i].onclick.parameters);
     choice.menuID_ = i;
     this.addChild(choice);
   }

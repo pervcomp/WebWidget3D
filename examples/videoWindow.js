@@ -49,7 +49,11 @@ var init = function(){
   videoWindow.addUpdateCallback(function(texture){texture.needsUpdate = true}, texture);
   
   //ONCLICK EVENT LISTENER FOR CLOSE BUTTON
-  videoWindow.closeButton_.addEventListener(WIDGET3D.EventType.onclick,
+  /*videoWindow.closeButton_.addEventListener(WIDGET3D.EventType.onclick,
+    function(event, p){p.video.pause(); p.window.remove()},
+    {video : video, window : videoWindow});*/
+  
+  videoWindow.closeButton_.addEventListener("click",
     function(event, p){p.video.pause(); p.window.remove()},
     {video : video, window : videoWindow});
 

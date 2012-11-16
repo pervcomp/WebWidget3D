@@ -32,10 +32,6 @@ var init = function(){
   //styled window
   var dialog = new THREEJS_WIDGET3D.Dialog({height : 1500, width : 1500});
   
-  //ONCLICK EVENT LISTENER FOR BUTTON
-  /*dialog.button_.addEventListener(WIDGET3D.EventType.onclick,
-    function(event, dialog){dialog.remove()}, dialog);*/
-  
   dialog.button_.addEventListener("click",
     function(event, dialog){dialog.remove()}, dialog);
     

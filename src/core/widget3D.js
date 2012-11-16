@@ -223,7 +223,7 @@ WIDGET3D.GuiObject = function(){
   this.events_ = {
   
     checkEvent : function(name){
-      if(this.hasOwnProperty(name.toString())){
+      if(this.hasOwnProperty(name.toString()) && this[name.toString()] != false){
         return true;
       }
       else{
@@ -232,9 +232,10 @@ WIDGET3D.GuiObject = function(){
     },
     
     addCallback : function(name, callback, arguments, index){
-      if(!this.hasOwnProperty(name.toString())){
-        this[name.toString()] = [];
-        
+      if(!this.hasOwnProperty(name.toString()) ||
+      (this.hasOwnProperty(name.toString()) && this[name.toString()] === false))
+      {
+        this[name.toString()] = [];  
       }
       this[name.toString()].push({callback : callback, arguments : arguments, index : index});
     },
@@ -242,15 +243,16 @@ WIDGET3D.GuiObject = function(){
     //TODO: FIX
     removeCallback : function(name, callback, arguments){
       if(this.hasOwnProperty(name.toString()) &&
-      Object.prototype.toString.apply(this[name.toString()]) === '[object Array]'){
-      
+      Object.prototype.toString.apply(this[name.toString()]) === '[object Array]')
+      {
         for(var i = 0; i < this[name.toString()].length; ++i){
-          if(this[name.toString()].callback === callback && arguments === arguments){
+          if(this[name.toString()][i].callback === callback && this[name.toString()][i].arguments === arguments){
+            
             var index = this[name.toString()][i].index;
             this[name.toString()].splice(i, 1);
-            
+
             if(this[name.toString()].length == 0){
-              this[name.toString()] = null;
+              this[name.toString()] = false;
             }
             return index;
           }
@@ -263,9 +265,10 @@ WIDGET3D.GuiObject = function(){
     removeAll : function(name){
     
       if(this.hasOwnProperty(name.toString()) &&
-      Object.prototype.toString.apply(this[name.toString()]) === '[object Array]'){
+      Object.prototype.toString.apply(this[name.toString()]) === '[object Array]')
+      {
         var index = this[name.toString()][0].index;
-        this[name.toString()] = null;
+        this[name.toString()] = false;
         return index;
       }
       
@@ -321,15 +324,21 @@ WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, args){
 //             args = binded arguments for callback
 WIDGET3D.GuiObject.prototype.removeEventListener = function(name, callback, args){  
   var index = this.events_.removeCallback(name, callback, args);
+  
   if(index === false){
     return false;
   }
-  if(this.events_[name.toString()].length == 0){
+  if(this.events_[name.toString()] === false){
     WIDGET3D.mainWindow.childEvents_[name.toString()].splice(index, 1);
+    
+    //if there were no events left lets disable event
+    if(WIDGET3D.mainWindow.childEvents_[name.toString()].length == 0){
+      WIDGET3D.mainWindow.childEvents_.removeEvent(name);
+    }
+    
     for(var i = 0; i < WIDGET3D.mainWindow.childEvents_[name.toString()].length; ++i){
       WIDGET3D.mainWindow.childEvents_[name.toString()][i].setNewEventIndex(name, i);
     }
-    
     return true;
   }
 };
@@ -346,6 +355,10 @@ WIDGET3D.GuiObject.prototype.removeEventListeners = function(name){
   else{
     WIDGET3D.mainWindow.childEvents_[name.toString()].splice(index, 1);
     
+    //if there were no events left lets disable event
+    if(WIDGET3D.mainWindow.childEvents_[name.toString()].length == 0){   
+      WIDGET3D.mainWindow.childEvents_.removeEvent(name);
+    }
     for(var i = 0; i < WIDGET3D.mainWindow.childEvents_[name.toString()].length; ++i){
       WIDGET3D.mainWindow.childEvents_[name.toString()][i].setNewEventIndex(name, i);
     }
@@ -643,26 +656,22 @@ WIDGET3D.MainWindow = function(){
   this.meshes_ = [];
   
   this.childEvents_ = {
-    addEvent : function(name){
-      if(!this.hasOwnProperty(name.toString())){
-        this[name.toString()] = [];
-      }
-    },
     
     addObject : function(name, child){
-      if(!this.hasOwnProperty(name.toString())){
-        return false;
+      if(!this.hasOwnProperty(name.toString()) ||
+        (this.hasOwnProperty(name.toString()) && this[name.toString()] == false))
+      {
+        this[name.toString()] = [];
       }
-      else{
-        this[name.toString()].push(child);
-        return (this[name.toString()].lenght-1);
-      }
+      this[name.toString()].push(child);
+      var index = this[name.toString()].length-1;
+      return index;
     },
-    
-    //TODO: FIX
+
     removeEvent : function(name){
       if(this.hasOwnProperty(name.toString()) && this[name.toString()].length == 0){
-        this[name.toString()] = null;
+        this[name.toString()] = false;  
+        WIDGET3D.events.disableEvent(name);
         return true;
       }
       return false;

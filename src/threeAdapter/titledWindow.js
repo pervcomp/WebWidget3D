@@ -106,8 +106,6 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
       if(that.drag_){
         that.drag_ = false;
         that.clickStart_ = undefined;
-        //that.title_.removeEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
-        //THREEJS_WIDGET3D.mainWindow.removeEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
         
         that.title_.removeEventListener("mousemove", that.mousemoveHandler);
         THREEJS_WIDGET3D.mainWindow.removeEventListener("mouseup", that.mouseupHandler);
@@ -126,8 +124,6 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
       if(!that.drag_){
         that.drag_ = true;
         that.clickStart_ = event.objectCoordinates;
-        //that.title_.addEventListener(WIDGET3D.EventType.onmousemove, that.mousemoveHandler);
-        //THREEJS_WIDGET3D.mainWindow.addEventListener(WIDGET3D.EventType.onmouseup, that.mouseupHandler);
         
         that.title_.addEventListener("mousemove", that.mousemoveHandler);
         THREEJS_WIDGET3D.mainWindow.addEventListener("mouseup", that.mouseupHandler);
@@ -154,8 +150,6 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
         that.newPos_.x = tmpX + (dy * Math.sin(Math.PI * rotation.x) * Math.sin(Math.PI * rotation.y));
       }
     };
-    
-    //this.title_.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler);
     this.title_.addEventListener("mousedown", this.mousedownHandler);
   }
 };

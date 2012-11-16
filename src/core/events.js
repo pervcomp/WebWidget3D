@@ -53,8 +53,9 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
     var hit = _that_.collisions_.callback(domEvent, _that_.collisions_.args);
     
     var name = domEvent.type;
-
-    if(hit && hit.events_[name.toString()].length != 0){
+    
+    //hit can't be mainWindow because mainWindow doesn't have mesh
+    if(hit && hit.events_.hasOwnProperty(name.toString())){
       for(var k = 0; k < hit.events_[name.toString()].length; ++k){
         hit.events_[name.toString()][k].callback(domEvent,
           hit.events_[name.toString()][k].arguments);
@@ -72,19 +73,10 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
   _that_.keyboardEvent = function(domEvent){
     
     var name = domEvent.type;
-    //first we call main windows onkeydown callback if there is one
-    if(WIDGET3D.mainWindow.events_.hasOwnProperty(name.toString())){
-      console.log("mainwindow event!");
-      
-      for(var l = 0; l < WIDGET3D.mainWindow.events_[name.toString()].length; ++l){
-        WIDGET3D.mainWindow.events_[name.toString()][l].callback(domEvent,
-          WIDGET3D.mainWindow.events_[name.toString()][l].arguments);
-      }
-    }
     
-    //then we check other objects
     for(var k = 0; k < WIDGET3D.mainWindow.childEvents_[name.toString()].length; ++k){
-      if(WIDGET3D.mainWindow.childEvents_[name.toString()][k].inFocus_){
+      if(WIDGET3D.mainWindow.childEvents_[name.toString()][k] != WIDGET3D.mainWindow &&
+      WIDGET3D.mainWindow.childEvents_[name.toString()][k].inFocus_){
         var object = WIDGET3D.mainWindow.childEvents_[name.toString()][k];
         
         for(var m = 0; m < object.events_[name.toString()].length; ++m){
@@ -94,22 +86,48 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
         }
       }
     }
+    
+    //then we call main windows onkeydown callback if there is one
+    if(WIDGET3D.mainWindow.events_.hasOwnProperty(name.toString())){      
+      for(var l = 0; l < WIDGET3D.mainWindow.events_[name.toString()].length; ++l){
+        WIDGET3D.mainWindow.events_[name.toString()][l].callback(domEvent,
+          WIDGET3D.mainWindow.events_[name.toString()][l].arguments);
+      }
+    }
   };
 };
 
 //Enables event
 WIDGET3D.DomEvents.prototype.enableEvent = function(name){
-  if(name == "keyup" || name == "keydown" || name == "keypress"){
-    document.addEventListener(name, this.keyboardEvent, false);
+  //if there is no property or if the property is false
+  if(!this.enabled_.hasOwnProperty(name.toString()) || 
+    (this.enabled_.hasOwnProperty(name.toString()) && this.enabled_[name.toString()] === false))
+  {
+    if(name == "keyup" || name == "keydown" || name == "keypress"){
+      document.addEventListener(name, this.keyboardEvent, false);
+    }
+    else{
+      this.domElement_.addEventListener(name, this.mouseEvent, false);
+    }
+    this.enabled_[name.toString()] = true;
   }
-  else{
-    this.domElement_.addEventListener(name, this.mouseEvent, false);
-  }
-  this.enabled_[name.toString()] = true;
-  console.log(this.enabled_);
-  WIDGET3D.mainWindow.childEvents_.addEvent(name);
 }
 
 //TODO: DISABLE EVENT
+
+WIDGET3D.DomEvents.prototype.disableEvent = function(name){
+
+  if(this.enabled_.hasOwnProperty(name.toString()) && this.enabled_[name.toString()] === true){
+    if(name == "keyup" || name == "keydown" || name == "keypress"){
+      document.removeEventListener(name, this.keyboardEvent, false);
+    }
+    else{
+      this.domElement_.removeEventListener(name, this.mouseEvent, false);
+    }
+    this.enabled_[name.toString()] = false;
+    return true;
+  }
+  return false;
+}
 
 

@@ -31,8 +31,7 @@ For building the library you need nodejs. Then just run command "node build.js" 
 
 TODO:
 -------
-* Event system needs to be redone in more generic way.
+* Example pages
 * Drag controls for the TitledWindow component needs some work. At the moment drag works only along the objects xy-axis.
 This isn't intuitive if camera have rotation.
 * Adapters to other 3D engines
-* Updating Three.js to it's latest version.

@@ -4,7 +4,7 @@ widget3D
 
 3D widget library for the web.
 
-Experimenting ways to make 3D UIs in the web. At the moment library can be used with the [Three.js] (http://github.com/mrdoob/three.js) 3D-engine version 51.
+Experimenting ways to make 3D UIs in the web. At the moment library can be used with the [Three.js] (http://github.com/mrdoob/three.js) 3D-engine version 53.
 
 Work in progress.
 

@@ -37,5 +37,5 @@ TODO:
 -------
 * Example pages
 * Drag controls for the TitledWindow component needs some work. At the moment drag works only along the objects xy-axis.
-This isn't intuitive if camera have rotation.
+This isn't intuitive if camera or the object has rotation.
 * Adapters to other 3D engines

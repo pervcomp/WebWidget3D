@@ -240,7 +240,6 @@ WIDGET3D.GuiObject = function(){
       this[name.toString()].push({callback : callback, arguments : arguments, index : index});
     },
     
-    //TODO: FIX
     removeCallback : function(name, callback, arguments){
       if(this.hasOwnProperty(name.toString()) &&
       Object.prototype.toString.apply(this[name.toString()]) === '[object Array]')
@@ -261,7 +260,6 @@ WIDGET3D.GuiObject = function(){
       return false;
     },
     
-    //TODO: FIX
     removeAll : function(name){
     
       if(this.hasOwnProperty(name.toString()) &&
@@ -296,15 +294,14 @@ WIDGET3D.GuiObject.prototype.unfocus = function(){
   }
 };
 
-// Adds one of supported event listnerss to object
-// Parameters: event = WIDGET3D.EventType object that defines event type
+// Adds event listner to object
 // callback: callback function that is called when the event is triggered to object
 // (args: arguments for callback)
 //
-// NOTE: domEvent IS ALLWAYS PASSED TO CALLBACKFUNCTION AS ITS FIRST ARGUMENT
-// so don't include it to args!
+// NOTE: event object IS ALLWAYS PASSED TO CALLBACKFUNCTION AS ITS FIRST ARGUMENT
 //
 WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, args){
+
   if(!WIDGET3D.events.enabled_[name.toString()]){
     WIDGET3D.events.enableEvent(name);
   }
@@ -317,12 +314,13 @@ WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, args){
   this.events_.addCallback(name, callback, args, index);
 };
 
-//TODO: FIX
 // Removes eventlistener from object
-// Parameters: event = WIDGET3D.EventType object
+// Parameters: event = event name
 //             callback = binded callbackfunction
 //             args = binded arguments for callback
-WIDGET3D.GuiObject.prototype.removeEventListener = function(name, callback, args){  
+//             custom = boolean flag that tells if the event is dom event or custom event (message)
+WIDGET3D.GuiObject.prototype.removeEventListener = function(name, callback, args){
+
   var index = this.events_.removeCallback(name, callback, args);
   
   if(index === false){
@@ -343,8 +341,6 @@ WIDGET3D.GuiObject.prototype.removeEventListener = function(name, callback, args
   }
 };
 
-
-//TODO: FIX
 // Removes eventlisteners from object
 // Parameters: event = WIDGET3D.EventType object
 WIDGET3D.GuiObject.prototype.removeEventListeners = function(name){  
@@ -367,7 +363,6 @@ WIDGET3D.GuiObject.prototype.removeEventListeners = function(name){
   }
 };
 
-//TODO: FIX
 WIDGET3D.GuiObject.prototype.setNewEventIndex = function(name, index){
   
   for(var i = 0; i < this.events_[name.toString()].length; ++i){

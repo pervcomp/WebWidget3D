@@ -35,8 +35,8 @@ For building the library you need nodejs. Then just run command "node build.js" 
 
 TODO:
 -------
-* Refactoring of core code (divide into multiple files etc.)
 * Example pages
 * Drag controls for the TitledWindow component needs some work. At the moment drag works only along the objects xy-axis.
 This isn't intuitive if camera or the object has rotation.
+* Rethinking of cores and adapters responsibilities and interfaces.
 * Adapters to other 3D engines

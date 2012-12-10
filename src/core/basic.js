@@ -101,11 +101,8 @@ WIDGET3D.Basic.prototype.hide = function(){
 //removes object
 WIDGET3D.Basic.prototype.remove = function(){
   this.hide();
-  for(var i = 0; i < this.events_.length; ++i){
-    if(this.events_[i].callback){
-      this.removeEventListeners(i);
-    }
-  }
+  //removing event listeners
+  this.removeAllListeners();
   //removing mesh
   var mesh = WIDGET3D.getMainWindow().removeMesh(this.mesh_);
   //removing object

@@ -71,7 +71,7 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
   };
   
   _that_.keyboardEvent = function(domEvent){
-    
+  
     var name = domEvent.type;
     var mainWindow = WIDGET3D.getMainWindow();
     
@@ -120,10 +120,11 @@ WIDGET3D.DomEvents.prototype.disableEvent = function(name){
 
   if(this.enabled_.hasOwnProperty(name.toString()) && this.enabled_[name.toString()] === true){
     if(name == "keyup" || name == "keydown" || name == "keypress"){
-      console.log("removed keyboard listener from event "+name);
+      //console.log("removed keyboard listener from event "+name);
       document.removeEventListener(name, this.keyboardEvent, false);
     }
     else{
+      //console.log("removed mouse listener from event "+name);
       this.domElement_.removeEventListener(name, this.mouseEvent, false);
     }
     this.enabled_[name.toString()] = false;
@@ -140,16 +141,18 @@ WIDGET3D.DomEvents.prototype.disableEvent = function(name){
 //             it has to have a type field so that it can be passed
 //             to the right recievers.
 WIDGET3D.DomEvents.prototype.passMessage = function(message){
-    var name = message.type;
-    var mainWindow = WIDGET3D.getMainWindow();
+  var name = message.type;
+  var mainWindow = WIDGET3D.getMainWindow();
+  
+  for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
     
-    for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
-      
-      var object = mainWindow.childEvents_[name.toString()][k];
-      
-      for(var m = 0; m < object.events_[name.toString()].length; ++m){
-        object.events_[name.toString()][m].callback(message,
-        object.events_[name.toString()][m].arguments);
-      }
+    var object = mainWindow.childEvents_[name.toString()][k];
+    
+    for(var m = 0; m < object.events_[name.toString()].length; ++m){
+      object.events_[name.toString()][m].callback(message,
+      object.events_[name.toString()][m].arguments);
     }
-  };
+  }
+};
+
+

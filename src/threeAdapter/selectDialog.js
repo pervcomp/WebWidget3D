@@ -126,7 +126,6 @@ THREEJS_WIDGET3D.SelectDialog.prototype.createChoises = function(){
     
     choice.setLocation(parentLoc.x, y ,parentLoc.z);
     
-    //choice.addEventListener(WIDGET3D.EventType.onclick, this.choices_[i].onclick.handler, this.choices_[i].onclick.parameters);
     choice.addEventListener("click", this.choices_[i].onclick.handler, this.choices_[i].onclick.parameters);
     choice.menuID_ = i;
     this.addChild(choice);
@@ -197,9 +196,8 @@ THREEJS_WIDGET3D.SelectDialog.prototype.changeChoiceText = function(text, index)
 
 THREEJS_WIDGET3D.SelectDialog.prototype.remove = function(){
 
-  //children needs to be removed
-  for(var k = 0; k < this.children_.length; ++k){
-    this.children_[k].remove();
+  while(this.children_.length > 0){
+    this.children_[0].remove();
   }
   
   //removing child canvases from DOM
@@ -207,6 +205,7 @@ THREEJS_WIDGET3D.SelectDialog.prototype.remove = function(){
     canvas = this.choiceCanvases_[i];
     document.body.removeChild(canvas);
   }
+  this.choiceCanvases_ = null;
   
   //hiding the window from scene
   this.hide();
@@ -215,12 +214,8 @@ THREEJS_WIDGET3D.SelectDialog.prototype.remove = function(){
   var canvas = this.textCanvas_;
   document.body.removeChild(canvas);
   
-  //removing eventlisteners
-  for(var i = 0; i < this.events_.length; ++i){
-    if(this.events_[i]){
-      this.removeEventListeners(i);
-    }
-  }
+  //removing eventlisteners  
+  this.removeAllListeners();
   
   //If wondow has a mesh, it has to be removed allso
   if(this.mesh_){

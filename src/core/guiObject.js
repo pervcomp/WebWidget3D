@@ -63,6 +63,20 @@ WIDGET3D.GuiObject = function(){
       }
       
       return false;
+    },
+    
+    remove : function(){
+      var listeners = [];
+      for(listener in this){
+        if(this.hasOwnProperty(listener) &&
+        Object.prototype.toString.apply(this[listener]) === '[object Array]')
+        {
+          var tmp = {name : listener, index: this[listener][0].index};
+          listeners.push(tmp);
+          listener = false;
+        }
+      }
+      return listeners;
     }
   };
   
@@ -99,7 +113,7 @@ WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, args){
   if(!WIDGET3D.getEvents().enabled_[name.toString()]){
     WIDGET3D.getEvents().enableEvent(name);
   }
-  if(!this.events_.checkEvent(name)){    
+  if(!this.events_.checkEvent(name)){
     var index = WIDGET3D.getMainWindow().childEvents_.addObject(name, this);
   }
   else{
@@ -121,24 +135,17 @@ WIDGET3D.GuiObject.prototype.removeEventListener = function(name, callback, args
     return false;
   }
   if(this.events_[name.toString()] === false){
-    //WIDGET3D.mainWindow.childEvents_[name.toString()].splice(index, 1);
-    WIDGET3D.getMainWindow().childEvents_[name.toString()].splice(index, 1);
+    var mainWindow = WIDGET3D.getMainWindow();
+    
+    mainWindow.childEvents_[name.toString()].splice(index, 1);
     
     //if there were no events left lets disable event
-    /*if(WIDGET3D.mainWindow.childEvents_[name.toString()].length == 0){
-      WIDGET3D.mainWindow.childEvents_.removeEvent(name);
-    }*/
-    
-    if(WIDGET3D.getMainWindow().childEvents_[name.toString()].length == 0){
-      WIDGET3D.getMainWindow().childEvents_.removeEvent(name);
+    if(mainWindow.childEvents_[name.toString()].length == 0){
+      mainWindow.childEvents_.removeEvent(name);
     }
-    
-    /*for(var i = 0; i < WIDGET3D.mainWindow.childEvents_[name.toString()].length; ++i){
-      WIDGET3D.mainWindow.childEvents_[name.toString()][i].setNewEventIndex(name, i);
-    }*/
-    
-    for(var i = 0; i < WIDGET3D.getMainWindow().childEvents_[name.toString()].length; ++i){
-      WIDGET3D.getMainWindow().childEvents_[name.toString()][i].setNewEventIndex(name, i);
+        
+    for(var i = 0; i < mainWindow.childEvents_[name.toString()].length; ++i){
+      mainWindow.childEvents_[name.toString()][i].setNewEventIndex(name, i);
     }
     
     return true;
@@ -147,7 +154,6 @@ WIDGET3D.GuiObject.prototype.removeEventListener = function(name, callback, args
 
 // Removes eventlisteners from object
 WIDGET3D.GuiObject.prototype.removeEventListeners = function(name){
-  console.log("removing event: "+name);
   var index = this.events_.removeAll(name);
   if(index === false){
     return false;
@@ -168,6 +174,26 @@ WIDGET3D.GuiObject.prototype.removeEventListeners = function(name){
     return true;
   }
 };
+
+WIDGET3D.GuiObject.prototype.removeAllListeners = function(){
+  var listeners = this.events_.remove();
+  
+  var mainWindow = WIDGET3D.getMainWindow();
+  for(var i = 0; i < listeners.length; ++i){
+    var name = listeners[i].name;
+    var index = listeners[i].index;
+    
+    mainWindow.childEvents_[name].splice(index, 1);
+    
+    if(mainWindow.childEvents_[name].length == 0){
+      mainWindow.childEvents_.removeEvent(name);
+    }
+    
+    for(var k = 0; k < mainWindow.childEvents_[name].length; ++k){
+      mainWindow.childEvents_[name][k].setNewEventIndex(name, k);
+    }
+  }
+}
 
 WIDGET3D.GuiObject.prototype.setNewEventIndex = function(name, index){
   
@@ -197,3 +223,4 @@ WIDGET3D.GuiObject.prototype.inheritance = function(){
   var created = new guiObjectPrototype();
   return created;
 };
+

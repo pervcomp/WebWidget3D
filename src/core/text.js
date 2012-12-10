@@ -121,3 +121,4 @@ WIDGET3D.Text.prototype.inheritance = function(){
   var created = new guiTextPrototype();
   return created;
 };
+

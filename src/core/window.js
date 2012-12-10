@@ -111,19 +111,16 @@ WIDGET3D.Window.prototype.hide = function(){
 
 //removes window and it's children
 WIDGET3D.Window.prototype.remove = function(){
-  //children needs to be removed
-  for(var k = 0; k < this.children_.length; ++k){
-    this.children_[k].remove();
+  //children needs to be removed  
+  while(this.children_.length > 0){
+    this.children_[0].remove();
   }
   //hiding the window from scene
   this.hide();
-  //removing eventlisteners
-  for(var i = 0; i < this.events_.length; ++i){
-    if(this.events_[i].callback){
-      this.removeEventListeners(i);
-    }
-  }
-  //If wondow has a mesh, it has to be removed allso
+  //removing event listeners
+  this.removeAllListeners();
+  
+  //If window has a mesh, it has to be removed allso
   if(this.mesh_){
     var mesh = WIDGET3D.getMainWindow().removeMesh(this.mesh_);
   }
@@ -194,3 +191,5 @@ WIDGET3D.Window.prototype.inheritance = function(){
   var created = new guiWindowPrototype();
   return created;
 };
+
+

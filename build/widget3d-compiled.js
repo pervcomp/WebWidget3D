@@ -289,6 +289,20 @@ WIDGET3D.GuiObject = function(){
       }
       
       return false;
+    },
+    
+    remove : function(){
+      var listeners = [];
+      for(listener in this){
+        if(this.hasOwnProperty(listener) &&
+        Object.prototype.toString.apply(this[listener]) === '[object Array]')
+        {
+          var tmp = {name : listener, index: this[listener][0].index};
+          listeners.push(tmp);
+          listener = false;
+        }
+      }
+      return listeners;
     }
   };
   
@@ -322,14 +336,10 @@ WIDGET3D.GuiObject.prototype.unfocus = function(){
 //
 WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, args){
 
-  /*if(!WIDGET3D.events.enabled_[name.toString()]){
-    WIDGET3D.events.enableEvent(name);
-  }*/
   if(!WIDGET3D.getEvents().enabled_[name.toString()]){
     WIDGET3D.getEvents().enableEvent(name);
   }
-  if(!this.events_.checkEvent(name)){    
-    //var index = WIDGET3D.mainWindow.childEvents_.addObject(name, this);
+  if(!this.events_.checkEvent(name)){
     var index = WIDGET3D.getMainWindow().childEvents_.addObject(name, this);
   }
   else{
@@ -351,24 +361,17 @@ WIDGET3D.GuiObject.prototype.removeEventListener = function(name, callback, args
     return false;
   }
   if(this.events_[name.toString()] === false){
-    //WIDGET3D.mainWindow.childEvents_[name.toString()].splice(index, 1);
-    WIDGET3D.getMainWindow().childEvents_[name.toString()].splice(index, 1);
+    var mainWindow = WIDGET3D.getMainWindow();
+    
+    mainWindow.childEvents_[name.toString()].splice(index, 1);
     
     //if there were no events left lets disable event
-    /*if(WIDGET3D.mainWindow.childEvents_[name.toString()].length == 0){
-      WIDGET3D.mainWindow.childEvents_.removeEvent(name);
-    }*/
-    
-    if(WIDGET3D.getMainWindow().childEvents_[name.toString()].length == 0){
-      WIDGET3D.getMainWindow().childEvents_.removeEvent(name);
+    if(mainWindow.childEvents_[name.toString()].length == 0){
+      mainWindow.childEvents_.removeEvent(name);
     }
-    
-    /*for(var i = 0; i < WIDGET3D.mainWindow.childEvents_[name.toString()].length; ++i){
-      WIDGET3D.mainWindow.childEvents_[name.toString()][i].setNewEventIndex(name, i);
-    }*/
-    
-    for(var i = 0; i < WIDGET3D.getMainWindow().childEvents_[name.toString()].length; ++i){
-      WIDGET3D.getMainWindow().childEvents_[name.toString()][i].setNewEventIndex(name, i);
+        
+    for(var i = 0; i < mainWindow.childEvents_[name.toString()].length; ++i){
+      mainWindow.childEvents_[name.toString()][i].setNewEventIndex(name, i);
     }
     
     return true;
@@ -376,9 +379,7 @@ WIDGET3D.GuiObject.prototype.removeEventListener = function(name, callback, args
 };
 
 // Removes eventlisteners from object
-// Parameters: event = WIDGET3D.EventType object
 WIDGET3D.GuiObject.prototype.removeEventListeners = function(name){
-  console.log("removing event: "+name);
   var index = this.events_.removeAll(name);
   if(index === false){
     return false;
@@ -399,6 +400,26 @@ WIDGET3D.GuiObject.prototype.removeEventListeners = function(name){
     return true;
   }
 };
+
+WIDGET3D.GuiObject.prototype.removeAllListeners = function(){
+  var listeners = this.events_.remove();
+  
+  var mainWindow = WIDGET3D.getMainWindow();
+  for(var i = 0; i < listeners.length; ++i){
+    var name = listeners[i].name;
+    var index = listeners[i].index;
+    
+    mainWindow.childEvents_[name].splice(index, 1);
+    
+    if(mainWindow.childEvents_[name].length == 0){
+      mainWindow.childEvents_.removeEvent(name);
+    }
+    
+    for(var k = 0; k < mainWindow.childEvents_[name].length; ++k){
+      mainWindow.childEvents_[name][k].setNewEventIndex(name, k);
+    }
+  }
+}
 
 WIDGET3D.GuiObject.prototype.setNewEventIndex = function(name, index){
   
@@ -427,7 +448,9 @@ WIDGET3D.GuiObject.prototype.inheritance = function(){
   guiObjectPrototype.prototype = this;
   var created = new guiObjectPrototype();
   return created;
-};//---------------------------------------------
+};
+
+//---------------------------------------------
 // GUI OBJECT: BASIC
 //---------------------------------------------
 //
@@ -530,11 +553,8 @@ WIDGET3D.Basic.prototype.hide = function(){
 //removes object
 WIDGET3D.Basic.prototype.remove = function(){
   this.hide();
-  for(var i = 0; i < this.events_.length; ++i){
-    if(this.events_[i].callback){
-      this.removeEventListeners(i);
-    }
-  }
+  //removing event listeners
+  this.removeAllListeners();
   //removing mesh
   var mesh = WIDGET3D.getMainWindow().removeMesh(this.mesh_);
   //removing object
@@ -822,19 +842,16 @@ WIDGET3D.Window.prototype.hide = function(){
 
 //removes window and it's children
 WIDGET3D.Window.prototype.remove = function(){
-  //children needs to be removed
-  for(var k = 0; k < this.children_.length; ++k){
-    this.children_[k].remove();
+  //children needs to be removed  
+  while(this.children_.length > 0){
+    this.children_[0].remove();
   }
   //hiding the window from scene
   this.hide();
-  //removing eventlisteners
-  for(var i = 0; i < this.events_.length; ++i){
-    if(this.events_[i].callback){
-      this.removeEventListeners(i);
-    }
-  }
-  //If wondow has a mesh, it has to be removed allso
+  //removing event listeners
+  this.removeAllListeners();
+  
+  //If window has a mesh, it has to be removed allso
   if(this.mesh_){
     var mesh = WIDGET3D.getMainWindow().removeMesh(this.mesh_);
   }
@@ -904,7 +921,10 @@ WIDGET3D.Window.prototype.inheritance = function(){
   guiWindowPrototype.prototype = this;
   var created = new guiWindowPrototype();
   return created;
-};//---------------------------------------------
+};
+
+
+//---------------------------------------------
 // GUI OBJECT: TEXT
 //---------------------------------------------
 //
@@ -1026,7 +1046,9 @@ WIDGET3D.Text.prototype.inheritance = function(){
   guiTextPrototype.prototype = this;
   var created = new guiTextPrototype();
   return created;
-};/*
+};
+
+/*
 Copyright (C) 2012 Anna-Liisa Mattila
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -1099,7 +1121,7 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
   };
   
   _that_.keyboardEvent = function(domEvent){
-    
+  
     var name = domEvent.type;
     var mainWindow = WIDGET3D.getMainWindow();
     
@@ -1148,10 +1170,11 @@ WIDGET3D.DomEvents.prototype.disableEvent = function(name){
 
   if(this.enabled_.hasOwnProperty(name.toString()) && this.enabled_[name.toString()] === true){
     if(name == "keyup" || name == "keydown" || name == "keypress"){
-      console.log("removed keyboard listener from event "+name);
+      //console.log("removed keyboard listener from event "+name);
       document.removeEventListener(name, this.keyboardEvent, false);
     }
     else{
+      //console.log("removed mouse listener from event "+name);
       this.domElement_.removeEventListener(name, this.mouseEvent, false);
     }
     this.enabled_[name.toString()] = false;
@@ -1168,19 +1191,21 @@ WIDGET3D.DomEvents.prototype.disableEvent = function(name){
 //             it has to have a type field so that it can be passed
 //             to the right recievers.
 WIDGET3D.DomEvents.prototype.passMessage = function(message){
-    var name = message.type;
-    var mainWindow = WIDGET3D.getMainWindow();
+  var name = message.type;
+  var mainWindow = WIDGET3D.getMainWindow();
+  
+  for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
     
-    for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
-      
-      var object = mainWindow.childEvents_[name.toString()][k];
-      
-      for(var m = 0; m < object.events_[name.toString()].length; ++m){
-        object.events_[name.toString()][m].callback(message,
-        object.events_[name.toString()][m].arguments);
-      }
+    var object = mainWindow.childEvents_[name.toString()][k];
+    
+    for(var m = 0; m < object.events_[name.toString()].length; ++m){
+      object.events_[name.toString()][m].callback(message,
+      object.events_[name.toString()][m].arguments);
     }
-  };
+  }
+};
+
+
 /*
 Copyright (C) 2012 Anna-Liisa Mattila
 
@@ -1774,9 +1799,9 @@ THREEJS_WIDGET3D.TitledWindow.prototype.setTitle = function(title){
 
 
 THREEJS_WIDGET3D.TitledWindow.prototype.remove = function(){
-  //children needs to be removed
-  for(var k = 0; k < this.children_.length; ++k){
-    this.children_[k].remove();
+  //children needs to be removed  
+  while(this.children_.length > 0){
+    this.children_[0].remove();
   }
   
   //hiding the window from scene
@@ -1787,11 +1812,7 @@ THREEJS_WIDGET3D.TitledWindow.prototype.remove = function(){
   document.body.removeChild(canvas);
   
   //removing eventlisteners
-  for(var i = 0; i < this.events_.length; ++i){
-    if(this.events_[i].callback){
-      this.removeEventListeners(i);
-    }
-  }
+  this.removeAllListeners();
   
   //If wondow has a mesh, it has to be removed allso
   if(this.mesh_){
@@ -2030,8 +2051,8 @@ THREEJS_WIDGET3D.Dialog.prototype.textBoxOnkeypress = function(event, window){
 THREEJS_WIDGET3D.Dialog.prototype.remove = function(){
   
   //children needs to be removed
-  for(var k = 0; k < this.children_.length; ++k){
-    this.children_[k].remove();
+  while(this.children_.length > 0){
+    this.children_[0].remove();
   }
   
   //hiding the window from scene
@@ -2043,22 +2064,12 @@ THREEJS_WIDGET3D.Dialog.prototype.remove = function(){
   document.body.removeChild(canvas1);
   document.body.removeChild(canvas2);
   
-  console.log("removing dialog");
-  console.log(this.events_);
-  //removing eventlisteners
-  for(var i = 0; i < this.events_.length; ++i){
-    console.log(i);
-    if(this.events_[i]){
-      this.removeEventListeners(i);
-    }
-  }
+  //removing event listeners
+  this.removeAllListeners();
   
   //If window has a mesh, it has to be removed allso
   if(this.mesh_){
     var mesh = WIDGET3D.getMainWindow().removeMesh(this.mesh_);
-    if(mesh != this.mesh_){
-      console.log("removed mesh was wrong! " + mesh);
-    }
   }
   
   //container has to be removed from parent's container
@@ -2066,11 +2077,6 @@ THREEJS_WIDGET3D.Dialog.prototype.remove = function(){
   
   //removing this from parents objects
   var obj = this.parent_.removeFromObjects(this);
-  if(obj != this){
-    console.log(obj);
-    console.log(this);
-    console.log("removed object was wrong! " + obj);
-  }
   
 }
 
@@ -2202,7 +2208,6 @@ THREEJS_WIDGET3D.SelectDialog.prototype.createChoises = function(){
     
     choice.setLocation(parentLoc.x, y ,parentLoc.z);
     
-    //choice.addEventListener(WIDGET3D.EventType.onclick, this.choices_[i].onclick.handler, this.choices_[i].onclick.parameters);
     choice.addEventListener("click", this.choices_[i].onclick.handler, this.choices_[i].onclick.parameters);
     choice.menuID_ = i;
     this.addChild(choice);
@@ -2273,9 +2278,8 @@ THREEJS_WIDGET3D.SelectDialog.prototype.changeChoiceText = function(text, index)
 
 THREEJS_WIDGET3D.SelectDialog.prototype.remove = function(){
 
-  //children needs to be removed
-  for(var k = 0; k < this.children_.length; ++k){
-    this.children_[k].remove();
+  while(this.children_.length > 0){
+    this.children_[0].remove();
   }
   
   //removing child canvases from DOM
@@ -2283,6 +2287,7 @@ THREEJS_WIDGET3D.SelectDialog.prototype.remove = function(){
     canvas = this.choiceCanvases_[i];
     document.body.removeChild(canvas);
   }
+  this.choiceCanvases_ = null;
   
   //hiding the window from scene
   this.hide();
@@ -2291,12 +2296,8 @@ THREEJS_WIDGET3D.SelectDialog.prototype.remove = function(){
   var canvas = this.textCanvas_;
   document.body.removeChild(canvas);
   
-  //removing eventlisteners
-  for(var i = 0; i < this.events_.length; ++i){
-    if(this.events_[i]){
-      this.removeEventListeners(i);
-    }
-  }
+  //removing eventlisteners  
+  this.removeAllListeners();
   
   //If wondow has a mesh, it has to be removed allso
   if(this.mesh_){

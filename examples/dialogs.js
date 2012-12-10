@@ -39,9 +39,6 @@ var init = function(){
   
   mainWindow.addChild(dialog);
   
-  mainWindow.addEventListener("keydown", function(event){console.log("keydown")});
-  mainWindow.focus();
-  
   var choices = [
     {string : "choice1", onclick : {}},
     {string : "choice2", onclick : {}},
@@ -70,3 +67,4 @@ var init = function(){
   };
   mainLoop();
 }
+

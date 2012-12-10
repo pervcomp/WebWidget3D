@@ -214,8 +214,8 @@ THREEJS_WIDGET3D.Dialog.prototype.textBoxOnkeypress = function(event, window){
 THREEJS_WIDGET3D.Dialog.prototype.remove = function(){
   
   //children needs to be removed
-  for(var k = 0; k < this.children_.length; ++k){
-    this.children_[k].remove();
+  while(this.children_.length > 0){
+    this.children_[0].remove();
   }
   
   //hiding the window from scene
@@ -227,22 +227,12 @@ THREEJS_WIDGET3D.Dialog.prototype.remove = function(){
   document.body.removeChild(canvas1);
   document.body.removeChild(canvas2);
   
-  console.log("removing dialog");
-  console.log(this.events_);
-  //removing eventlisteners
-  for(var i = 0; i < this.events_.length; ++i){
-    console.log(i);
-    if(this.events_[i]){
-      this.removeEventListeners(i);
-    }
-  }
+  //removing event listeners
+  this.removeAllListeners();
   
   //If window has a mesh, it has to be removed allso
   if(this.mesh_){
     var mesh = WIDGET3D.getMainWindow().removeMesh(this.mesh_);
-    if(mesh != this.mesh_){
-      console.log("removed mesh was wrong! " + mesh);
-    }
   }
   
   //container has to be removed from parent's container
@@ -250,11 +240,6 @@ THREEJS_WIDGET3D.Dialog.prototype.remove = function(){
   
   //removing this from parents objects
   var obj = this.parent_.removeFromObjects(this);
-  if(obj != this){
-    console.log(obj);
-    console.log(this);
-    console.log("removed object was wrong! " + obj);
-  }
   
 }
 

@@ -37,8 +37,6 @@ WIDGET3D.MainWindow = function(){
     }
   };
   
-  this.needsUpdate_ = true;
-  
 };
 
 
@@ -65,7 +63,10 @@ WIDGET3D.MainWindow.prototype.removeMesh = function(mesh){
   for(var k = 0; k < this.meshes_.length; ++k){
     if(this.meshes_[k] === mesh){
       var removedMesh = this.meshes_.splice(k, 1);
+      return removedMesh[0];
     }
   }
-  return removedMesh[0];
+  return false;
 };
+
+

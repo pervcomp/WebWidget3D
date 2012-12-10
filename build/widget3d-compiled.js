@@ -655,10 +655,10 @@ WIDGET3D.WindowBase.prototype.removeFromObjects = function(object){
   for(var k = 0; k < this.children_.length; ++k){
     if(this.children_[k] === object){
       var removedObj = this.children_.splice(k, 1);
+      return removedObj[0];
     }
   }
-  
-  return removedObj[0];
+  return false;
 };//------------------------------------------------
 // MAIN WINDOW: Singleton root window
 //
@@ -698,8 +698,6 @@ WIDGET3D.MainWindow = function(){
     }
   };
   
-  this.needsUpdate_ = true;
-  
 };
 
 
@@ -726,10 +724,14 @@ WIDGET3D.MainWindow.prototype.removeMesh = function(mesh){
   for(var k = 0; k < this.meshes_.length; ++k){
     if(this.meshes_[k] === mesh){
       var removedMesh = this.meshes_.splice(k, 1);
+      return removedMesh[0];
     }
   }
-  return removedMesh[0];
-};//---------------------------------------------
+  return false;
+};
+
+
+//---------------------------------------------
 // GUI OBJECT: WINDOW
 //---------------------------------------------
 // Basic window that can has children.

@@ -34,8 +34,8 @@ WIDGET3D.WindowBase.prototype.removeFromObjects = function(object){
   for(var k = 0; k < this.children_.length; ++k){
     if(this.children_[k] === object){
       var removedObj = this.children_.splice(k, 1);
+      return removedObj[0];
     }
   }
-  
-  return removedObj[0];
+  return false;
 };

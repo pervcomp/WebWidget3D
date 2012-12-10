@@ -48,8 +48,9 @@ var init = function(){
   pictureDisplay.setMesh(display);
   mainWindow.addChild(pictureDisplay);
   
-  //pictureDisplay.addEventListener(WIDGET3D.EventType.onclick, pictureclick, pictureDisplay);
   pictureDisplay.addEventListener("click", pictureclick, pictureDisplay);
+  
+  pictureDisplay.addEventListener("myOwnEventType", clickMessage);
   pictureDisplay.hide();
   
   //creates small pictures
@@ -66,6 +67,39 @@ var init = function(){
 }
 
 //event handlers
+
+var clickMessage = function(message){
+  document.body.style.backgroundColor = "#B6C560";
+  setTimeout(fade, 300);
+  
+}
+
+var fade = function(){
+  var color = colorToHex(document.body.style.backgroundColor);
+  
+  if(color != "#B6C5BE"){
+    var tmp = color.substr(1,6);
+    var colorHex = parseInt(tmp, 16);
+    colorHex += 0x2;
+    color = "#" + colorHex.toString(16).toUpperCase();
+    document.body.style.backgroundColor = color;
+    setTimeout(fade, 10);
+  }
+}
+
+var colorToHex = function(color) {
+    if (color.substr(0, 1) === '#') {
+        return color;
+    }
+    var digits = /(.*?)rgb\((\d+), (\d+), (\d+)\)/.exec(color);
+    
+    var red = parseInt(digits[2]);
+    var green = parseInt(digits[3]);
+    var blue = parseInt(digits[4]);
+    
+    var rgb = blue | (green << 8) | (red << 16);
+    return (digits[1] + '#' + rgb.toString(16)).toUpperCase();
+};
 
 //mouse click handler for small pictures
 var mouseclickHandler = function(event, parameters){
@@ -85,6 +119,7 @@ var mouseclickHandler = function(event, parameters){
 //mouse click handler for picture display
 var pictureclick = function(event, pictureDisplay){
   pictureDisplay.hide();
+  WIDGET3D.getEvents().passMessage({type: "myOwnEventType"});
 }
 
 //constructing picture grid and gui buttons
@@ -102,7 +137,6 @@ var displayPictures = function(subWindow, pictureDisplay){
   for (var i = 0; i < pictures.length; ++i){
 
     var button = new THREEJS_WIDGET3D.GridIcon({parent : subWindow, picture : pictures[i]});
-    //button.addEventListener(WIDGET3D.EventType.onclick, mouseclickHandler, {button: button, pictureDisplay : pictureDisplay});
     button.addEventListener("click", mouseclickHandler, {button: button, pictureDisplay : pictureDisplay});
     
   }

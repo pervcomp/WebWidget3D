@@ -78,8 +78,9 @@ THREEJS_WIDGET3D.GridWindow = function(parameters){
       if(that.rotate_){
         that.rotate_ = false;
         
-        THREEJS_WIDGET3D.mainWindow.removeEventListener("mousemove", that.mousemoveHandler);
-        THREEJS_WIDGET3D.mainWindow.removeEventListener("mouseup", that.mouseupHandler);
+        var mainWindow = WIDGET3D.getMainWindow();
+        mainWindow.removeEventListener("mousemove", that.mousemoveHandler);
+        mainWindow.removeEventListener("mouseup", that.mouseupHandler);
       }
     };
     
@@ -92,8 +93,9 @@ THREEJS_WIDGET3D.GridWindow = function(parameters){
         that.rotationOnMouseDownY_ = that.modelRotationY_;
         that.rotationOnMouseDownX_ = that.modelRotationX_;
         
-        THREEJS_WIDGET3D.mainWindow.addEventListener("mousemove", that.mousemoveHandler);
-        THREEJS_WIDGET3D.mainWindow.addEventListener("mouseup", that.mouseupHandler);
+        var mainWindow = WIDGET3D.getMainWindow();
+        mainWindow.addEventListener("mousemove", that.mousemoveHandler);
+        mainWindow.addEventListener("mouseup", that.mouseupHandler);
       }
     };
 

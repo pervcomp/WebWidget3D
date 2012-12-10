@@ -217,14 +217,14 @@ THREEJS_WIDGET3D.SelectDialog.prototype.remove = function(){
   
   //removing eventlisteners
   for(var i = 0; i < this.events_.length; ++i){
-    if(this.events_[i].callback){
+    if(this.events_[i]){
       this.removeEventListeners(i);
     }
   }
   
   //If wondow has a mesh, it has to be removed allso
   if(this.mesh_){
-    var mesh = WIDGET3D.mainWindow.removeMesh(this.mesh_);
+    var mesh = WIDGET3D.getMainWindow().removeMesh(this.mesh_);
     if(mesh != this.mesh_){
       console.log("removed mesh was wrong! " + mesh);
     }

@@ -44,13 +44,20 @@ if ( helpGiven == true ){
 
 
 var srcFiles = {
-	Widget3D: ["../src/core/widget3D.js", "../src/core/events.js", "../src/threeAdapter/adapter.js",
+	Widget3D: ["../src/core/widget3D.js","../src/core/guiObject.js", "../src/core/basic.js", "../src/core/windowBase.js",
+    "../src/core/mainWindow.js", "../src/core/window.js", "../src/core/text.js", "../src/core/events.js", "../src/threeAdapter/adapter.js",
     "../src/threeAdapter/gridLayout.js", "../src/threeAdapter/titledWindow.js",
     "../src/threeAdapter/dialog.js", "../src/threeAdapter/selectDialog.js", "../src/threeAdapter/cameraGroup.js"]
 }
 
 var deps = {
 	"../src/core/widget3D.js": [],
+  "../src/core/guiObject.js" : ["../src/core/widget3D.js"],
+  "../src/core/basic.js" : ["../src/core/widget3D.js", "../src/core/guiObject.js"],
+  "../src/core/windowBase.js" : ["../src/core/widget3D.js", "../src/core/guiObject.js"],
+  "../src/core/mainWindow.js" : ["../src/core/widget3D.js", "../src/core/guiObject.js", "../src/core/windowBase.js"],
+  "../src/core/window.js" : ["../src/core/widget3D.js", "../src/core/guiObject.js", "../src/core/basic.js", "../src/core/windowBase.js"],
+  "../src/core/text.js" : ["../src/core/widget3D.js", "../src/core/guiObject.js", "../src/core/basic.js"],
 	"../src/core/events.js": ["../src/core/widget3D.js"],
 	"../src/threeAdapter/adapter.js": ["../src/core/widget3D.js", "../src/core/events.js"],
 	"../extras/wplugTHREE_gridLayout.js": ["../src/core/widget3D.js", "../src/core/events.js", "../src/threeAdapter/adapter.js"],

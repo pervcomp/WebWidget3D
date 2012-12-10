@@ -94,10 +94,6 @@ THREEJS_WIDGET3D.Dialog = function(parameters){
   this.addChild(this.textBox_);
   this.textBox_.setText("");
   
-  //this.textBox_.addEventListener(WIDGET3D.EventType.onclick, this.textBoxOnclick, this);
-  //this.textBox_.addEventListener(WIDGET3D.EventType.onkeypress, this.textBoxOnkeypress, this);
-  //this.textBox_.addEventListener(WIDGET3D.EventType.onkeydown, this.textBoxOnkeypress, this);
-  
   this.textBox_.addEventListener("click", this.textBoxOnclick, this);
   this.textBox_.addEventListener("keypress", this.textBoxOnkeypress, this);
   this.textBox_.addEventListener("keydown", this.textBoxOnkeypress, this);
@@ -231,16 +227,19 @@ THREEJS_WIDGET3D.Dialog.prototype.remove = function(){
   document.body.removeChild(canvas1);
   document.body.removeChild(canvas2);
   
+  console.log("removing dialog");
+  console.log(this.events_);
   //removing eventlisteners
   for(var i = 0; i < this.events_.length; ++i){
-    if(this.events_[i].callback){
+    console.log(i);
+    if(this.events_[i]){
       this.removeEventListeners(i);
     }
   }
   
-  //If wondow has a mesh, it has to be removed allso
+  //If window has a mesh, it has to be removed allso
   if(this.mesh_){
-    var mesh = WIDGET3D.mainWindow.removeMesh(this.mesh_);
+    var mesh = WIDGET3D.getMainWindow().removeMesh(this.mesh_);
     if(mesh != this.mesh_){
       console.log("removed mesh was wrong! " + mesh);
     }

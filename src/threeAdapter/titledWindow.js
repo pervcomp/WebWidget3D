@@ -108,7 +108,7 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
         that.clickStart_ = undefined;
         
         that.title_.removeEventListener("mousemove", that.mousemoveHandler);
-        THREEJS_WIDGET3D.mainWindow.removeEventListener("mouseup", that.mouseupHandler);
+        WIDGET3D.getMainWindow().removeEventListener("mouseup", that.mouseupHandler);
       }
     };
     
@@ -126,7 +126,7 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
         that.clickStart_ = event.objectCoordinates;
         
         that.title_.addEventListener("mousemove", that.mousemoveHandler);
-        THREEJS_WIDGET3D.mainWindow.addEventListener("mouseup", that.mouseupHandler);
+        WIDGET3D.getMainWindow().addEventListener("mouseup", that.mouseupHandler);
       }
       return false;
     };
@@ -220,7 +220,7 @@ THREEJS_WIDGET3D.TitledWindow.prototype.remove = function(){
   
   //If wondow has a mesh, it has to be removed allso
   if(this.mesh_){
-    var mesh = WIDGET3D.mainWindow.removeMesh(this.mesh_);
+    var mesh = WIDGET3D.getMainWindow().removeMesh(this.mesh_);
     if(mesh != this.mesh_){
       console.log("removed mesh was wrong! " + mesh);
     }

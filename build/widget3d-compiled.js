@@ -41,96 +41,6 @@ WIDGET3D = {
     return this.initialized;
   },
   
-  //------------------------------------------------------------
-  // USEFUL HELPPER FUNCTIONS FOR MOUSE COORDINATE CALCULATIONS
-  //------------------------------------------------------------
-
-  //returns the real width of the canvas element
-  getRealWidth : function(){
-    return parseInt(window.getComputedStyle(this.getEvents().domElement_,null).getPropertyValue("width"));
-  },
-
-  getRealHeight : function(){
-    return parseInt(window.getComputedStyle(this.getEvents().domElement_,null).getPropertyValue("height"));
-  },
-
-  getCanvasWidth : function(){
-    return this.getEvents().domElement_.width;
-  },
-
-  getCanvasHeight : function(){
-    return this.getEvents().domElement_.height;
-  },
-
-  //calculates mouseScreenCoordinates from domEvent
-  mouseScreenCoordinates : function(domEvent){
-    
-    var coords = { x: 0, y: 0};
-    if (!domEvent) {
-      domEvent = window.event;
-      coords.x = domEvent.x;
-      coords.y = domEvent.y;
-    }
-    else {
-      var element = domEvent.target ;
-      var totalOffsetLeft = 0;
-      var totalOffsetTop = 0 ;
-
-      while (element.offsetParent)
-      {
-          totalOffsetLeft += element.offsetLeft;
-          totalOffsetTop += element.offsetTop;
-          element = element.offsetParent;
-      }
-      coords.x = domEvent.pageX - totalOffsetLeft;
-      coords.y = domEvent.pageY - totalOffsetTop;
-    }
-    
-    return coords;
-  },
-
-  mouseCoordinates : function(domEvent){
-
-    var coords = this.mouseScreenCoordinates(domEvent);
-    
-    //If canvas element size has been manipulated with CSS the domElement.width and domElement.height aren't the
-    // values of the height and width used showing the canvas. In here we need the real screen coordinatelimits
-    //to calculate mouse position correctly.
-    
-    var CSSwidth = this.getRealWidth();
-    var CSSheight = this.getRealHeight();
-    
-    var limits = {
-      minX: 0,
-      maxX: CSSwidth,
-      minY: 0,
-      maxY: CSSheight
-    };
-    
-    var mouse = this.scaleCoordinates(coords, limits);
-    return mouse;
-  },
-
-  //scales coordinates to range of -1..1
-  scaleCoordinates : function(point, limits){
-    var x = +((point.x - limits.minX) / limits.maxX) * 2 - 1;
-    var y = -((point.y - limits.minY) / limits.maxY) * 2 + 1;
-    
-    return {x: x, y: y};
-  },
-
-  //calculates childs coordinate limits in parent coordinate system
-  calculateLimits : function(position, width, height){
-
-    var maxX = position.x + (width/2);
-    var minX = position.x - (width/2);
-    
-    var maxY = position.y + (height/2);
-    var minY = position.y - (height/2);
-    
-    return {minX: minX, maxX: maxX, minY: minY, maxY: maxY};
-  },
-  
   //Initializes the widget system core
   //
   //PARAMETERS:
@@ -151,7 +61,6 @@ WIDGET3D = {
   //  root window which is Window typed gui object.
   //
   init : function(parameters){
-    
     //Some private variables inside a closure
     
     var focused_ = [];
@@ -1077,6 +986,98 @@ WIDGET3D.Text.prototype.inheritance = function(){
   return created;
 };
 
+
+//------------------------------------------------------------
+// USEFUL HELPPER FUNCTIONS
+//------------------------------------------------------------
+
+//returns the real width of the canvas element
+WIDGET3D.getRealWidth = function(){
+  return parseInt(window.getComputedStyle(WIDGET3D.getEvents().domElement_,null).getPropertyValue("width"));
+};
+
+WIDGET3D.getRealHeight = function(){
+  return parseInt(window.getComputedStyle(WIDGET3D.getEvents().domElement_,null).getPropertyValue("height"));
+};
+
+WIDGET3D.getCanvasWidth = function(){
+  return WIDGET3D.getEvents().domElement_.width;
+};
+
+WIDGET3D.getCanvasHeight = function(){
+  return WIDGET3D.getEvents().domElement_.height;
+};
+
+//calculates mouseScreenCoordinates from domEvent
+WIDGET3D.mouseScreenCoordinates = function(domEvent){
+  
+  var coords = { x: 0, y: 0};
+  if (!domEvent) {
+    domEvent = window.event;
+    coords.x = domEvent.x;
+    coords.y = domEvent.y;
+  }
+  else {
+    var element = domEvent.target ;
+    var totalOffsetLeft = 0;
+    var totalOffsetTop = 0 ;
+
+    while (element.offsetParent)
+    {
+        totalOffsetLeft += element.offsetLeft;
+        totalOffsetTop += element.offsetTop;
+        element = element.offsetParent;
+    }
+    coords.x = domEvent.pageX - totalOffsetLeft;
+    coords.y = domEvent.pageY - totalOffsetTop;
+  }
+  
+  return coords;
+};
+
+WIDGET3D.mouseCoordinates = function(domEvent){
+
+  var coords = WIDGET3D.mouseScreenCoordinates(domEvent);
+  
+  //If canvas element size has been manipulated with CSS the domElement.width and domElement.height aren't the
+  // values of the height and width used showing the canvas. In here we need the real screen coordinatelimits
+  //to calculate mouse position correctly.
+  
+  var CSSwidth = WIDGET3D.getRealWidth();
+  var CSSheight = WIDGET3D.getRealHeight();
+  
+  var limits = {
+    minX: 0,
+    maxX: CSSwidth,
+    minY: 0,
+    maxY: CSSheight
+  };
+  
+  var mouse = WIDGET3D.scaleCoordinates(coords, limits);
+  return mouse;
+};
+
+//scales coordinates to range of -1..1
+WIDGET3D.scaleCoordinates = function(point, limits){
+  var x = +((point.x - limits.minX) / limits.maxX) * 2 - 1;
+  var y = -((point.y - limits.minY) / limits.maxY) * 2 + 1;
+  
+  return {x: x, y: y};
+};
+
+//calculates childs coordinate limits in parent coordinate system
+WIDGET3D.calculateLimits = function(position, width, height){
+
+  var maxX = position.x + (width/2);
+  var minX = position.x - (width/2);
+  
+  var maxY = position.y + (height/2);
+  var minY = position.y - (height/2);
+  
+  return {minX: minX, maxX: maxX, minY: minY, maxY: maxY};
+};
+
+
 /*
 Copyright (C) 2012 Anna-Liisa Mattila
 
@@ -1275,66 +1276,15 @@ SOFTWARE.
 var THREEJS_WIDGET3D = {
 
   initialized : false,
-  Container : THREE.Object3D,
-  renderer : undefined,
-  scene : undefined,
-  projector : undefined,
-  camera : undefined,
   
   init : function(parameters){
-    //---------------------------------------------
-    //ADDING CALLBACKFUNCTIONS INSIDE THE CLOSURE
-    //---------------------------------------------
-    var that = this;
-    
-    THREEJS_WIDGET3D.checkIfHits = function(event){
-    
-      var mouse = WIDGET3D.mouseCoordinates(event);
-      
-      var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
-      var ray = that.projector.pickingRay(vector, that.camera);
-      
-      //intersects checks now all the meshes in scene. It might be good to construct
-      // a datastructure that contains meshes of mainWindow.childEvents_.event array content
-      var intersects = ray.intersectObjects(WIDGET3D.getMainWindow().meshes_);
-      
-      var closest = false;
-      
-      if(intersects.length > 0){
-        //finding closest
-        //closest object is the first visible object in intersects
-        for(var m = 0; m < intersects.length; ++m){
-          
-          if(intersects[m].object.visible){
-            closest = intersects[m].object;
-            var inv = new THREE.Matrix4();
-            inv.getInverse(intersects[m].object.matrixWorld);
-            
-            //position where the click happened in object coordinates
-            var objPos = inv.multiplyVector3(intersects[m].point.clone());
-            
-            var found = that.findObject(closest, event.type);
-            
-            if(found){          
-              event.objectCoordinates = objPos;
-              event.worldCoordinates = intersects[m].point;
-            }
 
-            return found;
-          }
-        }
-      }
-      return false;
-    };
-    //---------------------------------------------
-    
-    //Actuall initialization
-    if(WIDGET3D != undefined && !that.initialized){
+    if(WIDGET3D != undefined && !THREEJS_WIDGET3D.initialized){
       var parameters = parameters || {};
       
       //seting the three.js renderer
       if(parameters.renderer){
-        that.renderer = parameters.renderer;
+        WIDGET3D.renderer = parameters.renderer;
       }
       else{
         //if there were no renderer given as a parameter, we create one
@@ -1344,32 +1294,33 @@ var THREEJS_WIDGET3D = {
         var antialias = parameters.antialias !== undefined ? parameters.antialias : true;
         var domParent = parameters.domParent !== undefined ? parameters.domParent : document.body;
         
-        that.renderer = new THREE.WebGLRenderer({antialias: antialias});
-        that.renderer.setSize( width, height );
+        WIDGET3D.renderer = new THREE.WebGLRenderer({antialias: antialias});
+        WIDGET3D.renderer.setSize( width, height );
         
         var clearColor = parameters.clearColor !== undefined ? parameters.clearColor : 0x333333;
         var opacity = parameters.opacity !== undefined ? parameters.opacity : 1;
         
-        that.renderer.setClearColorHex( clearColor, opacity );
+        WIDGET3D.renderer.setClearColorHex( clearColor, opacity );
         
-        domParent.appendChild(that.renderer.domElement);
+        domParent.appendChild(WIDGET3D.renderer.domElement);
       }
       
       //setting three.js camera
-      that.camera = parameters.camera !== undefined ? parameters.camera  : 
+      WIDGET3D.camera = parameters.camera !== undefined ? parameters.camera  : 
         new THREE.PerspectiveCamera(75, 
-          that.renderer.domElement.width / that.renderer.domElement.height,
+          WIDGET3D.renderer.domElement.width / WIDGET3D.renderer.domElement.height,
           1, 10000);
       
-      that.scene = parameters.scene !== undefined ? parameters.scene : new THREE.Scene();
+      WIDGET3D.scene = parameters.scene !== undefined ? parameters.scene : new THREE.Scene();
       
       var mainWindow = false;
       
+      //initializing WIDGET3D
       if(!WIDGET3D.isInitialized()){
       
-        mainWindow = WIDGET3D.init({collisionCallback: {callback: that.checkIfHits},
+        mainWindow = WIDGET3D.init({collisionCallback: {callback: THREEJS_WIDGET3D.checkIfHits},
           container: THREE.Object3D,
-          domElement: that.renderer.domElement});
+          domElement: WIDGET3D.renderer.domElement});
         
         if(!mainWindow){
           console.log("Widget3D init failed!");
@@ -1380,17 +1331,65 @@ var THREEJS_WIDGET3D = {
         mainWindow = WIDGET3D.getMainWindow();
       }
       
-      that.scene.add(mainWindow.container_);
+      WIDGET3D.scene.add(mainWindow.container_);
       
-      that.projector = new THREE.Projector();
-      that.initialized = true;
+      WIDGET3D.projector = new THREE.Projector();
+      
+      //---------------------------------------------
+      //CREATING RENDERING METHOD
+      WIDGET3D.render = function(){
+        WIDGET3D.renderer.render(WIDGET3D.scene, WIDGET3D.camera);
+      };
+      //---------------------------------------------
+      
+      THREEJS_WIDGET3D.initialized = true;
       
       return mainWindow;
     }
     else{
       console.log("nothing to init");
-      return false;
+      return WIDGET3D.getMainWindow();
     }
+  },
+  
+  checkIfHits : function(event){
+  
+    var mouse = WIDGET3D.mouseCoordinates(event);
+    
+    var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
+    var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera);
+    
+    //intersects checks now all the meshes in scene. It might be good to construct
+    // a datastructure that contains meshes of mainWindow.childEvents_.event array content
+    var intersects = ray.intersectObjects(WIDGET3D.getMainWindow().meshes_);
+    
+    var closest = false;
+    
+    if(intersects.length > 0){
+      //finding closest
+      //closest object is the first visible object in intersects
+      for(var m = 0; m < intersects.length; ++m){
+        
+        if(intersects[m].object.visible){
+          closest = intersects[m].object;
+          var inv = new THREE.Matrix4();
+          inv.getInverse(intersects[m].object.matrixWorld);
+          
+          //position where the click happened in object coordinates
+          var objPos = inv.multiplyVector3(intersects[m].point.clone());
+          
+          var found = THREEJS_WIDGET3D.findObject(closest, event.type);
+          
+          if(found){          
+            event.objectCoordinates = objPos;
+            event.worldCoordinates = intersects[m].point;
+          }
+
+          return found;
+        }
+      }
+    }
+    return false;
   },
   
   findObject : function(mesh, name){
@@ -1413,35 +1412,10 @@ var THREEJS_WIDGET3D = {
       }//if visible
     }//for child events loop
     return false;
-  },
-  
-  render : function(){
-    this.renderer.render(THREEJS_WIDGET3D.scene, THREEJS_WIDGET3D.camera);
   }
 };
 
-/*
-Copyright (C) 2012 Anna-Liisa Mattila
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-*/
+WIDGET3D.createMainWindow_THREE = THREEJS_WIDGET3D.init;
 
 //---------------------------------------------------
 //
@@ -1676,29 +1650,6 @@ WIDGET3D.GridIcon.prototype.setToPlace = function(){
   this.setLocation(x, y, parentLoc.z/this.parent_.height_);
 };
 
-/*
-Copyright (C) 2012 Anna-Liisa Mattila
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-*/
-
 //---------------------------------------------------
 //
 // STYLED WIDGETS THAT CAN BE USED WITH THREEJS PLUGIN
@@ -1888,29 +1839,6 @@ WIDGET3D.TitledWindow.prototype.remove = function(){
   WIDGET3D.Window.prototype.remove.call( this );
 };
 
-
-/*
-Copyright (C) 2012 Anna-Liisa Mattila
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-*/
 
 //---------------------------------------------------
 //
@@ -2116,29 +2044,6 @@ WIDGET3D.Dialog.prototype.remove = function(){
   WIDGET3D.Window.prototype.remove.call( this );
 }
 
-/*
-Copyright (C) 2012 Anna-Liisa Mattila
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-*/
-
 //---------------------------------------------------
 //
 // 3D SELECT DIALOG
@@ -2332,29 +2237,6 @@ WIDGET3D.SelectDialog.prototype.remove = function(){
 
 }
 
-/*
-Copyright (C) 2012 Anna-Liisa Mattila
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-*/
-
 //---------------------------------------------------
 //
 // STYLED WIDGETS THAT CAN BE USED WITH THREEJS PLUGIN
@@ -2377,7 +2259,7 @@ WIDGET3D.CameraGroup = function(parameters){
   
   var parameters = parameters || {};
   
-  this.camera_ = parameters.camera !== undefined ? parameters.camera : THREEJS_WIDGET3D.camera;
+  this.camera_ = parameters.camera !== undefined ? parameters.camera : WIDGET3D.camera;
   this.camera_.position.set(0,0,0);
   this.container_.add(this.camera_);
 };

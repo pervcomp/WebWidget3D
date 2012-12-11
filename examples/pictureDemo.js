@@ -14,16 +14,17 @@ var init = function(){
   // THREEJS_WIDGET3D is a adapter that provides nesesary plugin for widget3D
   // widget3D doesn't use any 3D-engine in default
   // THREEJS_WIDGET3D defines the necessary callbacks for widget3D using three.js
-  // When usin three.js and widget3D, initializing widget3D can be done by THREEJS_WIDGET3D.
+  // When usin three.js and widget3D, initializing widget3D can be done by WIDGET3D.createMainWindow_THREE.
   
-  var mainWindow = THREEJS_WIDGET3D.init({domParent : document.getElementById("container"),
+  var mainWindow = WIDGET3D.createMainWindow_THREE({
+    domParent : document.getElementById("container"),
     aintialias : true,
     width : WIDTH,
     height : HEIGHT,
     clearColor : 0xf9f9f9
   });
   
-  THREEJS_WIDGET3D.camera.position.z = 2000;
+  WIDGET3D.camera.position.z = 2000;
   
   //--------------------------------------------
   // SUBWINDOW FOR SMALL IMAGES
@@ -61,7 +62,7 @@ var init = function(){
 
     subWindow.update();
     
-    THREEJS_WIDGET3D.render();
+    WIDGET3D.render();
   };
   mainLoop();
 }

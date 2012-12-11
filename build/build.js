@@ -45,7 +45,7 @@ if ( helpGiven == true ){
 
 var srcFiles = {
 	Widget3D: ["../src/core/widget3D.js","../src/core/guiObject.js", "../src/core/basic.js", "../src/core/windowBase.js",
-    "../src/core/mainWindow.js", "../src/core/window.js", "../src/core/text.js", "../src/core/events.js", "../src/threeAdapter/adapter.js",
+    "../src/core/mainWindow.js", "../src/core/window.js", "../src/core/text.js", "../src/core/common.js", "../src/core/events.js", "../src/threeAdapter/adapter.js",
     "../src/threeAdapter/gridLayout.js", "../src/threeAdapter/titledWindow.js",
     "../src/threeAdapter/dialog.js", "../src/threeAdapter/selectDialog.js", "../src/threeAdapter/cameraGroup.js"]
 }
@@ -58,13 +58,14 @@ var deps = {
   "../src/core/mainWindow.js" : ["../src/core/widget3D.js", "../src/core/guiObject.js", "../src/core/windowBase.js"],
   "../src/core/window.js" : ["../src/core/widget3D.js", "../src/core/guiObject.js", "../src/core/basic.js", "../src/core/windowBase.js"],
   "../src/core/text.js" : ["../src/core/widget3D.js", "../src/core/guiObject.js", "../src/core/basic.js"],
-	"../src/core/events.js": ["../src/core/widget3D.js"],
-	"../src/threeAdapter/adapter.js": ["../src/core/widget3D.js", "../src/core/events.js"],
-	"../extras/wplugTHREE_gridLayout.js": ["../src/core/widget3D.js", "../src/core/events.js", "../src/threeAdapter/adapter.js"],
-	"../extras/wplugTHREE_titledWindow.js": ["../src/core/widget3D.js", "../src/core/events.js", "../src/threeAdapter/adapter.js"],
-  "../extras/wplugTHREE_dialog.js" : ["../src/core/widget3D.js", "../src/core/events.js", "../src/threeAdapter/adapter.js"],
-  "../extras/wplugTHREE_selectDialog.js" : ["../src/core/widget3D.js", "../src/core/events.js", "../src/threeAdapter/adapter.js"],
-  "../src/threeAdapter/cameraGroup.js": ["../src/core/widget3D.js", "../src/core/events.js", "../src/threeAdapter/adapter.js"]
+  "../src/core/common.js" : ["../src/core/widget3D.js"],
+	"../src/core/events.js": ["../src/core/widget3D.js", "../src/core/common.js"],
+	"../src/threeAdapter/adapter.js": ["../src/core/widget3D.js", "../src/core/common.js", "../src/core/events.js"],
+	"../extras/wplugTHREE_gridLayout.js": ["../src/core/widget3D.js", "../src/core/common.js", "../src/core/events.js", "../src/threeAdapter/adapter.js"],
+	"../extras/wplugTHREE_titledWindow.js": ["../src/core/widget3D.js", "../src/core/common.js", "../src/core/events.js", "../src/threeAdapter/adapter.js"],
+  "../extras/wplugTHREE_dialog.js" : ["../src/core/widget3D.js", "../src/core/common.js", "../src/core/events.js", "../src/threeAdapter/adapter.js"],
+  "../extras/wplugTHREE_selectDialog.js" : ["../src/core/widget3D.js", "../src/core/common.js", "../src/core/events.js", "../src/threeAdapter/adapter.js"],
+  "../src/threeAdapter/cameraGroup.js": ["../src/core/widget3D.js", "../src/core/common.js", "../src/core/events.js", "../src/threeAdapter/adapter.js"]
 };
 
 var listFiles = function(list, all){

@@ -27,66 +27,15 @@ SOFTWARE.
 var THREEJS_WIDGET3D = {
 
   initialized : false,
-  Container : THREE.Object3D,
-  renderer : undefined,
-  scene : undefined,
-  projector : undefined,
-  camera : undefined,
   
   init : function(parameters){
-    //---------------------------------------------
-    //ADDING CALLBACKFUNCTIONS INSIDE THE CLOSURE
-    //---------------------------------------------
-    var that = this;
-    
-    THREEJS_WIDGET3D.checkIfHits = function(event){
-    
-      var mouse = WIDGET3D.mouseCoordinates(event);
-      
-      var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
-      var ray = that.projector.pickingRay(vector, that.camera);
-      
-      //intersects checks now all the meshes in scene. It might be good to construct
-      // a datastructure that contains meshes of mainWindow.childEvents_.event array content
-      var intersects = ray.intersectObjects(WIDGET3D.getMainWindow().meshes_);
-      
-      var closest = false;
-      
-      if(intersects.length > 0){
-        //finding closest
-        //closest object is the first visible object in intersects
-        for(var m = 0; m < intersects.length; ++m){
-          
-          if(intersects[m].object.visible){
-            closest = intersects[m].object;
-            var inv = new THREE.Matrix4();
-            inv.getInverse(intersects[m].object.matrixWorld);
-            
-            //position where the click happened in object coordinates
-            var objPos = inv.multiplyVector3(intersects[m].point.clone());
-            
-            var found = that.findObject(closest, event.type);
-            
-            if(found){          
-              event.objectCoordinates = objPos;
-              event.worldCoordinates = intersects[m].point;
-            }
 
-            return found;
-          }
-        }
-      }
-      return false;
-    };
-    //---------------------------------------------
-    
-    //Actuall initialization
-    if(WIDGET3D != undefined && !that.initialized){
+    if(WIDGET3D != undefined && !THREEJS_WIDGET3D.initialized){
       var parameters = parameters || {};
       
       //seting the three.js renderer
       if(parameters.renderer){
-        that.renderer = parameters.renderer;
+        WIDGET3D.renderer = parameters.renderer;
       }
       else{
         //if there were no renderer given as a parameter, we create one
@@ -96,32 +45,33 @@ var THREEJS_WIDGET3D = {
         var antialias = parameters.antialias !== undefined ? parameters.antialias : true;
         var domParent = parameters.domParent !== undefined ? parameters.domParent : document.body;
         
-        that.renderer = new THREE.WebGLRenderer({antialias: antialias});
-        that.renderer.setSize( width, height );
+        WIDGET3D.renderer = new THREE.WebGLRenderer({antialias: antialias});
+        WIDGET3D.renderer.setSize( width, height );
         
         var clearColor = parameters.clearColor !== undefined ? parameters.clearColor : 0x333333;
         var opacity = parameters.opacity !== undefined ? parameters.opacity : 1;
         
-        that.renderer.setClearColorHex( clearColor, opacity );
+        WIDGET3D.renderer.setClearColorHex( clearColor, opacity );
         
-        domParent.appendChild(that.renderer.domElement);
+        domParent.appendChild(WIDGET3D.renderer.domElement);
       }
       
       //setting three.js camera
-      that.camera = parameters.camera !== undefined ? parameters.camera  : 
+      WIDGET3D.camera = parameters.camera !== undefined ? parameters.camera  : 
         new THREE.PerspectiveCamera(75, 
-          that.renderer.domElement.width / that.renderer.domElement.height,
+          WIDGET3D.renderer.domElement.width / WIDGET3D.renderer.domElement.height,
           1, 10000);
       
-      that.scene = parameters.scene !== undefined ? parameters.scene : new THREE.Scene();
+      WIDGET3D.scene = parameters.scene !== undefined ? parameters.scene : new THREE.Scene();
       
       var mainWindow = false;
       
+      //initializing WIDGET3D
       if(!WIDGET3D.isInitialized()){
       
-        mainWindow = WIDGET3D.init({collisionCallback: {callback: that.checkIfHits},
+        mainWindow = WIDGET3D.init({collisionCallback: {callback: THREEJS_WIDGET3D.checkIfHits},
           container: THREE.Object3D,
-          domElement: that.renderer.domElement});
+          domElement: WIDGET3D.renderer.domElement});
         
         if(!mainWindow){
           console.log("Widget3D init failed!");
@@ -132,17 +82,65 @@ var THREEJS_WIDGET3D = {
         mainWindow = WIDGET3D.getMainWindow();
       }
       
-      that.scene.add(mainWindow.container_);
+      WIDGET3D.scene.add(mainWindow.container_);
       
-      that.projector = new THREE.Projector();
-      that.initialized = true;
+      WIDGET3D.projector = new THREE.Projector();
+      
+      //---------------------------------------------
+      //CREATING RENDERING METHOD
+      WIDGET3D.render = function(){
+        WIDGET3D.renderer.render(WIDGET3D.scene, WIDGET3D.camera);
+      };
+      //---------------------------------------------
+      
+      THREEJS_WIDGET3D.initialized = true;
       
       return mainWindow;
     }
     else{
       console.log("nothing to init");
-      return false;
+      return WIDGET3D.getMainWindow();
     }
+  },
+  
+  checkIfHits : function(event){
+  
+    var mouse = WIDGET3D.mouseCoordinates(event);
+    
+    var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
+    var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera);
+    
+    //intersects checks now all the meshes in scene. It might be good to construct
+    // a datastructure that contains meshes of mainWindow.childEvents_.event array content
+    var intersects = ray.intersectObjects(WIDGET3D.getMainWindow().meshes_);
+    
+    var closest = false;
+    
+    if(intersects.length > 0){
+      //finding closest
+      //closest object is the first visible object in intersects
+      for(var m = 0; m < intersects.length; ++m){
+        
+        if(intersects[m].object.visible){
+          closest = intersects[m].object;
+          var inv = new THREE.Matrix4();
+          inv.getInverse(intersects[m].object.matrixWorld);
+          
+          //position where the click happened in object coordinates
+          var objPos = inv.multiplyVector3(intersects[m].point.clone());
+          
+          var found = THREEJS_WIDGET3D.findObject(closest, event.type);
+          
+          if(found){          
+            event.objectCoordinates = objPos;
+            event.worldCoordinates = intersects[m].point;
+          }
+
+          return found;
+        }
+      }
+    }
+    return false;
   },
   
   findObject : function(mesh, name){
@@ -165,10 +163,8 @@ var THREEJS_WIDGET3D = {
       }//if visible
     }//for child events loop
     return false;
-  },
-  
-  render : function(){
-    this.renderer.render(THREEJS_WIDGET3D.scene, THREEJS_WIDGET3D.camera);
   }
 };
+
+WIDGET3D.createMainWindow_THREE = THREEJS_WIDGET3D.init;
 

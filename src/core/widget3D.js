@@ -41,96 +41,6 @@ WIDGET3D = {
     return this.initialized;
   },
   
-  //------------------------------------------------------------
-  // USEFUL HELPPER FUNCTIONS FOR MOUSE COORDINATE CALCULATIONS
-  //------------------------------------------------------------
-
-  //returns the real width of the canvas element
-  getRealWidth : function(){
-    return parseInt(window.getComputedStyle(this.getEvents().domElement_,null).getPropertyValue("width"));
-  },
-
-  getRealHeight : function(){
-    return parseInt(window.getComputedStyle(this.getEvents().domElement_,null).getPropertyValue("height"));
-  },
-
-  getCanvasWidth : function(){
-    return this.getEvents().domElement_.width;
-  },
-
-  getCanvasHeight : function(){
-    return this.getEvents().domElement_.height;
-  },
-
-  //calculates mouseScreenCoordinates from domEvent
-  mouseScreenCoordinates : function(domEvent){
-    
-    var coords = { x: 0, y: 0};
-    if (!domEvent) {
-      domEvent = window.event;
-      coords.x = domEvent.x;
-      coords.y = domEvent.y;
-    }
-    else {
-      var element = domEvent.target ;
-      var totalOffsetLeft = 0;
-      var totalOffsetTop = 0 ;
-
-      while (element.offsetParent)
-      {
-          totalOffsetLeft += element.offsetLeft;
-          totalOffsetTop += element.offsetTop;
-          element = element.offsetParent;
-      }
-      coords.x = domEvent.pageX - totalOffsetLeft;
-      coords.y = domEvent.pageY - totalOffsetTop;
-    }
-    
-    return coords;
-  },
-
-  mouseCoordinates : function(domEvent){
-
-    var coords = this.mouseScreenCoordinates(domEvent);
-    
-    //If canvas element size has been manipulated with CSS the domElement.width and domElement.height aren't the
-    // values of the height and width used showing the canvas. In here we need the real screen coordinatelimits
-    //to calculate mouse position correctly.
-    
-    var CSSwidth = this.getRealWidth();
-    var CSSheight = this.getRealHeight();
-    
-    var limits = {
-      minX: 0,
-      maxX: CSSwidth,
-      minY: 0,
-      maxY: CSSheight
-    };
-    
-    var mouse = this.scaleCoordinates(coords, limits);
-    return mouse;
-  },
-
-  //scales coordinates to range of -1..1
-  scaleCoordinates : function(point, limits){
-    var x = +((point.x - limits.minX) / limits.maxX) * 2 - 1;
-    var y = -((point.y - limits.minY) / limits.maxY) * 2 + 1;
-    
-    return {x: x, y: y};
-  },
-
-  //calculates childs coordinate limits in parent coordinate system
-  calculateLimits : function(position, width, height){
-
-    var maxX = position.x + (width/2);
-    var minX = position.x - (width/2);
-    
-    var maxY = position.y + (height/2);
-    var minY = position.y - (height/2);
-    
-    return {minX: minX, maxX: maxX, minY: minY, maxY: maxY};
-  },
-  
   //Initializes the widget system core
   //
   //PARAMETERS:
@@ -151,7 +61,6 @@ WIDGET3D = {
   //  root window which is Window typed gui object.
   //
   init : function(parameters){
-    
     //Some private variables inside a closure
     
     var focused_ = [];

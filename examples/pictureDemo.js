@@ -49,9 +49,9 @@ var init = function(){
   mainWindow.addChild(pictureDisplay);
   
   pictureDisplay.addEventListener("click", pictureclick, pictureDisplay);
-  
-  pictureDisplay.addEventListener("myOwnEventType", clickMessage);
   pictureDisplay.hide();
+  
+  mainWindow.addEventListener("myOwnEventType", clickMessage);
   
   //creates small pictures
   displayPictures(subWindow, pictureDisplay);
@@ -114,12 +114,14 @@ var mouseclickHandler = function(event, parameters){
   
   parameters.pictureDisplay.setMesh(display);
   parameters.pictureDisplay.show();
+  
+  WIDGET3D.getEvents().triggerEvent({type: "myOwnEventType"});
 }
 
 //mouse click handler for picture display
 var pictureclick = function(event, pictureDisplay){
   pictureDisplay.hide();
-  WIDGET3D.getEvents().passMessage({type: "myOwnEventType"});
+  WIDGET3D.getEvents().triggerEvent({type: "myOwnEventType"});
 }
 
 //constructing picture grid and gui buttons

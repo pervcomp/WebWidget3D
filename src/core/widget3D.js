@@ -151,39 +151,40 @@ WIDGET3D = {
   //  root window which is Window typed gui object.
   //
   init : function(parameters){
-    var that = this;
-    var parameters = parameters || {};
     
-    //INITIALIZING CODE
-    if(parameters.container != undefined){
-      WIDGET3D.Container = parameters.container;
-    }
-    else{
-      console.log("Container must be specified!");
-      console.log("Container has to be constructor method of container of used 3D-engine (eg. in three.js THREE.Object3D");
-    }
-    
-    var mainWindow_ = new WIDGET3D.MainWindow();
-    
-    if(parameters.collisionCallback != undefined && 
-      parameters.collisionCallback.callback != undefined){
-      
-      var events_ = new WIDGET3D.DomEvents(parameters.collisionCallback, parameters.domElement);
-    }
-    else{
-      console.log("CollisionCallback has to be JSON object containing attributes callback (and args, optional)");
-      console.log("Initializing WIDGET3D failed!");
-      return false;
-    }
+    //Some private variables inside a closure
     
     var focused_ = [];
+    var allObjects_ = {};
+    var mainWindow_;
+    var events_;
     
+    var makeId = function(){
+      var i = 0;
+      return function(){
+        return ++i;
+      }
+    }
+    WIDGET3D.id = makeId();
+      
     WIDGET3D.getEvents = function(){
       return events_;
     };
     
     WIDGET3D.getMainWindow = function(){
       return mainWindow_;
+    };
+    
+    WIDGET3D.addObject = function(widget){
+      allObjects_[(widget.id_)] = widget;
+    };
+    
+    WIDGET3D.removeObject = function(id){
+      delete allObjects_[id];
+    };
+    
+    WIDGET3D.getObjectById = function(id){
+      return allObjects_[id];
     };
     
     WIDGET3D.getFocused = function(){
@@ -213,7 +214,33 @@ WIDGET3D = {
       focused_ = [];
     };
     
+    var parameters = parameters || {};
+    
+    //INITIALIZING CODE
+    if(parameters.container != undefined){
+      WIDGET3D.Container = parameters.container;
+    }
+    else{
+      console.log("Container must be specified!");
+      console.log("Container has to be constructor method of container of used 3D-engine (eg. in three.js THREE.Object3D");
+    }
+    
+    mainWindow_ = new WIDGET3D.MainWindow();
+    
+    if(parameters.collisionCallback != undefined && 
+      parameters.collisionCallback.callback != undefined){
+      
+      events_ = new WIDGET3D.DomEvents(parameters.collisionCallback, parameters.domElement);
+    }
+    else{
+      console.log("CollisionCallback has to be JSON object containing attributes callback (and args, optional)");
+      console.log("Initializing WIDGET3D failed!");
+      return false;
+    }
+    
+    
     WIDGET3D.initialized = true;
+
     return mainWindow_;
   }
 };

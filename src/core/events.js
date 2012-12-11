@@ -97,6 +97,40 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
       }
     }
   };
+  
+  // This method can be used to trigger an event
+  // if id is specified the event is passed to specific object
+  // if the id isn't specified the event is passed to all objects
+  // that has the listener for the event.
+  //
+  _that_.triggerEvent = function(event, id){
+    var name = event.type;
+    
+    if(!id){
+      
+      var mainWindow = WIDGET3D.getMainWindow();
+      
+      for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
+        
+        var object = mainWindow.childEvents_[name.toString()][k];
+        
+        for(var m = 0; m < object.events_[name.toString()].length; ++m){
+          object.events_[name.toString()][m].callback(event,
+            object.events_[name.toString()][m].arguments);
+        }
+      }
+    }
+    else{
+      
+      var to = WIDGET3D.getObjectById(id);
+      for(var i = 0; i < to.events_[name.toString()].length; ++i){
+        to.events_[name.toString()][i].callback(event,
+          to.events_[name.toString()][i].arguments);
+      }
+    }
+  };
+
+  
 };
 
 //Adds event listener to dom element
@@ -132,27 +166,4 @@ WIDGET3D.DomEvents.prototype.disableEvent = function(name){
   }
   return false;
 };
-
-// Message passing function
-// Passes via event tables to objects that are registered
-// to recieve certain typed messages
-//
-// parameters: message is an object like dom event object.
-//             it has to have a type field so that it can be passed
-//             to the right recievers.
-WIDGET3D.DomEvents.prototype.passMessage = function(message){
-  var name = message.type;
-  var mainWindow = WIDGET3D.getMainWindow();
-  
-  for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
-    
-    var object = mainWindow.childEvents_[name.toString()][k];
-    
-    for(var m = 0; m < object.events_[name.toString()].length; ++m){
-      object.events_[name.toString()][m].callback(message,
-      object.events_[name.toString()][m].arguments);
-    }
-  }
-};
-
 

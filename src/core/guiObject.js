@@ -9,8 +9,10 @@
 
 //GUI OBJECT CONSTRUCTORS
 WIDGET3D.GuiObject = function(){
+
   this.isVisible_ = true;
   this.inFocus_ = false;
+  this.id_ = WIDGET3D.id();
   
   this.events_ = {
   
@@ -79,6 +81,8 @@ WIDGET3D.GuiObject = function(){
       return listeners;
     }
   };
+  
+  WIDGET3D.addObject(this);//TESTAA!!!
   
 };
 

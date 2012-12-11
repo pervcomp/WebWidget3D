@@ -151,39 +151,40 @@ WIDGET3D = {
   //  root window which is Window typed gui object.
   //
   init : function(parameters){
-    var that = this;
-    var parameters = parameters || {};
     
-    //INITIALIZING CODE
-    if(parameters.container != undefined){
-      WIDGET3D.Container = parameters.container;
-    }
-    else{
-      console.log("Container must be specified!");
-      console.log("Container has to be constructor method of container of used 3D-engine (eg. in three.js THREE.Object3D");
-    }
-    
-    var mainWindow_ = new WIDGET3D.MainWindow();
-    
-    if(parameters.collisionCallback != undefined && 
-      parameters.collisionCallback.callback != undefined){
-      
-      var events_ = new WIDGET3D.DomEvents(parameters.collisionCallback, parameters.domElement);
-    }
-    else{
-      console.log("CollisionCallback has to be JSON object containing attributes callback (and args, optional)");
-      console.log("Initializing WIDGET3D failed!");
-      return false;
-    }
+    //Some private variables inside a closure
     
     var focused_ = [];
+    var allObjects_ = {};
+    var mainWindow_;
+    var events_;
     
+    var makeId = function(){
+      var i = 0;
+      return function(){
+        return ++i;
+      }
+    }
+    WIDGET3D.id = makeId();
+      
     WIDGET3D.getEvents = function(){
       return events_;
     };
     
     WIDGET3D.getMainWindow = function(){
       return mainWindow_;
+    };
+    
+    WIDGET3D.addObject = function(widget){
+      allObjects_[(widget.id_)] = widget;
+    };
+    
+    WIDGET3D.removeObject = function(id){
+      delete allObjects_[id];
+    };
+    
+    WIDGET3D.getObjectById = function(id){
+      return allObjects_[id];
     };
     
     WIDGET3D.getFocused = function(){
@@ -213,7 +214,33 @@ WIDGET3D = {
       focused_ = [];
     };
     
+    var parameters = parameters || {};
+    
+    //INITIALIZING CODE
+    if(parameters.container != undefined){
+      WIDGET3D.Container = parameters.container;
+    }
+    else{
+      console.log("Container must be specified!");
+      console.log("Container has to be constructor method of container of used 3D-engine (eg. in three.js THREE.Object3D");
+    }
+    
+    mainWindow_ = new WIDGET3D.MainWindow();
+    
+    if(parameters.collisionCallback != undefined && 
+      parameters.collisionCallback.callback != undefined){
+      
+      events_ = new WIDGET3D.DomEvents(parameters.collisionCallback, parameters.domElement);
+    }
+    else{
+      console.log("CollisionCallback has to be JSON object containing attributes callback (and args, optional)");
+      console.log("Initializing WIDGET3D failed!");
+      return false;
+    }
+    
+    
     WIDGET3D.initialized = true;
+
     return mainWindow_;
   }
 };
@@ -235,8 +262,10 @@ WIDGET3D = {
 
 //GUI OBJECT CONSTRUCTORS
 WIDGET3D.GuiObject = function(){
+
   this.isVisible_ = true;
   this.inFocus_ = false;
+  this.id_ = WIDGET3D.id();
   
   this.events_ = {
   
@@ -305,6 +334,8 @@ WIDGET3D.GuiObject = function(){
       return listeners;
     }
   };
+  
+  WIDGET3D.addObject(this);//TESTAA!!!
   
 };
 
@@ -556,9 +587,11 @@ WIDGET3D.Basic.prototype.remove = function(){
   //removing event listeners
   this.removeAllListeners();
   //removing mesh
-  var mesh = WIDGET3D.getMainWindow().removeMesh(this.mesh_);
+  WIDGET3D.getMainWindow().removeMesh(this.mesh_);
   //removing object
-  var obj = this.parent_.removeFromObjects(this);
+  this.parent_.removeFromObjects(this);
+  
+  WIDGET3D.removeObject(this.id_);
 };
 
 //getters and setters for location and rotation
@@ -633,11 +666,10 @@ WIDGET3D.WindowBase = function(){
 };
 
 // adds new child to window
-WIDGET3D.WindowBase.prototype.addChild = function(object){
+WIDGET3D.WindowBase.prototype.addChild = function(widget){
   
-  object.setParent(this);
-  
-  return object;
+  widget.setParent(this);
+  return widget;
 };
 
 // hides unfocused objects in window
@@ -650,10 +682,10 @@ WIDGET3D.WindowBase.prototype.hideNotFocused = function(){
 };
 
 //removes object in place 'index' from object list
-WIDGET3D.WindowBase.prototype.removeFromObjects = function(object){
+WIDGET3D.WindowBase.prototype.removeFromObjects = function(widget){
   
   for(var k = 0; k < this.children_.length; ++k){
-    if(this.children_[k] === object){
+    if(this.children_[k] === widget){
       var removedObj = this.children_.splice(k, 1);
       return removedObj[0];
     }
@@ -671,7 +703,6 @@ WIDGET3D.MainWindow = function(){
   
   WIDGET3D.GuiObject.call( this );
   WIDGET3D.WindowBase.call( this );
-  
   
   this.meshes_ = [];
   
@@ -697,7 +728,6 @@ WIDGET3D.MainWindow = function(){
       return false;
     }
   };
-  
 };
 
 
@@ -855,12 +885,14 @@ WIDGET3D.Window.prototype.remove = function(){
   
   //If window has a mesh, it has to be removed allso
   if(this.mesh_){
-    var mesh = WIDGET3D.getMainWindow().removeMesh(this.mesh_);
+    WIDGET3D.getMainWindow().removeMesh(this.mesh_);
   }
   //container has to be removed from parent's container
   this.parent_.container_.remove(this.container_);
   //removing this from parents objects
-  var obj = this.parent_.removeFromObjects(this);
+  this.parent_.removeFromObjects(this);
+  
+  WIDGET3D.removeObject(this.id_);
 };
 
 //setters and getters for location and rotation
@@ -1017,25 +1049,20 @@ WIDGET3D.Text.prototype.erase = function(amount){
 //TODO: FIX FOCUSING
 //set focus on textobject
 WIDGET3D.Text.prototype.focus = function(){
-  if(!this.inFocus_){
+
+  WIDGET3D.Basic.prototype.focus.call(this);
   
-    WIDGET3D.unfocusFocused();
-    this.inFocus_ = true;
-    WIDGET3D.addFocus(this);
-    
-    if(this.mutable_){
-      this.setText(this.string_);
-    }
+  if(this.mutable_ && this.inFocus_){
+    this.setText(this.string_);
   }
 };
 
 //unfocus textobject
 WIDGET3D.Text.prototype.unfocus = function(){
-  if(this.inFocus_){
-    this.inFocus_ = false;
-    if(this.mutable_){
-      this.setText(this.string_);
-    }
+
+  WIDGET3D.Basic.prototype.unfocus.call(this);
+  if(this.mutable_ && !this.inFocus_){
+    this.setText(this.string_);
   }
 };
 
@@ -1149,6 +1176,40 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
       }
     }
   };
+  
+  // This method can be used to trigger an event
+  // if id is specified the event is passed to specific object
+  // if the id isn't specified the event is passed to all objects
+  // that has the listener for the event.
+  //
+  _that_.triggerEvent = function(event, id){
+    var name = event.type;
+    
+    if(!id){
+      
+      var mainWindow = WIDGET3D.getMainWindow();
+      
+      for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
+        
+        var object = mainWindow.childEvents_[name.toString()][k];
+        
+        for(var m = 0; m < object.events_[name.toString()].length; ++m){
+          object.events_[name.toString()][m].callback(event,
+            object.events_[name.toString()][m].arguments);
+        }
+      }
+    }
+    else{
+      
+      var to = WIDGET3D.getObjectById(id);
+      for(var i = 0; i < to.events_[name.toString()].length; ++i){
+        to.events_[name.toString()][i].callback(event,
+          to.events_[name.toString()][i].arguments);
+      }
+    }
+  };
+
+  
 };
 
 //Adds event listener to dom element
@@ -1184,29 +1245,6 @@ WIDGET3D.DomEvents.prototype.disableEvent = function(name){
   }
   return false;
 };
-
-// Message passing function
-// Passes via event tables to objects that are registered
-// to recieve certain typed messages
-//
-// parameters: message is an object like dom event object.
-//             it has to have a type field so that it can be passed
-//             to the right recievers.
-WIDGET3D.DomEvents.prototype.passMessage = function(message){
-  var name = message.type;
-  var mainWindow = WIDGET3D.getMainWindow();
-  
-  for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
-    
-    var object = mainWindow.childEvents_[name.toString()][k];
-    
-    for(var m = 0; m < object.events_[name.toString()].length; ++m){
-      object.events_[name.toString()][m].callback(message,
-      object.events_[name.toString()][m].arguments);
-    }
-  }
-};
-
 
 /*
 Copyright (C) 2012 Anna-Liisa Mattila
@@ -1429,27 +1467,25 @@ THREEJS_WIDGET3D.GridWindow = function(parameters){
   
   this.width_ = parameters.width !== undefined ? parameters.width : 1000;
   this.height_ = parameters.height !== undefined ? parameters.height : 1000;
-  this.density_ = parameters.density !== undefined ? parameters.density : 10;
+  this.density_ = parameters.density !== undefined ? parameters.density : 6;
   
-  var color = parameters.color !== undefined ? parameters.color : 0x6B6B6B;
-  var lineWidth = parameters.lineWidth !== undefined ? parameters.lineWidth : 2;
+  this.maxChildren_ = this.density_ * this.density_;
   
-  this.clickLocation_;
-  this.rotationOnMouseDownY_;
-  this.rotationOnMousedownX_;
-  this.modelRotationY_ = 0;
-  this.modelRotationX_ = 0;
-  this.rotate_ = false;
+  this.color_ = parameters.color !== undefined ? parameters.color : 0x6B6B6B;
+  this.lineWidth_ = parameters.lineWidth !== undefined ? parameters.lineWidth : 2;
+  this.opacity_ = parameters.opacity !== undefined ? parameters.opacity : 0.5;
   
+  this.material_ = new THREE.MeshBasicMaterial({
+    color: this.color_,
+    opacity: this.opacity_,
+    wireframe: true,
+    side : THREE.DoubleSide,
+    wireframeLinewidth : this.lineWidth_
+  });
   
-  var mesh =  new THREE.Mesh( 
-    new THREE.PlaneGeometry( this.width_, this.height_, this.density_, this.density_ ),
-    new THREE.MeshBasicMaterial({
-      color: color,
-      opacity: 0.5,
-      wireframe: true,
-      side : THREE.DoubleSide,
-      wireframeLinewidth : lineWidth}) );
+  var geometry = new THREE.PlaneGeometry( this.width_, this.height_, this.density_, this.density_ );
+  
+  var mesh =  new THREE.Mesh(geometry, this.material_);
   
   this.setMesh(mesh);
   
@@ -1457,6 +1493,13 @@ THREEJS_WIDGET3D.GridWindow = function(parameters){
   this.defaultControls_ = parameters.defaultControls !== undefined ? parameters.defaultControls : false;
   
   if(this.defaultControls_){
+  
+    this.clickLocation_;
+    this.rotationOnMouseDownY_;
+    this.rotationOnMousedownX_;
+    this.modelRotationY_ = 0;
+    this.modelRotationX_ = 0;
+    this.rotate_ = false;
   
     this.mouseupHandler = function(event){
       if(that.rotate_){
@@ -1492,8 +1535,6 @@ THREEJS_WIDGET3D.GridWindow = function(parameters){
         that.modelRotationX_ = that.rotationOnMouseDownX_ + ( mouse.y - that.clickLocation_.y );
       }
     };
-    
-    //this.addEventListener(WIDGET3D.EventType.onmousedown, this.mousedownHandler);
     this.addEventListener("mousedown", this.mousedownHandler);
   }
   
@@ -1513,6 +1554,36 @@ THREEJS_WIDGET3D.GridWindow.prototype.update = function(){
   }
 };
 
+THREEJS_WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
+  this.density_ = newDensity;
+  this.maxChildren_ = newDensity * newDensity;
+  
+  var grid = new THREE.PlaneGeometry( this.width_, this.height_, this.density_, this.density_ );
+  
+  var gridMesh =  new THREE.Mesh(grid, this.material_);
+  
+  this.setMesh(gridMesh);
+  
+  var tmpChilds = this.children_;
+  this.children_ = [];
+  
+  for(var i = 0; i < tmpChilds.length; ++i){
+  
+    var icon = tmpChilds[i];
+    this.children_.push(icon);
+    
+    icon.width_ = this.width_/(this.density_ + 3.3);
+    icon.height_ = this.height_/(this.density_ + 3.3);
+    
+    var geometry = new THREE.CubeGeometry(icon.width_, icon.height_, icon.depth_);
+    
+    var mesh = new THREE.Mesh( geometry, icon.material_);
+    icon.setMesh(mesh);
+    icon.setToPlace();
+  }
+  
+}
+
 
 //---------------------------------------------------
 // ICONS FOR GRIDWINDOW
@@ -1530,28 +1601,33 @@ THREEJS_WIDGET3D.GridIcon = function(parameters){
     return false;
   }
   
-  var parameters = parameters || {};
+  if(parent.children_.length >= parent.maxChildren_){
+    console.log("Grid is full! Creating bigger one");
+    parent.addSlots(Math.ceil(parent.density_ * 1.5));
+  }
   
-  var color = parameters.color !== undefined ? parameters.color : 0xFFFFFF;
-  var picture = parameters.picture !== undefined ? parameters.picture : false;
+  this.color_ = parameters.color !== undefined ? parameters.color : 0xFFFFFF;
+  this.picture_ = parameters.picture !== undefined ? parameters.picture : false;
+  
+  //object can store metadata in a format that user like
+  this.metadata_ = parameters.metadata !== undefined ? parameters.metadata : false;
   
   this.width_ = parent.width_/(parent.density_ + 3.3);
   this.height_ = parent.height_/(parent.density_ + 3.3);
-  this.depth_ = 30;
+  
+  this.depth_ = parameters.depth !== undefined ? parameters.depth : (this.height_/4);
   
   var geometry = new THREE.CubeGeometry(this.width_, this.height_, this.depth_);
   
-  var texture;
+  this.texture_ = false;
   
-  if(picture){
-    texture = THREE.ImageUtils.loadTexture(picture);
+  if(this.picture_){
+    this.texture_ = THREE.ImageUtils.loadTexture(this.picture_);
   }
-  else{
-    texture = false;
-  }
-  var material = new THREE.MeshBasicMaterial({map : texture, color: color});
+
+  this.material_ = new THREE.MeshBasicMaterial({map : this.texture_, color: this.color_});
   
-  var mesh = new THREE.Mesh( geometry, material);
+  var mesh = new THREE.Mesh( geometry, this.material_);
   
   this.setMesh(mesh);
   parent.addChild(this);
@@ -1801,10 +1877,6 @@ THREEJS_WIDGET3D.TitledWindow.prototype.setTitle = function(title){
 
 
 THREEJS_WIDGET3D.TitledWindow.prototype.remove = function(){
-  //children needs to be removed  
-  while(this.children_.length > 0){
-    this.children_[0].remove();
-  }
   
   //hiding the window from scene
   this.hide();
@@ -1813,27 +1885,7 @@ THREEJS_WIDGET3D.TitledWindow.prototype.remove = function(){
   var canvas = this.textureCanvas_;
   document.body.removeChild(canvas);
   
-  //removing eventlisteners
-  this.removeAllListeners();
-  
-  //If wondow has a mesh, it has to be removed allso
-  if(this.mesh_){
-    var mesh = WIDGET3D.getMainWindow().removeMesh(this.mesh_);
-    if(mesh != this.mesh_){
-      console.log("removed mesh was wrong! " + mesh);
-    }
-  }
-  
-  //container has to be removed from parent's container
-  this.parent_.container_.remove(this.container_);
-  
-  //removing this from parents objects
-  var obj = this.parent_.removeFromObjects(this);
-  if(obj != this){
-    console.log(obj);
-    console.log(this);
-    console.log("removed object was wrong! " + obj);
-  }
+  WIDGET3D.Window.prototype.remove.call( this );
 };
 
 
@@ -2052,11 +2104,6 @@ THREEJS_WIDGET3D.Dialog.prototype.textBoxOnkeypress = function(event, window){
 
 THREEJS_WIDGET3D.Dialog.prototype.remove = function(){
   
-  //children needs to be removed
-  while(this.children_.length > 0){
-    this.children_[0].remove();
-  }
-  
   //hiding the window from scene
   this.hide();
   
@@ -2066,20 +2113,7 @@ THREEJS_WIDGET3D.Dialog.prototype.remove = function(){
   document.body.removeChild(canvas1);
   document.body.removeChild(canvas2);
   
-  //removing event listeners
-  this.removeAllListeners();
-  
-  //If window has a mesh, it has to be removed allso
-  if(this.mesh_){
-    var mesh = WIDGET3D.getMainWindow().removeMesh(this.mesh_);
-  }
-  
-  //container has to be removed from parent's container
-  this.parent_.container_.remove(this.container_);
-  
-  //removing this from parents objects
-  var obj = this.parent_.removeFromObjects(this);
-  
+  WIDGET3D.Window.prototype.remove.call( this );
 }
 
 /*
@@ -2280,9 +2314,8 @@ THREEJS_WIDGET3D.SelectDialog.prototype.changeChoiceText = function(text, index)
 
 THREEJS_WIDGET3D.SelectDialog.prototype.remove = function(){
 
-  while(this.children_.length > 0){
-    this.children_[0].remove();
-  }
+  //hiding the window from scene
+  this.hide();
   
   //removing child canvases from DOM
   for(var i = 0; i < this.choiceCanvases_.length; ++i){
@@ -2291,34 +2324,11 @@ THREEJS_WIDGET3D.SelectDialog.prototype.remove = function(){
   }
   this.choiceCanvases_ = null;
   
-  //hiding the window from scene
-  this.hide();
-  
   //deleting the background canvas
   var canvas = this.textCanvas_;
   document.body.removeChild(canvas);
   
-  //removing eventlisteners  
-  this.removeAllListeners();
-  
-  //If wondow has a mesh, it has to be removed allso
-  if(this.mesh_){
-    var mesh = WIDGET3D.getMainWindow().removeMesh(this.mesh_);
-    if(mesh != this.mesh_){
-      console.log("removed mesh was wrong! " + mesh);
-    }
-  }
-  
-  //container has to be removed from parent's container
-  this.parent_.container_.remove(this.container_);
-  
-  //removing this from parents objects
-  var obj = this.parent_.removeFromObjects(this);
-  if(obj != this){
-    console.log(obj);
-    console.log(this);
-    console.log("removed object was wrong! " + obj);
-  }
+  WIDGET3D.Window.prototype.remove.call( this );
 
 }
 

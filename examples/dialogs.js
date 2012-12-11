@@ -30,7 +30,7 @@ var init = function(){
   //--------------------------------------------
   
   //styled window
-  var dialog = new THREEJS_WIDGET3D.Dialog({height : 1500, width : 1500});
+  var dialog = new WIDGET3D.Dialog({height : 1500, width : 1500});
   
   dialog.button_.addEventListener("click",
     function(event, dialog){dialog.remove()}, dialog);
@@ -48,7 +48,7 @@ var init = function(){
     {string : "choice6", onclick : {}}
   ];
   
-  var select = new THREEJS_WIDGET3D.SelectDialog({text : "Menu",
+  var select = new WIDGET3D.SelectDialog({text : "Menu",
     choices: choices,
     hasCancel : true,
     width : 1500,

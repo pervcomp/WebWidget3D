@@ -42,7 +42,7 @@ SOFTWARE.
 //
 //              All parameters are optional
 //
-THREEJS_WIDGET3D.TitledWindow = function(parameters){
+WIDGET3D.TitledWindow = function(parameters){
   
   WIDGET3D.Window.call( this );
   
@@ -154,10 +154,10 @@ THREEJS_WIDGET3D.TitledWindow = function(parameters){
   }
 };
 
-THREEJS_WIDGET3D.TitledWindow.prototype = WIDGET3D.Window.prototype.inheritance();
+WIDGET3D.TitledWindow.prototype = WIDGET3D.Window.prototype.inheritance();
 
 
-THREEJS_WIDGET3D.TitledWindow.prototype.update = function(){
+WIDGET3D.TitledWindow.prototype.update = function(){
   
   if(this.defaultControls_ && this.firstEvent_){
     
@@ -170,7 +170,7 @@ THREEJS_WIDGET3D.TitledWindow.prototype.update = function(){
 };
 
 //sets titlebar text
-THREEJS_WIDGET3D.TitledWindow.prototype.setTitle = function(title){
+WIDGET3D.TitledWindow.prototype.setTitle = function(title){
 
   this.titleContext_.fillStyle = "#B3B3B3";
   this.titleContext_.fillRect(0, 0, this.textureCanvas_.width, this.textureCanvas_.height);
@@ -198,7 +198,7 @@ THREEJS_WIDGET3D.TitledWindow.prototype.setTitle = function(title){
 };
 
 
-THREEJS_WIDGET3D.TitledWindow.prototype.remove = function(){
+WIDGET3D.TitledWindow.prototype.remove = function(){
   
   //hiding the window from scene
   this.hide();

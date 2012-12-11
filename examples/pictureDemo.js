@@ -30,7 +30,7 @@ var init = function(){
   //--------------------------------------------
   
   //styled window
-  var subWindow = new THREEJS_WIDGET3D.GridWindow({width : 2000,
+  var subWindow = new WIDGET3D.GridWindow({width : 2000,
     height : 2000,
     color : 0x213D30,
     defaultControls: true});
@@ -138,7 +138,7 @@ var displayPictures = function(subWindow, pictureDisplay){
 
   for (var i = 0; i < pictures.length; ++i){
 
-    var button = new THREEJS_WIDGET3D.GridIcon({parent : subWindow, picture : pictures[i]});
+    var button = new WIDGET3D.GridIcon({parent : subWindow, picture : pictures[i]});
     button.addEventListener("click", mouseclickHandler, {button: button, pictureDisplay : pictureDisplay});
     
   }

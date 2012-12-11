@@ -34,7 +34,7 @@ SOFTWARE.
 //              buttonText = string
 //              maxTextLength = integer
 //
-THREEJS_WIDGET3D.Dialog = function(parameters){
+WIDGET3D.Dialog = function(parameters){
   
   WIDGET3D.Window.call( this );
   
@@ -99,9 +99,9 @@ THREEJS_WIDGET3D.Dialog = function(parameters){
   this.textBox_.addEventListener("keydown", this.textBoxOnkeypress, this);
 };
 
-THREEJS_WIDGET3D.Dialog.prototype = WIDGET3D.Window.prototype.inheritance();
+WIDGET3D.Dialog.prototype = WIDGET3D.Window.prototype.inheritance();
 
-THREEJS_WIDGET3D.Dialog.prototype.update = function(){
+WIDGET3D.Dialog.prototype.update = function(){
   this.textBox_.update();
   
   if(this.updateCallback_){
@@ -109,7 +109,7 @@ THREEJS_WIDGET3D.Dialog.prototype.update = function(){
   }
 }
 
-THREEJS_WIDGET3D.Dialog.prototype.createDialogText = function(string){
+WIDGET3D.Dialog.prototype.createDialogText = function(string){
 
   this.context_.fillStyle = "#FFFFFF";
   this.context_.fillRect(0, 0, this.canvas_.width, this.canvas_.height);
@@ -131,7 +131,7 @@ THREEJS_WIDGET3D.Dialog.prototype.createDialogText = function(string){
   
 }
 
-THREEJS_WIDGET3D.Dialog.prototype.createButtonText = function(string){
+WIDGET3D.Dialog.prototype.createButtonText = function(string){
 
   this.buttonContext_.fillStyle = "#B3B3B3";
   this.buttonContext_.fillRect(0, 0, this.buttonCanvas_.width, this.buttonCanvas_.height);
@@ -160,7 +160,7 @@ THREEJS_WIDGET3D.Dialog.prototype.createButtonText = function(string){
   texture.needsUpdate = true;
 };
 
-THREEJS_WIDGET3D.Dialog.prototype.createTextBox = function(){
+WIDGET3D.Dialog.prototype.createTextBox = function(){
   
   var texture = new THREE.Texture(this.textCanvas_);
   var material = new THREE.MeshBasicMaterial({ map: texture });
@@ -177,7 +177,7 @@ THREEJS_WIDGET3D.Dialog.prototype.createTextBox = function(){
   this.updateTextBox(this);
 }
 
-THREEJS_WIDGET3D.Dialog.prototype.updateTextBox = function(window){
+WIDGET3D.Dialog.prototype.updateTextBox = function(window){
 
   window.textContext_.fillStyle = "#FFFFFF";
   window.textContext_.fillRect(0, 0, window.textCanvas_.width, window.textCanvas_.height);
@@ -193,11 +193,11 @@ THREEJS_WIDGET3D.Dialog.prototype.updateTextBox = function(window){
   
 };
 
-THREEJS_WIDGET3D.Dialog.prototype.textBoxOnclick = function(event, window){
+WIDGET3D.Dialog.prototype.textBoxOnclick = function(event, window){
   window.textBox_.focus();
 };
 
-THREEJS_WIDGET3D.Dialog.prototype.textBoxOnkeypress = function(event, window){
+WIDGET3D.Dialog.prototype.textBoxOnkeypress = function(event, window){
   
   if(event.charCode != 0){
     //if event is a character key press
@@ -211,7 +211,7 @@ THREEJS_WIDGET3D.Dialog.prototype.textBoxOnkeypress = function(event, window){
 
 };
 
-THREEJS_WIDGET3D.Dialog.prototype.remove = function(){
+WIDGET3D.Dialog.prototype.remove = function(){
   
   //hiding the window from scene
   this.hide();

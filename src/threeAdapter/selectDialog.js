@@ -35,7 +35,7 @@ SOFTWARE.
 //                {string: choice name displayed, 
 //                 onclick : {handler : function, parameters : object}}
 //
-THREEJS_WIDGET3D.SelectDialog = function(parameters){
+WIDGET3D.SelectDialog = function(parameters){
   
   WIDGET3D.Window.call( this );
   
@@ -67,9 +67,9 @@ THREEJS_WIDGET3D.SelectDialog = function(parameters){
 
 };
 
-THREEJS_WIDGET3D.SelectDialog.prototype = WIDGET3D.Window.prototype.inheritance();
+WIDGET3D.SelectDialog.prototype = WIDGET3D.Window.prototype.inheritance();
 
-THREEJS_WIDGET3D.SelectDialog.prototype.createText = function(){
+WIDGET3D.SelectDialog.prototype.createText = function(){
   this.textCanvas_ = document.createElement('canvas');
   this.textCanvas_.width = 512;
   this.textCanvas_.height = 128;
@@ -88,7 +88,7 @@ THREEJS_WIDGET3D.SelectDialog.prototype.createText = function(){
   this.setMesh(mesh);
 }
 
-THREEJS_WIDGET3D.SelectDialog.prototype.createChoises = function(){
+WIDGET3D.SelectDialog.prototype.createChoises = function(){
 
   var lastY = 0;
   
@@ -132,7 +132,7 @@ THREEJS_WIDGET3D.SelectDialog.prototype.createChoises = function(){
   }
 };
 
-THREEJS_WIDGET3D.SelectDialog.prototype.createButtonMaterial = function(string, context, canvas){
+WIDGET3D.SelectDialog.prototype.createButtonMaterial = function(string, context, canvas){
 
   
   context.fillStyle = "#FFFFFF";
@@ -153,7 +153,7 @@ THREEJS_WIDGET3D.SelectDialog.prototype.createButtonMaterial = function(string, 
   return material;
 }
 
-THREEJS_WIDGET3D.SelectDialog.prototype.createTitleMaterial = function(string, context, canvas){
+WIDGET3D.SelectDialog.prototype.createTitleMaterial = function(string, context, canvas){
 
   
   context.fillStyle = "#FFFFFF";
@@ -174,7 +174,7 @@ THREEJS_WIDGET3D.SelectDialog.prototype.createTitleMaterial = function(string, c
   return material;
 }
 
-THREEJS_WIDGET3D.SelectDialog.prototype.changeChoiceText = function(text, index){
+WIDGET3D.SelectDialog.prototype.changeChoiceText = function(text, index){
   var object = false;
   for(var i = 0; i < this.children_.length; ++i){
     if(this.children_[i].menuID_ == index){
@@ -194,7 +194,7 @@ THREEJS_WIDGET3D.SelectDialog.prototype.changeChoiceText = function(text, index)
 }
 
 
-THREEJS_WIDGET3D.SelectDialog.prototype.remove = function(){
+WIDGET3D.SelectDialog.prototype.remove = function(){
 
   //hiding the window from scene
   this.hide();

@@ -35,7 +35,7 @@ SOFTWARE.
 //              height = height in world coordinates
 //              color = hexadecimal
 //
-THREEJS_WIDGET3D.GridWindow = function(parameters){
+WIDGET3D.GridWindow = function(parameters){
   
   var that = this;
   
@@ -118,9 +118,9 @@ THREEJS_WIDGET3D.GridWindow = function(parameters){
   
 };
 
-THREEJS_WIDGET3D.GridWindow.prototype = WIDGET3D.Window.prototype.inheritance();
+WIDGET3D.GridWindow.prototype = WIDGET3D.Window.prototype.inheritance();
 
-THREEJS_WIDGET3D.GridWindow.prototype.update = function(){
+WIDGET3D.GridWindow.prototype.update = function(){
   if(this.defaultControls_){
     var rot = this.getRot();
     this.setRotY(rot.y + ((this.modelRotationY_ - rot.y)*0.03));
@@ -132,7 +132,7 @@ THREEJS_WIDGET3D.GridWindow.prototype.update = function(){
   }
 };
 
-THREEJS_WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
+WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
   this.density_ = newDensity;
   this.maxChildren_ = newDensity * newDensity;
   
@@ -166,7 +166,7 @@ THREEJS_WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
 //---------------------------------------------------
 // ICONS FOR GRIDWINDOW
 //---------------------------------------------------
-THREEJS_WIDGET3D.GridIcon = function(parameters){
+WIDGET3D.GridIcon = function(parameters){
   
   WIDGET3D.Basic.call( this );
   
@@ -214,9 +214,9 @@ THREEJS_WIDGET3D.GridIcon = function(parameters){
   
 };
 
-THREEJS_WIDGET3D.GridIcon.prototype = WIDGET3D.Basic.prototype.inheritance();
+WIDGET3D.GridIcon.prototype = WIDGET3D.Basic.prototype.inheritance();
 
-THREEJS_WIDGET3D.GridIcon.prototype.setToPlace = function(){
+WIDGET3D.GridIcon.prototype.setToPlace = function(){
 
   var parentLoc = this.parent_.getLocation();
   

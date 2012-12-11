@@ -39,7 +39,7 @@ var init = function(){
   
   
   //styled window
-  var videoWindow = new THREEJS_WIDGET3D.TitledWindow({width : 480*7,
+  var videoWindow = new WIDGET3D.TitledWindow({width : 480*7,
     height : 204*7,
     title : "video",
     texture : texture,

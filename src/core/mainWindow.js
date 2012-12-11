@@ -11,7 +11,6 @@ WIDGET3D.MainWindow = function(){
   WIDGET3D.GuiObject.call( this );
   WIDGET3D.WindowBase.call( this );
   
-  
   this.meshes_ = [];
   
   this.childEvents_ = {
@@ -36,7 +35,6 @@ WIDGET3D.MainWindow = function(){
       return false;
     }
   };
-  
 };
 
 

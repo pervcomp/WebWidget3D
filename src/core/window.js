@@ -122,12 +122,14 @@ WIDGET3D.Window.prototype.remove = function(){
   
   //If window has a mesh, it has to be removed allso
   if(this.mesh_){
-    var mesh = WIDGET3D.getMainWindow().removeMesh(this.mesh_);
+    WIDGET3D.getMainWindow().removeMesh(this.mesh_);
   }
   //container has to be removed from parent's container
   this.parent_.container_.remove(this.container_);
   //removing this from parents objects
-  var obj = this.parent_.removeFromObjects(this);
+  this.parent_.removeFromObjects(this);
+  
+  WIDGET3D.removeObject(this.id_);
 };
 
 //setters and getters for location and rotation

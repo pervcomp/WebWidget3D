@@ -89,25 +89,20 @@ WIDGET3D.Text.prototype.erase = function(amount){
 //TODO: FIX FOCUSING
 //set focus on textobject
 WIDGET3D.Text.prototype.focus = function(){
-  if(!this.inFocus_){
+
+  WIDGET3D.Basic.prototype.focus.call(this);
   
-    WIDGET3D.unfocusFocused();
-    this.inFocus_ = true;
-    WIDGET3D.addFocus(this);
-    
-    if(this.mutable_){
-      this.setText(this.string_);
-    }
+  if(this.mutable_ && this.inFocus_){
+    this.setText(this.string_);
   }
 };
 
 //unfocus textobject
 WIDGET3D.Text.prototype.unfocus = function(){
-  if(this.inFocus_){
-    this.inFocus_ = false;
-    if(this.mutable_){
-      this.setText(this.string_);
-    }
+
+  WIDGET3D.Basic.prototype.unfocus.call(this);
+  if(this.mutable_ && !this.inFocus_){
+    this.setText(this.string_);
   }
 };
 

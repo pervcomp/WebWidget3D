@@ -12,11 +12,10 @@ WIDGET3D.WindowBase = function(){
 };
 
 // adds new child to window
-WIDGET3D.WindowBase.prototype.addChild = function(object){
+WIDGET3D.WindowBase.prototype.addChild = function(widget){
   
-  object.setParent(this);
-  
-  return object;
+  widget.setParent(this);
+  return widget;
 };
 
 // hides unfocused objects in window
@@ -29,10 +28,10 @@ WIDGET3D.WindowBase.prototype.hideNotFocused = function(){
 };
 
 //removes object in place 'index' from object list
-WIDGET3D.WindowBase.prototype.removeFromObjects = function(object){
+WIDGET3D.WindowBase.prototype.removeFromObjects = function(widget){
   
   for(var k = 0; k < this.children_.length; ++k){
-    if(this.children_[k] === object){
+    if(this.children_[k] === widget){
       var removedObj = this.children_.splice(k, 1);
       return removedObj[0];
     }

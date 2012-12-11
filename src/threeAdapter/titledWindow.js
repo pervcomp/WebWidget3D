@@ -199,10 +199,6 @@ THREEJS_WIDGET3D.TitledWindow.prototype.setTitle = function(title){
 
 
 THREEJS_WIDGET3D.TitledWindow.prototype.remove = function(){
-  //children needs to be removed  
-  while(this.children_.length > 0){
-    this.children_[0].remove();
-  }
   
   //hiding the window from scene
   this.hide();
@@ -211,27 +207,7 @@ THREEJS_WIDGET3D.TitledWindow.prototype.remove = function(){
   var canvas = this.textureCanvas_;
   document.body.removeChild(canvas);
   
-  //removing eventlisteners
-  this.removeAllListeners();
-  
-  //If wondow has a mesh, it has to be removed allso
-  if(this.mesh_){
-    var mesh = WIDGET3D.getMainWindow().removeMesh(this.mesh_);
-    if(mesh != this.mesh_){
-      console.log("removed mesh was wrong! " + mesh);
-    }
-  }
-  
-  //container has to be removed from parent's container
-  this.parent_.container_.remove(this.container_);
-  
-  //removing this from parents objects
-  var obj = this.parent_.removeFromObjects(this);
-  if(obj != this){
-    console.log(obj);
-    console.log(this);
-    console.log("removed object was wrong! " + obj);
-  }
+  WIDGET3D.Window.prototype.remove.call( this );
 };
 
 

@@ -196,9 +196,8 @@ THREEJS_WIDGET3D.SelectDialog.prototype.changeChoiceText = function(text, index)
 
 THREEJS_WIDGET3D.SelectDialog.prototype.remove = function(){
 
-  while(this.children_.length > 0){
-    this.children_[0].remove();
-  }
+  //hiding the window from scene
+  this.hide();
   
   //removing child canvases from DOM
   for(var i = 0; i < this.choiceCanvases_.length; ++i){
@@ -207,34 +206,11 @@ THREEJS_WIDGET3D.SelectDialog.prototype.remove = function(){
   }
   this.choiceCanvases_ = null;
   
-  //hiding the window from scene
-  this.hide();
-  
   //deleting the background canvas
   var canvas = this.textCanvas_;
   document.body.removeChild(canvas);
   
-  //removing eventlisteners  
-  this.removeAllListeners();
-  
-  //If wondow has a mesh, it has to be removed allso
-  if(this.mesh_){
-    var mesh = WIDGET3D.getMainWindow().removeMesh(this.mesh_);
-    if(mesh != this.mesh_){
-      console.log("removed mesh was wrong! " + mesh);
-    }
-  }
-  
-  //container has to be removed from parent's container
-  this.parent_.container_.remove(this.container_);
-  
-  //removing this from parents objects
-  var obj = this.parent_.removeFromObjects(this);
-  if(obj != this){
-    console.log(obj);
-    console.log(this);
-    console.log("removed object was wrong! " + obj);
-  }
+  WIDGET3D.Window.prototype.remove.call( this );
 
 }
 

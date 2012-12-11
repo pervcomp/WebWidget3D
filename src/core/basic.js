@@ -104,9 +104,11 @@ WIDGET3D.Basic.prototype.remove = function(){
   //removing event listeners
   this.removeAllListeners();
   //removing mesh
-  var mesh = WIDGET3D.getMainWindow().removeMesh(this.mesh_);
+  WIDGET3D.getMainWindow().removeMesh(this.mesh_);
   //removing object
-  var obj = this.parent_.removeFromObjects(this);
+  this.parent_.removeFromObjects(this);
+  
+  WIDGET3D.removeObject(this.id_);
 };
 
 //getters and setters for location and rotation

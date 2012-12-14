@@ -54,7 +54,7 @@ WIDGET3D.Dialog = function(parameters){
   
   //CREATING TEXTBOX
   
-  this.textBox_ = new WIDGET3D.Text();
+  this.textBox_ = new WIDGET3D.Text({maxLength : 15});
   this.textBox_.maxLength_ = this.maxTextLength;
   
   this.textCanvas_ = document.createElement('canvas');

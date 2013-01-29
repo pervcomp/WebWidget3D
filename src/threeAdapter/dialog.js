@@ -163,7 +163,7 @@ WIDGET3D.Dialog.prototype.updateTextBox = function(window){
   window.textContext_.align = "center";
   window.textContext_.textBaseline = "middle";
   
-  window.textContext_.fillText(window.textBox_.text_, 5, window.textCanvas_.height/2);
+  window.textContext_.fillText(window.textBox_.textHandle_, 5, window.textCanvas_.height/2);
   
   window.textBox_.mesh_.material.map.needsUpdate = true;
   

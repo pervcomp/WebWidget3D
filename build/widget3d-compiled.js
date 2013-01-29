@@ -899,13 +899,13 @@ WIDGET3D.Text = function(parameters){
   this.currentRow_ = "";
   
   //the whole text that is processed in add and erase functions
-  this.textHandle_ = "";
+  this.text_ = "";
   
   //table of rows
   this.rows_ = [];
   
   //the whole text + cursor
-  this.text_ = this.textHandle_;
+  this.textHandle_ = this.text_;
   
   if(parameters.text){
     this.setText(parameters.text);
@@ -932,31 +932,31 @@ WIDGET3D.Text.prototype.addLetter = function(letter){
   if(this.mutable_){
     
     //Checking it the current row and the whole text length are below limits
-    if(!this.maxLength_ || this.textHandle_.length < this.maxLength_)
+    if(!this.maxLength_ || this.text_.length < this.maxLength_)
     {
     
       if(!this.maxLineLength_ || this.currentRow_.length < this.maxLineLength_){
         this.currentRow_ += letter;
-        this.textHandle_ += letter;
+        this.text_ += letter;
         
-        if(this.currentRow_.length == this.maxLineLength_ || this.textHandle_.length == this.maxLength_)
+        if(this.currentRow_.length == this.maxLineLength_ || this.text_.length == this.maxLength_)
         {
           this.rows_.push(this.currentRow_+this.endl_);
           this.currentRow_ = "";
         }
       }
-      else if(this.currentRow_.length == this.maxLineLength_ || this.textHandle_.length == this.maxLength_)
+      else if(this.currentRow_.length == this.maxLineLength_ || this.text_.length == this.maxLength_)
       {
         this.rows_.push(this.currentRow_+this.endl_);
         this.currentRow_ = letter;
-        this.textHandle_ += letter;
+        this.text_ += letter;
       }
       
     }
     
-    this.text_ = this.textHandle_;
+    this.textHandle_ = this.text_;
     if(this.inFocus_){
-      this.text_ += this.cursor_;
+      this.textHandle_ += this.cursor_;
     }
     
     this.update();
@@ -986,11 +986,11 @@ WIDGET3D.Text.prototype.erase = function(amount){
         this.currentRow_ = this.currentRow_.substring(0, (this.currentRow_.length-2));
       }
     }
-    this.textHandle_ = this.textHandle_.substring(0, (this.textHandle_.length-amount));
+    this.text_ = this.text_.substring(0, (this.text_.length-amount));
     
-    this.text_ = this.textHandle_;
+    this.textHandle_ = this.text_;
     if(this.inFocus_){
-      this.text_ += this.cursor_;
+      this.textHandle_ += this.cursor_;
     }
     
     this.update();
@@ -1000,17 +1000,19 @@ WIDGET3D.Text.prototype.erase = function(amount){
 //set focus on textobject
 WIDGET3D.Text.prototype.focus = function(){
   if(this.mutable_ && !this.inFocus_){
-    this.text_ = this.textHandle_ + this.cursor_;
+    this.textHandle_ = this.text_ + this.cursor_;
   }
   WIDGET3D.Basic.prototype.focus.call(this);
+  this.update();
 };
 
 //unfocus textobject
 WIDGET3D.Text.prototype.unfocus = function(){
   if(this.inFocus_ && this.mutable_){
-    this.text_ = this.textHandle_;
+    this.textHandle_ = this.text_;
   }
   WIDGET3D.Basic.prototype.unfocus.call(this);
+  this.update();
 };
 
 
@@ -1414,7 +1416,10 @@ var THREEJS_WIDGET3D = {
           inv.getInverse(intersects[m].object.matrixWorld);
           
           //position where the click happened in object coordinates
-          var objPos = inv.multiplyVector3(intersects[m].point.clone());
+          //TODO: THIS IS DEPRECATED!
+          //var objPos = inv.multiplyVector3(intersects[m].point.clone());
+          
+          var objPos = intersects[m].point.clone().applyProjection(inv);
           
           var found = THREEJS_WIDGET3D.findObject(closest, event.type);
           
@@ -2043,7 +2048,7 @@ WIDGET3D.Dialog.prototype.updateTextBox = function(window){
   window.textContext_.align = "center";
   window.textContext_.textBaseline = "middle";
   
-  window.textContext_.fillText(window.textBox_.text_, 5, window.textCanvas_.height/2);
+  window.textContext_.fillText(window.textBox_.textHandle_, 5, window.textCanvas_.height/2);
   
   window.textBox_.mesh_.material.map.needsUpdate = true;
   

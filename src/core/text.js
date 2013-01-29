@@ -30,13 +30,13 @@ WIDGET3D.Text = function(parameters){
   this.currentRow_ = "";
   
   //the whole text that is processed in add and erase functions
-  this.textHandle_ = "";
+  this.text_ = "";
   
   //table of rows
   this.rows_ = [];
   
   //the whole text + cursor
-  this.text_ = this.textHandle_;
+  this.textHandle_ = this.text_;
   
   if(parameters.text){
     this.setText(parameters.text);
@@ -63,31 +63,31 @@ WIDGET3D.Text.prototype.addLetter = function(letter){
   if(this.mutable_){
     
     //Checking it the current row and the whole text length are below limits
-    if(!this.maxLength_ || this.textHandle_.length < this.maxLength_)
+    if(!this.maxLength_ || this.text_.length < this.maxLength_)
     {
     
       if(!this.maxLineLength_ || this.currentRow_.length < this.maxLineLength_){
         this.currentRow_ += letter;
-        this.textHandle_ += letter;
+        this.text_ += letter;
         
-        if(this.currentRow_.length == this.maxLineLength_ || this.textHandle_.length == this.maxLength_)
+        if(this.currentRow_.length == this.maxLineLength_ || this.text_.length == this.maxLength_)
         {
           this.rows_.push(this.currentRow_+this.endl_);
           this.currentRow_ = "";
         }
       }
-      else if(this.currentRow_.length == this.maxLineLength_ || this.textHandle_.length == this.maxLength_)
+      else if(this.currentRow_.length == this.maxLineLength_ || this.text_.length == this.maxLength_)
       {
         this.rows_.push(this.currentRow_+this.endl_);
         this.currentRow_ = letter;
-        this.textHandle_ += letter;
+        this.text_ += letter;
       }
       
     }
     
-    this.text_ = this.textHandle_;
+    this.textHandle_ = this.text_;
     if(this.inFocus_){
-      this.text_ += this.cursor_;
+      this.textHandle_ += this.cursor_;
     }
     
     this.update();
@@ -117,11 +117,11 @@ WIDGET3D.Text.prototype.erase = function(amount){
         this.currentRow_ = this.currentRow_.substring(0, (this.currentRow_.length-2));
       }
     }
-    this.textHandle_ = this.textHandle_.substring(0, (this.textHandle_.length-amount));
+    this.text_ = this.text_.substring(0, (this.text_.length-amount));
     
-    this.text_ = this.textHandle_;
+    this.textHandle_ = this.text_;
     if(this.inFocus_){
-      this.text_ += this.cursor_;
+      this.textHandle_ += this.cursor_;
     }
     
     this.update();
@@ -131,17 +131,19 @@ WIDGET3D.Text.prototype.erase = function(amount){
 //set focus on textobject
 WIDGET3D.Text.prototype.focus = function(){
   if(this.mutable_ && !this.inFocus_){
-    this.text_ = this.textHandle_ + this.cursor_;
+    this.textHandle_ = this.text_ + this.cursor_;
   }
   WIDGET3D.Basic.prototype.focus.call(this);
+  this.update();
 };
 
 //unfocus textobject
 WIDGET3D.Text.prototype.unfocus = function(){
   if(this.inFocus_ && this.mutable_){
-    this.text_ = this.textHandle_;
+    this.textHandle_ = this.text_;
   }
   WIDGET3D.Basic.prototype.unfocus.call(this);
+  this.update();
 };
 
 

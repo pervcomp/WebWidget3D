@@ -127,7 +127,10 @@ var THREEJS_WIDGET3D = {
           inv.getInverse(intersects[m].object.matrixWorld);
           
           //position where the click happened in object coordinates
-          var objPos = inv.multiplyVector3(intersects[m].point.clone());
+          //TODO: THIS IS DEPRECATED!
+          //var objPos = inv.multiplyVector3(intersects[m].point.clone());
+          
+          var objPos = intersects[m].point.clone().applyProjection(inv);
           
           var found = THREEJS_WIDGET3D.findObject(closest, event.type);
           

@@ -1,4 +1,3 @@
-//Simple video window demo by Anna-Liisa Mattila
 //made with widget3D and three.js
 
 //INIT FUNCTION
@@ -17,7 +16,7 @@ var init = function(){
   // When usin three.js and widget3D, initializing widget3D can be done by WIDGET3D.createMainWindow_THREE.
   
   var mainWindow = WIDGET3D.createMainWindow_THREE({
-    aintialias : true,
+    antialias : true,
     width : WIDTH,
     height : HEIGHT,
     clearColor : 0xf9f9f9
@@ -67,4 +66,3 @@ var init = function(){
   };
   mainLoop();
 }
-

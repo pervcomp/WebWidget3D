@@ -18,7 +18,7 @@ var init = function(){
   
   var mainWindow = WIDGET3D.createMainWindow_THREE({
     domParent : document.getElementById("container"),
-    aintialias : true,
+    antialias : true,
     width : WIDTH,
     height : HEIGHT,
     clearColor : 0xf9f9f9

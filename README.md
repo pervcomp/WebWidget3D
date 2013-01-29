@@ -4,13 +4,14 @@ widget3D
 
 3D widget library for the web.
 
-Experimenting ways to make 3D UIs in the web. At the moment library can be used with the [Three.js] (http://github.com/mrdoob/three.js) 3D-engine version 53.
+Experimenting ways to make 3D UIs in the web. At the moment library can be used with the [three.js](http://github.com/mrdoob/three.js) 3D-engine version 55.
 
 Work in progress.
 
-Simple examples:
+Some examples:
 -------
-* [Picture demo] (http://www.cs.tut.fi/~mattila3/rimina)
+* [Picture demo](http://www.cs.tut.fi/~mattila3/rimina)
+* [Lively3D](http://lively3d.cs.tut.fi/dev)
 
 Features:
 -------
@@ -24,7 +25,8 @@ Using the library:
 -------
 
 To use the library include widget3D-build-min.js or widget3D-build.js. The files can be found from build directory.
-This library also needs at the moment Three.js version 53 to work. So you have to include it too.
+This library also needs at the moment [three.js](http://github.com/mrdoob/three.js) to work so you have to include it too.
+You can find the version of three.js that the library supports under externals.
 
 There isn't any formal documentation yet. Look at the examples from examples directory to get started.
 
@@ -36,7 +38,6 @@ For building the library you need nodejs. Then just run command "node build.js" 
 TODO:
 -------
 * Example pages
-* Drag controls for the TitledWindow component needs some work. At the moment drag works only along the objects xy-axis.
-This isn't intuitive if camera or the object has rotation.
-* Rethinking of cores and adapters responsibilities and interfaces.
+* Drag controls needs some work. At the moment drag works only along the objects xy-axis.
+This isn't intuitive if camera or the object have rotation.
 * Adapters to other 3D engines

@@ -23,7 +23,7 @@ WIDGET3D.Dialog = function(parameters){
   this.opacity_ = parameters.opacity !== undefined ? parameters.opacity : 0.9;
   this.text_ = parameters.text !== undefined ? parameters.text : "This is a dialog";
   this.buttonText_ = parameters.buttonText !== undefined ? parameters.buttonText : "submit";
-  this.maxTextLength = parameters.maxTextLength !== undefined ? parameters.maxTextLength : undefined;
+  this.maxTextLength_ = parameters.maxTextLength !== undefined ? parameters.maxTextLength : undefined;
   
   this.canvas_ = document.createElement('canvas');
   this.canvas_.width = 512;
@@ -54,8 +54,7 @@ WIDGET3D.Dialog = function(parameters){
   
   //CREATING TEXTBOX
   
-  this.textBox_ = new WIDGET3D.Text({maxLength : 15});
-  this.textBox_.maxLength_ = this.maxTextLength;
+  this.textBox_ = new WIDGET3D.Text({maxLength : this.maxTextLength_});
   
   this.textCanvas_ = document.createElement('canvas');
   this.textCanvas_.width = 512;

@@ -30,7 +30,7 @@ var init = function(){
   //--------------------------------------------
   
   //styled window
-  var dialog = new WIDGET3D.Dialog({height : 1500, width : 1500});
+  var dialog = new WIDGET3D.Dialog({height : 1500, width : 1500, maxTextLength : 16});
   
   dialog.button_.addEventListener("click",
     function(event, dialog){dialog.remove()}, dialog);

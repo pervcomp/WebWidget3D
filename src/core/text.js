@@ -22,21 +22,29 @@ WIDGET3D.Text = function(parameters){
   this.cursor_ = parameters.cursor !== undefined ? parameters.cursor : "|";
   
   this.maxLength_ = parameters.maxLength !== undefined ? parameters.maxLength : false;
-  this.maxLineLength_ = parameters.maxLineLength !==  undefined ? parameters.maxLineLength : false;
+  this.maxLineLength_ = parameters.maxLineLength !==  undefined ? parameters.maxLineLength : this.maxLength_;
+  
+  this.endl_ = '\n';
+  
+  //row buffer that is not yet added to the rows_ table
+  this.currentRow_ = "";
+  
+  //the whole text that is processed in add and erase functions
+  this.textHandle_ = "";
+  
+  //table of rows
+  this.rows_ = [];
+  
+  //the whole text + cursor
+  this.text_ = this.textHandle_;
   
   if(parameters.text){
     this.setText(parameters.text);
   }
-  else{
-    this.string_ = "";
-    this.text_ = "";
-  }
-  
-  this.rows_ = [];
 };
 
 
-// inheriting Text from GuiObject
+// inheriting Text from Basic
 WIDGET3D.Text.prototype = WIDGET3D.Basic.prototype.inheritance();
 
 WIDGET3D.Text.prototype.type_ = WIDGET3D.ElementType.TEXT;
@@ -54,90 +62,76 @@ WIDGET3D.Text.prototype.setText = function(text){
 WIDGET3D.Text.prototype.addLetter = function(letter){
   if(this.mutable_){
     
-    //to determine text length we want to remove cursor
-    //so if text was focused we need to unfocus it and
-    // after altering it focus it again
-    var wasFocused = false;
+    //Checking it the current row and the whole text length are below limits
+    if(!this.maxLength_ || this.textHandle_.length < this.maxLength_)
+    {
     
+      if(!this.maxLineLength_ || this.currentRow_.length < this.maxLineLength_){
+        this.currentRow_ += letter;
+        this.textHandle_ += letter;
+        
+        if(this.currentRow_.length == this.maxLineLength_ || this.textHandle_.length == this.maxLength_)
+        {
+          this.rows_.push(this.currentRow_+this.endl_);
+          this.currentRow_ = "";
+        }
+      }
+      else if(this.currentRow_.length == this.maxLineLength_ || this.textHandle_.length == this.maxLength_)
+      {
+        this.rows_.push(this.currentRow_+this.endl_);
+        this.currentRow_ = letter;
+        this.textHandle_ += letter;
+      }
+      
+    }
+    
+    this.text_ = this.textHandle_;
     if(this.inFocus_){
-      this.unfocus();
-      wasFocused = true;
+      this.text_ += this.cursor_;
     }
     
-    //Checking it the string and the text length are below limits
-    if((!this.maxLineLength_ && !this.maxLength_)||
-      (this.maxLength_ && this.text_.length < this.maxLength_ &&
-      this.maxLineLength_ && this.string_.length < this.maxLineLength_))
-    {
-      this.string_ += letter;
-      this.text_ += letter;
-      
-      console.log(this.text_);
-    }
-    //if the lines character limit exceeds we need to store the string buffer to rows array
-    //and reset it. New line character is stored at the end of the full string.
-    else if((this.maxLineLength_ && this.string_.length == this.maxLineLength) &&
-      ((this.maxLength_ && this.text_.length < this.maxLength_) ||
-      (this.maxLength_ == undefined)))
-    {
-      this.string_ += '\n';
-      this.rows_.push(this.string_);
-      this.text_ += letter;
-      this.string_ = letter;
-      
-      
-    }
-    //if the total maximum size exceeds we don't do anything but focus the text component
-    //if it was unfocused.
-    if(wasFocused){
-      this.focus();
-    }
     this.update();
   }
 };
 
 WIDGET3D.Text.prototype.erase = function(amount){
   if(this.mutable_){
-    var wasFocused = false;
-    if(this.inFocus_){
-      this.unfocus();
-      wasFocused = true;
-    }
     
-    if(amount >= this.text_.length){
-      this.rows_ = [];
-      this.text_ = "";
-      this.string_ = "";
-    }
-    else if(amount >= this.string_.length){
-    
-      if(this.rows_.length != 0){
-        var newAmount = amount - this.string_.length;
-        this.string_ = this.rows_[this.rows_.length-1];
+    for(i = 0; i < amount; ++i){
+      if(this.currentRow_.length != 0){
+        this.currentRow_ = this.currentRow_.substring(0, (this.currentRow_.length-1));
+        
+        if(this.currentRow_.length == 0 && this.rows_.length != 0){
+          this.currentRow_ = this.rows_[this.rows_.length-1];
+          this.rows_.splice(-1, 1);
+          //taking the endl character out.
+          this.currentRow_ = this.currentRow_.substring(0, (this.currentRow_.length-1));
+          
+        }
+      }
+      else if(this.rows_.length != 0){
+        this.currentRow_ = this.rows_[this.rows_.length-1];
         this.rows_.splice(-1, 1);
         
-        this.string_ = this.string_.substring(0, (this.string_.length-newAmount));
+        //taking the endl character and the character to be erased out.
+        this.currentRow_ = this.currentRow_.substring(0, (this.currentRow_.length-2));
       }
-      
     }
-    else{
-      this.string_ = this.string_.substring(0, (this.string_.length-amount));
-    }
-    this.text_ = this.text_.substring(0, (this.text_.length-amount));
+    this.textHandle_ = this.textHandle_.substring(0, (this.textHandle_.length-amount));
     
-    if(wasFocused){
-      this.focus();
+    this.text_ = this.textHandle_;
+    if(this.inFocus_){
+      this.text_ += this.cursor_;
     }
     
     this.update();
   }
 };
 
-//TODO: FIX FOCUSING
 //set focus on textobject
 WIDGET3D.Text.prototype.focus = function(){
   if(this.mutable_ && !this.inFocus_){
-    //this.text_ += this.cursor_;
+    this.text_ = this.textHandle_ + this.cursor_;
   }
   WIDGET3D.Basic.prototype.focus.call(this);
 };
@@ -145,8 +139,7 @@ WIDGET3D.Text.prototype.focus = function(){
 //unfocus textobject
 WIDGET3D.Text.prototype.unfocus = function(){
   if(this.inFocus_ && this.mutable_){
-    //this.text_ = this.text_.substring(0, (this.text_.length_-1));
-    console.log(this.text_);
+    this.text_ = this.textHandle_;
   }
   WIDGET3D.Basic.prototype.unfocus.call(this);
 };

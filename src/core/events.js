@@ -68,10 +68,11 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
           mainWindow.events_[name.toString()][j].arguments);
       }
     }
+    
   };
   
   _that_.keyboardEvent = function(domEvent){
-  
+    
     var name = domEvent.type;
     var mainWindow = WIDGET3D.getMainWindow();
     

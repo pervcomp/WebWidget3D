@@ -160,6 +160,268 @@ WIDGET3D = {
 
 
 
+
+//------------------------------------------------------------
+// USEFUL HELPPER FUNCTIONS
+//------------------------------------------------------------
+
+//returns the real width of the canvas element
+WIDGET3D.getRealWidth = function(){
+  return parseInt(window.getComputedStyle(WIDGET3D.getEvents().domElement_,null).getPropertyValue("width"));
+};
+
+WIDGET3D.getRealHeight = function(){
+  return parseInt(window.getComputedStyle(WIDGET3D.getEvents().domElement_,null).getPropertyValue("height"));
+};
+
+WIDGET3D.getCanvasWidth = function(){
+  return WIDGET3D.getEvents().domElement_.width;
+};
+
+WIDGET3D.getCanvasHeight = function(){
+  return WIDGET3D.getEvents().domElement_.height;
+};
+
+//calculates mouseScreenCoordinates from domEvent
+WIDGET3D.mouseScreenCoordinates = function(domEvent){
+  
+  var coords = { x: 0, y: 0};
+  if (!domEvent) {
+    domEvent = window.event;
+    coords.x = domEvent.x;
+    coords.y = domEvent.y;
+  }
+  else {
+    var element = domEvent.target ;
+    var totalOffsetLeft = 0;
+    var totalOffsetTop = 0 ;
+
+    while (element.offsetParent)
+    {
+        totalOffsetLeft += element.offsetLeft;
+        totalOffsetTop += element.offsetTop;
+        element = element.offsetParent;
+    }
+    coords.x = domEvent.pageX - totalOffsetLeft;
+    coords.y = domEvent.pageY - totalOffsetTop;
+  }
+  
+  return coords;
+};
+
+WIDGET3D.mouseCoordinates = function(domEvent){
+
+  var coords = WIDGET3D.mouseScreenCoordinates(domEvent);
+  
+  //If canvas element size has been manipulated with CSS the domElement.width and domElement.height aren't the
+  // values of the height and width used showing the canvas. In here we need the real screen coordinatelimits
+  //to calculate mouse position correctly.
+  
+  var CSSwidth = WIDGET3D.getRealWidth();
+  var CSSheight = WIDGET3D.getRealHeight();
+  
+  var limits = {
+    minX: 0,
+    maxX: CSSwidth,
+    minY: 0,
+    maxY: CSSheight
+  };
+  
+  var mouse = WIDGET3D.scaleCoordinates(coords, limits);
+  return mouse;
+};
+
+//scales coordinates to range of -1..1
+WIDGET3D.scaleCoordinates = function(point, limits){
+  var x = +((point.x - limits.minX) / limits.maxX) * 2 - 1;
+  var y = -((point.y - limits.minY) / limits.maxY) * 2 + 1;
+  
+  return {x: x, y: y};
+};
+
+//calculates childs coordinate limits in parent coordinate system
+WIDGET3D.calculateLimits = function(position, width, height){
+
+  var maxX = position.x + (width/2);
+  var minX = position.x - (width/2);
+  
+  var maxY = position.y + (height/2);
+  var minY = position.y - (height/2);
+  
+  return {minX: minX, maxX: maxX, minY: minY, maxY: maxY};
+};
+
+
+/*
+Copyright (C) 2012 Anna-Liisa Mattila
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+*/
+
+//WIDGET 3D EVENTS
+//---------------------------------------------
+// DOM EVENTS
+//--------------------------------------------
+
+
+//Eventhandler abstraction for WIDGET3D's objects
+// needs the gui's main window (root window)
+//For mouse events uses mainwindows renderer as domElement!
+WIDGET3D.DomEvents = function(collisionCallback, domElement){
+
+  var _that_ = this;
+  
+  if(domElement){
+    _that_.domElement_ = domElement;
+  }
+  else{
+    _that_.domElement_ = document;
+  }
+  
+  _that_.collisions_ = {
+    callback: collisionCallback.callback,
+    args: collisionCallback.args
+  };
+  
+  _that_.enabled_ = {};
+  
+  _that_.mouseEvent = function(domEvent){
+    
+    var hit = _that_.collisions_.callback(domEvent, _that_.collisions_.args);
+    var name = domEvent.type;
+    var mainWindow = WIDGET3D.getMainWindow();
+    
+    //hit can't be mainWindow because mainWindow doesn't have mesh
+    if(hit && hit.events_.hasOwnProperty(name.toString())){
+      for(var k = 0; k < hit.events_[name.toString()].length; ++k){
+        hit.events_[name.toString()][k].callback(domEvent,
+          hit.events_[name.toString()][k].arguments);
+      }
+    }
+    //if mainwindow has eventlistener it is executed also
+    if(mainWindow.events_.hasOwnProperty(name.toString())){
+      for(var j = 0; j < mainWindow.events_[name.toString()].length; ++j){
+        mainWindow.events_[name.toString()][j].callback(domEvent,
+          mainWindow.events_[name.toString()][j].arguments);
+      }
+    }
+    
+  };
+  
+  _that_.keyboardEvent = function(domEvent){
+    
+    var name = domEvent.type;
+    var mainWindow = WIDGET3D.getMainWindow();
+    
+    for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
+      if(mainWindow.childEvents_[name.toString()][k] != mainWindow &&
+        mainWindow.childEvents_[name.toString()][k].inFocus_)
+      {
+        var object = mainWindow.childEvents_[name.toString()][k];
+        
+        for(var m = 0; m < object.events_[name.toString()].length; ++m){
+          object.events_[name.toString()][m].callback(domEvent,
+            object.events_[name.toString()][m].arguments);
+          
+        }
+      }
+    }
+    
+    //then we call main windows onkeydown callback if there is one
+    if(mainWindow.events_.hasOwnProperty(name.toString())){      
+      for(var l = 0; l < mainWindow.events_[name.toString()].length; ++l){
+        mainWindow.events_[name.toString()][l].callback(domEvent,
+          mainWindow.events_[name.toString()][l].arguments);
+      }
+    }
+  };
+  
+  // This method can be used to trigger an event
+  // if id is specified the event is passed to specific object
+  // if the id isn't specified the event is passed to all objects
+  // that has the listener for the event.
+  //
+  _that_.triggerEvent = function(event, id){
+    var name = event.type;
+    
+    if(!id){
+      
+      var mainWindow = WIDGET3D.getMainWindow();
+      
+      for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
+        
+        var object = mainWindow.childEvents_[name.toString()][k];
+        
+        for(var m = 0; m < object.events_[name.toString()].length; ++m){
+          object.events_[name.toString()][m].callback(event,
+            object.events_[name.toString()][m].arguments);
+        }
+      }
+    }
+    else{
+      
+      var to = WIDGET3D.getObjectById(id);
+      for(var i = 0; i < to.events_[name.toString()].length; ++i){
+        to.events_[name.toString()][i].callback(event,
+          to.events_[name.toString()][i].arguments);
+      }
+    }
+  };
+
+  
+};
+
+//Adds event listener to dom element
+WIDGET3D.DomEvents.prototype.enableEvent = function(name){
+  //if there is no property or if the property is false
+  if(!this.enabled_.hasOwnProperty(name.toString()) || 
+    (this.enabled_.hasOwnProperty(name.toString()) && this.enabled_[name.toString()] === false))
+  {
+    if(name == "keyup" || name == "keydown" || name == "keypress"){
+      document.addEventListener(name, this.keyboardEvent, false);
+    }
+    else{
+      this.domElement_.addEventListener(name, this.mouseEvent, false);
+    }
+    this.enabled_[name.toString()] = true;
+  }
+};
+
+//Removes event listener from dom element
+WIDGET3D.DomEvents.prototype.disableEvent = function(name){
+
+  if(this.enabled_.hasOwnProperty(name.toString()) && this.enabled_[name.toString()] === true){
+    if(name == "keyup" || name == "keydown" || name == "keypress"){
+      //console.log("removed keyboard listener from event "+name);
+      document.removeEventListener(name, this.keyboardEvent, false);
+    }
+    else{
+      //console.log("removed mouse listener from event "+name);
+      this.domElement_.removeEventListener(name, this.mouseEvent, false);
+    }
+    this.enabled_[name.toString()] = false;
+    return true;
+  }
+  return false;
+};
+
 //---------------------------------------------
 // GUI OBJECT : generic abstract object
 //---------------------------------------------
@@ -1026,265 +1288,81 @@ WIDGET3D.Text.prototype.inheritance = function(){
   return created;
 };
 
-
-//------------------------------------------------------------
-// USEFUL HELPPER FUNCTIONS
-//------------------------------------------------------------
-
-//returns the real width of the canvas element
-WIDGET3D.getRealWidth = function(){
-  return parseInt(window.getComputedStyle(WIDGET3D.getEvents().domElement_,null).getPropertyValue("width"));
-};
-
-WIDGET3D.getRealHeight = function(){
-  return parseInt(window.getComputedStyle(WIDGET3D.getEvents().domElement_,null).getPropertyValue("height"));
-};
-
-WIDGET3D.getCanvasWidth = function(){
-  return WIDGET3D.getEvents().domElement_.width;
-};
-
-WIDGET3D.getCanvasHeight = function(){
-  return WIDGET3D.getEvents().domElement_.height;
-};
-
-//calculates mouseScreenCoordinates from domEvent
-WIDGET3D.mouseScreenCoordinates = function(domEvent){
+// ROLL CONTROLS
+//
+//Parameters: component: WIDGET3D.Basic typed object to which the controlls are attached
+//                       COMPONENT MUST BE GIVEN!
+//            mouseButtom: integer 0, 1 or 2. Tells which mouse button the controll is attached.
+//                         0 = left button (default), 1 = middle button if present, 2 = right button
+//            shiftKey: Boolean that tells if the shift key should be pressed down with the mouse button to apply the movement.
+//                      Default value is false.
+//
+WIDGET3D.RollControls = function(parameters){
   
-  var coords = { x: 0, y: 0};
-  if (!domEvent) {
-    domEvent = window.event;
-    coords.x = domEvent.x;
-    coords.y = domEvent.y;
-  }
-  else {
-    var element = domEvent.target ;
-    var totalOffsetLeft = 0;
-    var totalOffsetTop = 0 ;
-
-    while (element.offsetParent)
-    {
-        totalOffsetLeft += element.offsetLeft;
-        totalOffsetTop += element.offsetTop;
-        element = element.offsetParent;
-    }
-    coords.x = domEvent.pageX - totalOffsetLeft;
-    coords.y = domEvent.pageY - totalOffsetTop;
-  }
+  var that = this;
   
-  return coords;
-};
-
-WIDGET3D.mouseCoordinates = function(domEvent){
-
-  var coords = WIDGET3D.mouseScreenCoordinates(domEvent);
+  this.component_ = parameters.component;
+  this.mouseButton_ = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
+  this.shiftKey_ = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
   
-  //If canvas element size has been manipulated with CSS the domElement.width and domElement.height aren't the
-  // values of the height and width used showing the canvas. In here we need the real screen coordinatelimits
-  //to calculate mouse position correctly.
-  
-  var CSSwidth = WIDGET3D.getRealWidth();
-  var CSSheight = WIDGET3D.getRealHeight();
-  
-  var limits = {
-    minX: 0,
-    maxX: CSSwidth,
-    minY: 0,
-    maxY: CSSheight
-  };
-  
-  var mouse = WIDGET3D.scaleCoordinates(coords, limits);
-  return mouse;
-};
+  this.clickLocation_;
+  this.rotationOnMouseDownY_;
+  this.rotationOnMousedownX_;
+  this.modelRotationY_ = 0;
+  this.modelRotationX_ = 0;
+  this.rotate_ = false;
 
-//scales coordinates to range of -1..1
-WIDGET3D.scaleCoordinates = function(point, limits){
-  var x = +((point.x - limits.minX) / limits.maxX) * 2 - 1;
-  var y = -((point.y - limits.minY) / limits.maxY) * 2 + 1;
-  
-  return {x: x, y: y};
-};
-
-//calculates childs coordinate limits in parent coordinate system
-WIDGET3D.calculateLimits = function(position, width, height){
-
-  var maxX = position.x + (width/2);
-  var minX = position.x - (width/2);
-  
-  var maxY = position.y + (height/2);
-  var minY = position.y - (height/2);
-  
-  return {minX: minX, maxX: maxX, minY: minY, maxY: maxY};
-};
-
-
-/*
-Copyright (C) 2012 Anna-Liisa Mattila
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-*/
-
-//WIDGET 3D EVENTS
-//---------------------------------------------
-// DOM EVENTS
-//--------------------------------------------
-
-
-//Eventhandler abstraction for WIDGET3D's objects
-// needs the gui's main window (root window)
-//For mouse events uses mainwindows renderer as domElement!
-WIDGET3D.DomEvents = function(collisionCallback, domElement){
-
-  var _that_ = this;
-  
-  if(domElement){
-    _that_.domElement_ = domElement;
-  }
-  else{
-    _that_.domElement_ = document;
-  }
-  
-  _that_.collisions_ = {
-    callback: collisionCallback.callback,
-    args: collisionCallback.args
-  };
-  
-  _that_.enabled_ = {};
-  
-  _that_.mouseEvent = function(domEvent){
-    
-    var hit = _that_.collisions_.callback(domEvent, _that_.collisions_.args);
-    var name = domEvent.type;
-    var mainWindow = WIDGET3D.getMainWindow();
-    
-    //hit can't be mainWindow because mainWindow doesn't have mesh
-    if(hit && hit.events_.hasOwnProperty(name.toString())){
-      for(var k = 0; k < hit.events_[name.toString()].length; ++k){
-        hit.events_[name.toString()][k].callback(domEvent,
-          hit.events_[name.toString()][k].arguments);
-      }
-    }
-    //if mainwindow has eventlistener it is executed also
-    if(mainWindow.events_.hasOwnProperty(name.toString())){
-      for(var j = 0; j < mainWindow.events_[name.toString()].length; ++j){
-        mainWindow.events_[name.toString()][j].callback(domEvent,
-          mainWindow.events_[name.toString()][j].arguments);
-      }
-    }
-  };
-  
-  _that_.keyboardEvent = function(domEvent){
-  
-    var name = domEvent.type;
-    var mainWindow = WIDGET3D.getMainWindow();
-    
-    for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
-      if(mainWindow.childEvents_[name.toString()][k] != mainWindow &&
-        mainWindow.childEvents_[name.toString()][k].inFocus_)
-      {
-        var object = mainWindow.childEvents_[name.toString()][k];
-        
-        for(var m = 0; m < object.events_[name.toString()].length; ++m){
-          object.events_[name.toString()][m].callback(domEvent,
-            object.events_[name.toString()][m].arguments);
-          
-        }
-      }
-    }
-    
-    //then we call main windows onkeydown callback if there is one
-    if(mainWindow.events_.hasOwnProperty(name.toString())){      
-      for(var l = 0; l < mainWindow.events_[name.toString()].length; ++l){
-        mainWindow.events_[name.toString()][l].callback(domEvent,
-          mainWindow.events_[name.toString()][l].arguments);
-      }
-    }
-  };
-  
-  // This method can be used to trigger an event
-  // if id is specified the event is passed to specific object
-  // if the id isn't specified the event is passed to all objects
-  // that has the listener for the event.
-  //
-  _that_.triggerEvent = function(event, id){
-    var name = event.type;
-    
-    if(!id){
+  this.mouseupHandler = function(event){
+    if(that.rotate_){
+      that.rotate_ = false;
       
       var mainWindow = WIDGET3D.getMainWindow();
-      
-      for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
-        
-        var object = mainWindow.childEvents_[name.toString()][k];
-        
-        for(var m = 0; m < object.events_[name.toString()].length; ++m){
-          object.events_[name.toString()][m].callback(event,
-            object.events_[name.toString()][m].arguments);
-        }
-      }
+      mainWindow.removeEventListener("mousemove", that.mousemoveHandler);
+      mainWindow.removeEventListener("mouseup", that.mouseupHandler);
     }
-    else{
-      
-      var to = WIDGET3D.getObjectById(id);
-      for(var i = 0; i < to.events_[name.toString()].length; ++i){
-        to.events_[name.toString()][i].callback(event,
-          to.events_[name.toString()][i].arguments);
+  };
+  
+  this.mousedownHandler = function(event){
+    
+    if(event.button === that.mouseButton_ && event.shiftKey === that.shiftKey_){
+      that.component_.focus();
+      if(!that.rotate_){
+        that.rotate_ = true;
+        
+        that.clickLocation_ = WIDGET3D.mouseCoordinates(event);
+        that.rotationOnMouseDownY_ = that.modelRotationY_;
+        that.rotationOnMouseDownX_ = that.modelRotationX_;
+        
+        var mainWindow = WIDGET3D.getMainWindow();
+        mainWindow.addEventListener("mousemove", that.mousemoveHandler);
+        mainWindow.addEventListener("mouseup", that.mouseupHandler);
       }
     }
   };
 
+  this.mousemoveHandler = function(event){
+
+    if (that.rotate_){
+    
+      var mouse = WIDGET3D.mouseCoordinates(event);
+      
+      that.modelRotationY_ = that.rotationOnMouseDownY_ + ( mouse.x - that.clickLocation_.x );
+      that.modelRotationX_ = that.rotationOnMouseDownX_ + ( mouse.y - that.clickLocation_.y );
+    }
+
+  };
   
+  this.component_.addEventListener("mousedown", this.mousedownHandler);
 };
 
-//Adds event listener to dom element
-WIDGET3D.DomEvents.prototype.enableEvent = function(name){
-  //if there is no property or if the property is false
-  if(!this.enabled_.hasOwnProperty(name.toString()) || 
-    (this.enabled_.hasOwnProperty(name.toString()) && this.enabled_[name.toString()] === false))
-  {
-    if(name == "keyup" || name == "keydown" || name == "keypress"){
-      document.addEventListener(name, this.keyboardEvent, false);
-    }
-    else{
-      this.domElement_.addEventListener(name, this.mouseEvent, false);
-    }
-    this.enabled_[name.toString()] = true;
-  }
-};
+//Update must be called before the component is rendered to apply
+//the change in components rotation
+WIDGET3D.RollControls.prototype.update = function(){
 
-//Removes event listener from dom element
-WIDGET3D.DomEvents.prototype.disableEvent = function(name){
-
-  if(this.enabled_.hasOwnProperty(name.toString()) && this.enabled_[name.toString()] === true){
-    if(name == "keyup" || name == "keydown" || name == "keypress"){
-      //console.log("removed keyboard listener from event "+name);
-      document.removeEventListener(name, this.keyboardEvent, false);
-    }
-    else{
-      //console.log("removed mouse listener from event "+name);
-      this.domElement_.removeEventListener(name, this.mouseEvent, false);
-    }
-    this.enabled_[name.toString()] = false;
-    return true;
-  }
-  return false;
+  var rot = this.component_.getRot();
+  this.component_.setRotY(rot.y + ((this.modelRotationY_ - rot.y)*0.03));
+  this.component_.setRotX(rot.x + ((this.modelRotationX_ - rot.x)*0.03));
+  
 };
 
 /*
@@ -1416,14 +1494,13 @@ var THREEJS_WIDGET3D = {
           inv.getInverse(intersects[m].object.matrixWorld);
           
           //position where the click happened in object coordinates
-          //TODO: THIS IS DEPRECATED!
-          //var objPos = inv.multiplyVector3(intersects[m].point.clone());
-          
           var objPos = intersects[m].point.clone().applyProjection(inv);
-          
           var found = THREEJS_WIDGET3D.findObject(closest, event.type);
           
-          if(found){          
+          if(found){
+            //Info about object and world coordinates are atached to
+            //the event object so that the data may be used in eventhandlers like
+            //controls.
             event.objectCoordinates = objPos;
             event.worldCoordinates = intersects[m].point;
           }
@@ -1510,49 +1587,11 @@ WIDGET3D.GridWindow = function(parameters){
   this.defaultControls_ = parameters.defaultControls !== undefined ? parameters.defaultControls : false;
   
   if(this.defaultControls_){
-  
-    this.clickLocation_;
-    this.rotationOnMouseDownY_;
-    this.rotationOnMousedownX_;
-    this.modelRotationY_ = 0;
-    this.modelRotationX_ = 0;
-    this.rotate_ = false;
-  
-    this.mouseupHandler = function(event){
-      if(that.rotate_){
-        that.rotate_ = false;
-        
-        var mainWindow = WIDGET3D.getMainWindow();
-        mainWindow.removeEventListener("mousemove", that.mousemoveHandler);
-        mainWindow.removeEventListener("mouseup", that.mouseupHandler);
-      }
-    };
     
-    this.mousedownHandler = function(event){
-      that.focus();
-      if(!that.rotate_){
-        that.rotate_ = true;
-        
-        that.clickLocation_ = WIDGET3D.mouseCoordinates(event);
-        that.rotationOnMouseDownY_ = that.modelRotationY_;
-        that.rotationOnMouseDownX_ = that.modelRotationX_;
-        
-        var mainWindow = WIDGET3D.getMainWindow();
-        mainWindow.addEventListener("mousemove", that.mousemoveHandler);
-        mainWindow.addEventListener("mouseup", that.mouseupHandler);
-      }
-    };
-
-    this.mousemoveHandler = function(event){
-      if (that.rotate_){
-      
-        var mouse = WIDGET3D.mouseCoordinates(event);
-        
-        that.modelRotationY_ = that.rotationOnMouseDownY_ + ( mouse.x - that.clickLocation_.x );
-        that.modelRotationX_ = that.rotationOnMouseDownX_ + ( mouse.y - that.clickLocation_.y );
-      }
-    };
-    this.addEventListener("mousedown", this.mousedownHandler);
+    var button = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
+    var shift = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
+    
+    this.controls_ = new WIDGET3D.RollControls({component : this, mouseButton : button, shiftKey : shift});
   }
   
 };
@@ -1561,9 +1600,7 @@ WIDGET3D.GridWindow.prototype = WIDGET3D.Window.prototype.inheritance();
 
 WIDGET3D.GridWindow.prototype.update = function(){
   if(this.defaultControls_){
-    var rot = this.getRot();
-    this.setRotY(rot.y + ((this.modelRotationY_ - rot.y)*0.03));
-    this.setRotX(rot.x + ((this.modelRotationX_ - rot.x)*0.03));
+    this.controls_.update();
   }
   
   if(this.updateCallback_){
@@ -1766,80 +1803,15 @@ WIDGET3D.TitledWindow = function(parameters){
   
   this.defaultControls_ = parameters.defaultControls !== undefined ? parameters.defaultControls : false;
   
-  //drag controlls
-  this.clickStart_ = undefined;
-  this.newPos_ = this.getLocation();
-  this.drag_ = false;
-  this.firstEvent_ = false;
-  
   if(this.defaultControls_){
-  
-    this.mouseupHandler = function(event){
-      if(that.drag_){
-        that.drag_ = false;
-        that.clickStart_ = undefined;
-        
-        that.title_.removeEventListener("mousemove", that.mousemoveHandler);
-        WIDGET3D.getMainWindow().removeEventListener("mouseup", that.mouseupHandler);
-      }
-    };
+    var button = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
+    var shift = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
     
-    this.mousedownHandler = function(event){
-      that.focus();
-      //If this is the first time the event is fired we need to update the
-      //objects position data because it might have changed after constructor.
-      if(!that.firstEvent_){
-        that.newPos_ = that.getLocation();
-        that.firstEvent_ = true;
-      }
-      
-      if(!that.drag_){
-        that.drag_ = true;
-        that.clickStart_ = event.objectCoordinates;
-        
-        that.title_.addEventListener("mousemove", that.mousemoveHandler);
-        WIDGET3D.getMainWindow().addEventListener("mouseup", that.mouseupHandler);
-      }
-      return false;
-    };
-
-    this.mousemoveHandler = function(event){
-      if(that.drag_){
-        
-        var point = event.objectCoordinates;
-        
-        var dy = (point.y - that.clickStart_.y);
-        var dx = (point.x - that.clickStart_.x);
-        
-        var pos = that.getLocation();
-        var rotation = that.getRot();
-        
-        var tmpX = pos.x + (dx * Math.cos(Math.PI * rotation.y));
-        var tmpZ = pos.z + (dx * Math.sin(Math.PI * rotation.y));
-        
-        that.newPos_.y = pos.y + (dy * Math.cos(Math.PI * rotation.x));
-        that.newPos_.z = tmpZ - (dy * Math.sin(Math.PI * rotation.x) * Math.cos(Math.PI * rotation.y));
-        that.newPos_.x = tmpX + (dy * Math.sin(Math.PI * rotation.x) * Math.sin(Math.PI * rotation.y));
-      }
-    };
-    this.title_.addEventListener("mousedown", this.mousedownHandler);
+    this.controls_ = new WIDGET3D.DragControls({component : this, mouseButton : button, shiftKey : shift});
   }
 };
 
 WIDGET3D.TitledWindow.prototype = WIDGET3D.Window.prototype.inheritance();
-
-
-WIDGET3D.TitledWindow.prototype.update = function(){
-  
-  if(this.defaultControls_ && this.firstEvent_){
-    
-    this.setLocation(this.newPos_.x, this.newPos_.y, this.newPos_.z);
-  }
-  
-  if(this.updateCallback_){
-    this.updateCallback_.callback(this.updateCallback_.arguments);
-  }
-};
 
 //sets titlebar text
 WIDGET3D.TitledWindow.prototype.setTitle = function(title){
@@ -2376,3 +2348,72 @@ WIDGET3D.CameraGroup.prototype.setRotZ = function(rotZ){
   this.container_.rotation.z = rotZ;
   this.camera_.rotation.z = rotZ;
 };
+// DRAG CONTROLS for WIDGET3D three.js version
+//
+//Parameters: component: WIDGET3D.Basic typed object to which the controlls are attached
+//                       COMPONENT MUST BE GIVEN!
+//            mouseButtom: integer 0, 1 or 2. Tells which mouse button the controll is attached.
+//                         0 = left button (default), 1 = middle button if present, 2 = right button
+//            shiftKey: Boolean that tells if the shift key should be pressed down with the mouse button to apply the movement.
+//                      Default value is false.
+//
+WIDGET3D.DragControls = function(parameters){
+  
+  var that = this;
+  
+  this.component_ = parameters.component;
+  this.mouseButton_ = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
+  this.shiftKey_ = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
+  
+  this.drag_ = false;
+  this.offset_ = new THREE.Vector3();
+  
+  //invisible plane that is used to detect where the component should be draged.
+  this.plane_ = new THREE.Mesh( new THREE.PlaneGeometry( 2000, 2000, 8, 8 ), 
+    new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) );
+  this.plane_.visible = false;
+  WIDGET3D.scene.add( this.plane_ );
+  
+  
+  this.mouseupHandler = function(event){
+    if(that.drag_){
+      that.drag_ = false;
+      
+      that.plane_.position = that.component_.getLocation();
+      
+      that.component_.removeEventListener("mousemove", that.mousemoveHandler);
+      WIDGET3D.getMainWindow().removeEventListener("mouseup", that.mouseupHandler);
+    }
+  };
+  
+  this.mousedownHandler = function(event){
+    if(event.button === that.mouseButton_ && event.shiftKey === that.shiftKey_){
+      if(!that.drag_){
+        that.drag_ = true;
+        that.component_.focus();
+
+        that.offset_.copy(event.worldCoordinates).sub( that.plane_.position );
+        
+        that.component_.addEventListener("mousemove", that.mousemoveHandler);
+        WIDGET3D.getMainWindow().addEventListener("mouseup", that.mouseupHandler);
+      }
+    }
+  };
+
+  this.mousemoveHandler = function(event){
+    if(that.drag_){
+      
+      var pos = event.worldCoordinates.sub( that.offset_ );
+      that.component_.setLocation(pos.x, pos.y, pos.z);
+      that.plane_.position = that.component_.getLocation();
+      
+      that.plane_.lookAt( WIDGET3D.camera.position );
+    }
+  };
+  
+  this.component_.addEventListener("mousedown", this.mousedownHandler);
+};
+
+WIDGET3D.DragControls.prototype.update = function(){
+};
+

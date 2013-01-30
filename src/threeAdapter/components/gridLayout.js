@@ -48,49 +48,11 @@ WIDGET3D.GridWindow = function(parameters){
   this.defaultControls_ = parameters.defaultControls !== undefined ? parameters.defaultControls : false;
   
   if(this.defaultControls_){
-  
-    this.clickLocation_;
-    this.rotationOnMouseDownY_;
-    this.rotationOnMousedownX_;
-    this.modelRotationY_ = 0;
-    this.modelRotationX_ = 0;
-    this.rotate_ = false;
-  
-    this.mouseupHandler = function(event){
-      if(that.rotate_){
-        that.rotate_ = false;
-        
-        var mainWindow = WIDGET3D.getMainWindow();
-        mainWindow.removeEventListener("mousemove", that.mousemoveHandler);
-        mainWindow.removeEventListener("mouseup", that.mouseupHandler);
-      }
-    };
     
-    this.mousedownHandler = function(event){
-      that.focus();
-      if(!that.rotate_){
-        that.rotate_ = true;
-        
-        that.clickLocation_ = WIDGET3D.mouseCoordinates(event);
-        that.rotationOnMouseDownY_ = that.modelRotationY_;
-        that.rotationOnMouseDownX_ = that.modelRotationX_;
-        
-        var mainWindow = WIDGET3D.getMainWindow();
-        mainWindow.addEventListener("mousemove", that.mousemoveHandler);
-        mainWindow.addEventListener("mouseup", that.mouseupHandler);
-      }
-    };
-
-    this.mousemoveHandler = function(event){
-      if (that.rotate_){
-      
-        var mouse = WIDGET3D.mouseCoordinates(event);
-        
-        that.modelRotationY_ = that.rotationOnMouseDownY_ + ( mouse.x - that.clickLocation_.x );
-        that.modelRotationX_ = that.rotationOnMouseDownX_ + ( mouse.y - that.clickLocation_.y );
-      }
-    };
-    this.addEventListener("mousedown", this.mousedownHandler);
+    var button = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
+    var shift = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
+    
+    this.controls_ = new WIDGET3D.RollControls({component : this, mouseButton : button, shiftKey : shift});
   }
   
 };
@@ -99,9 +61,7 @@ WIDGET3D.GridWindow.prototype = WIDGET3D.Window.prototype.inheritance();
 
 WIDGET3D.GridWindow.prototype.update = function(){
   if(this.defaultControls_){
-    var rot = this.getRot();
-    this.setRotY(rot.y + ((this.modelRotationY_ - rot.y)*0.03));
-    this.setRotX(rot.x + ((this.modelRotationX_ - rot.x)*0.03));
+    this.controls_.update();
   }
   
   if(this.updateCallback_){

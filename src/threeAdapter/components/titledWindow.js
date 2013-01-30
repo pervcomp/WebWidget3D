@@ -71,80 +71,15 @@ WIDGET3D.TitledWindow = function(parameters){
   
   this.defaultControls_ = parameters.defaultControls !== undefined ? parameters.defaultControls : false;
   
-  //drag controlls
-  this.clickStart_ = undefined;
-  this.newPos_ = this.getLocation();
-  this.drag_ = false;
-  this.firstEvent_ = false;
-  
   if(this.defaultControls_){
-  
-    this.mouseupHandler = function(event){
-      if(that.drag_){
-        that.drag_ = false;
-        that.clickStart_ = undefined;
-        
-        that.title_.removeEventListener("mousemove", that.mousemoveHandler);
-        WIDGET3D.getMainWindow().removeEventListener("mouseup", that.mouseupHandler);
-      }
-    };
+    var button = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
+    var shift = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
     
-    this.mousedownHandler = function(event){
-      that.focus();
-      //If this is the first time the event is fired we need to update the
-      //objects position data because it might have changed after constructor.
-      if(!that.firstEvent_){
-        that.newPos_ = that.getLocation();
-        that.firstEvent_ = true;
-      }
-      
-      if(!that.drag_){
-        that.drag_ = true;
-        that.clickStart_ = event.objectCoordinates;
-        
-        that.title_.addEventListener("mousemove", that.mousemoveHandler);
-        WIDGET3D.getMainWindow().addEventListener("mouseup", that.mouseupHandler);
-      }
-      return false;
-    };
-
-    this.mousemoveHandler = function(event){
-      if(that.drag_){
-        
-        var point = event.objectCoordinates;
-        
-        var dy = (point.y - that.clickStart_.y);
-        var dx = (point.x - that.clickStart_.x);
-        
-        var pos = that.getLocation();
-        var rotation = that.getRot();
-        
-        var tmpX = pos.x + (dx * Math.cos(Math.PI * rotation.y));
-        var tmpZ = pos.z + (dx * Math.sin(Math.PI * rotation.y));
-        
-        that.newPos_.y = pos.y + (dy * Math.cos(Math.PI * rotation.x));
-        that.newPos_.z = tmpZ - (dy * Math.sin(Math.PI * rotation.x) * Math.cos(Math.PI * rotation.y));
-        that.newPos_.x = tmpX + (dy * Math.sin(Math.PI * rotation.x) * Math.sin(Math.PI * rotation.y));
-      }
-    };
-    this.title_.addEventListener("mousedown", this.mousedownHandler);
+    this.controls_ = new WIDGET3D.DragControls({component : this, mouseButton : button, shiftKey : shift});
   }
 };
 
 WIDGET3D.TitledWindow.prototype = WIDGET3D.Window.prototype.inheritance();
-
-
-WIDGET3D.TitledWindow.prototype.update = function(){
-  
-  if(this.defaultControls_ && this.firstEvent_){
-    
-    this.setLocation(this.newPos_.x, this.newPos_.y, this.newPos_.z);
-  }
-  
-  if(this.updateCallback_){
-    this.updateCallback_.callback(this.updateCallback_.arguments);
-  }
-};
 
 //sets titlebar text
 WIDGET3D.TitledWindow.prototype.setTitle = function(title){

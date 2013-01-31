@@ -70,13 +70,13 @@ WIDGET3D.RollControls = function(parameters){
 //the change in components rotation
 WIDGET3D.RollControls.prototype.update = function(){
 
-  var rot = this.component_.getRot();
+  var rot = this.component_.getRotation();
   
   var newRotY = rot.y + ((this.modelRotationY_ - rot.y)*0.03);
   var newRotX = rot.x + ((this.modelRotationX_ - rot.x)*0.03);
   
-  this.component_.setRotY(newRotY);
-  this.component_.setRotX(newRotX);
+  this.component_.setRotationY(newRotY);
+  this.component_.setRotationX(newRotX);
 };
 
 

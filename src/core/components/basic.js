@@ -137,23 +137,23 @@ WIDGET3D.Basic.prototype.setZ = function(z){
   this.mesh_.position.z = z;
 };
 
-WIDGET3D.Basic.prototype.getRot = function(){
+WIDGET3D.Basic.prototype.getRotation = function(){
   return {x: this.mesh_.rotation.x,
     y: this.mesh_.rotation.y,
     z: this.mesh_.rotation.z};
 };
 
-WIDGET3D.Basic.prototype.setRot = function(rotX, rotY, rotZ){
+WIDGET3D.Basic.prototype.setRotation = function(rotX, rotY, rotZ){
   this.mesh_.rotation.x = rotX;
   this.mesh_.rotation.y = rotY;
   this.mesh_.rotation.z = rotZ;
 };
 
-WIDGET3D.Basic.prototype.setRotX = function(rotX){
+WIDGET3D.Basic.prototype.setRotationX = function(rotX){
   this.mesh_.rotation.x = rotX;
 };
 
-WIDGET3D.Basic.prototype.setRotY = function(rotY){
+WIDGET3D.Basic.prototype.setRotationY = function(rotY){
   this.mesh_.rotation.y = rotY;
 };
 

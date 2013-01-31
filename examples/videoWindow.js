@@ -23,7 +23,7 @@ var init = function(){
     clearColor : 0xf9f9f9
   });
   
-  WIDGET3D.camera.position.z = 2000;
+  WIDGET3D.camera.position.z = 3000;
   WIDGET3D.camera.rotation.x = Math.PI/5;
   
   //--------------------------------------------
@@ -55,7 +55,6 @@ var init = function(){
     function(event, p){p.video.pause(); p.window.remove()},
     {video : video, window : videoWindow});
     
-  videoWindow.setLocation(100, -100, -100);
 
   mainWindow.addChild(videoWindow);
   

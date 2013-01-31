@@ -159,27 +159,27 @@ WIDGET3D.Window.prototype.setZ = function(z){
   this.container_.position.z = z;
 };
 
-WIDGET3D.Window.prototype.getRot = function(){
+WIDGET3D.Window.prototype.getRotation = function(){
   return {x: this.container_.rotation.x,
     y: this.container_.rotation.y,
     z: this.container_.rotation.z};
 };
 
-WIDGET3D.Window.prototype.setRot = function(rotX, rotY, rotZ){
+WIDGET3D.Window.prototype.setRotation = function(rotX, rotY, rotZ){
   this.container_.rotation.x = rotX;
   this.container_.rotation.y = rotY;
   this.container_.rotation.z = rotZ;
 };
 
-WIDGET3D.Window.prototype.setRotX = function(rotX){
+WIDGET3D.Window.prototype.setRotationX = function(rotX){
   this.container_.rotation.x = rotX;
 };
 
-WIDGET3D.Window.prototype.setRotY = function(rotY){
+WIDGET3D.Window.prototype.setRotationY = function(rotY){
   this.container_.rotation.y = rotY;
 };
 
-WIDGET3D.Window.prototype.setRotZ = function(rotZ){
+WIDGET3D.Window.prototype.setRotationZ = function(rotZ){
   this.container_.rotation.z = rotZ;
 };
 

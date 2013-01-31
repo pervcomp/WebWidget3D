@@ -31,7 +31,7 @@ WIDGET3D.CameraGroup.prototype = WIDGET3D.Window.prototype.inheritance();
 //Adds the object to cameragroup.
 //objects place is its offset from camera (camera is in origo when component is added)
 WIDGET3D.CameraGroup.prototype.addChild = function(object, distance){
-  var rot = this.getRot();
+  var rot = this.getRotation();
   var loc = this.getLocation();
   
   var distance = distance || {};
@@ -55,43 +55,43 @@ WIDGET3D.CameraGroup.prototype.addChild = function(object, distance){
 //LOCATION
 WIDGET3D.CameraGroup.prototype.setLocation = function(x, y, z){
 
-  this.container_.position.set({x: x, y: y, z: z});
+  WIDGET3D.Window.prototype.setLocation.call( this, x, y, z);
   this.camera_.position.set({x: x, y: y, z: z});
 };
 
 WIDGET3D.CameraGroup.prototype.setX = function(x){
-  this.container_.position.x = x;
+  WIDGET3D.Window.prototype.setX.call( this, x);
   this.camera_.position.x = x;
 };
 
 WIDGET3D.CameraGroup.prototype.setY = function(y){
-  this.container_.position.y = y;
+  WIDGET3D.Window.prototype.setY.call( this, y );
   this.camera_.position.y = y;
 };
 
 WIDGET3D.CameraGroup.prototype.setZ = function(z){
-  this.container_.position.z = z;
+  WIDGET3D.Window.prototype.setZ.call( this, z );
   this.camera_.position.z = z;
 };
 
 //ROTATION
-WIDGET3D.CameraGroup.prototype.setRot = function(rotX, rotY, rotZ){
+WIDGET3D.CameraGroup.prototype.setRotation = function(rotX, rotY, rotZ){
   
-  this.container_.rotation.set({x: rotX, y: rotY, z: rotZ});
+  WIDGET3D.Window.prototype.setRotation.call( this, x, y, z);
   this.camera_.rotation.set({x: rotX, y: rotY, z: rotZ});
 };
 
-WIDGET3D.CameraGroup.prototype.setRotX = function(rotX){
-  this.container_.rotation.x = rotX;
+WIDGET3D.CameraGroup.prototype.setRotationX = function(rotX){
+  WIDGET3D.Window.prototype.setRotationX.call( this, x);
   this.camera_.rotation.x = rotX;
 };
 
-WIDGET3D.CameraGroup.prototype.setRotY = function(rotY){
-  this.container_.rotation.y = rotY;
+WIDGET3D.CameraGroup.prototype.setRotationY = function(rotY){
+  WIDGET3D.Window.prototype.setRotationY.call( this, y);
   this.camera_.rotation.y = rotY;
 };
 
-WIDGET3D.CameraGroup.prototype.setRotZ = function(rotZ){
-  this.container_.rotation.z = rotZ;
+WIDGET3D.CameraGroup.prototype.setRotationZ = function(rotZ){
+  WIDGET3D.Window.prototype.setRotationZ.call( this, z);
   this.camera_.rotation.z = rotZ;
 };

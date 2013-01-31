@@ -27,9 +27,10 @@ WIDGET3D.DragControls = function(parameters){
     new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true, side : THREE.DoubleSide } ) );
   this.plane_.position = this.component_.getLocation();
   that.plane_.rotation = WIDGET3D.camera.rotation;
-  //this.plane_.visible = false;
+  this.plane_.visible = false;
   WIDGET3D.scene.add( this.plane_ );
   
+  this.start_ = false;
   
   this.mouseupHandler = function(event){
     if(that.drag_){
@@ -44,6 +45,7 @@ WIDGET3D.DragControls = function(parameters){
   
   this.mousedownHandler = function(event){
     if(event.button === that.mouseButton_ && event.shiftKey === that.shiftKey_){
+      that.start_ = true;
       if(!that.drag_){
       
         that.plane_.position = that.component_.getLocation();
@@ -87,5 +89,13 @@ WIDGET3D.DragControls = function(parameters){
   };
   
   this.component_.addEventListener("mousedown", this.mousedownHandler);
+  
+  this.startPositionChanged = function(){
+    if(!this.start_){
+      this.plane_.position = this.component_.getLocation();
+      return true;
+    }
+    return false;
+  };
 };
 

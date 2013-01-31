@@ -88,6 +88,8 @@ WIDGET3D.TitledWindow = function(parameters){
     
     this.controls_ = new WIDGET3D.DragControls({component : this, mouseButton : button, shiftKey : shift,
     width : (this.width_*2), height : ((this.height_+this.title_.height_)*2)});
+    
+    this.start_ = false;
   }
 };
 
@@ -133,4 +135,41 @@ WIDGET3D.TitledWindow.prototype.remove = function(){
   WIDGET3D.Window.prototype.remove.call( this );
 };
 
+WIDGET3D.TitledWindow.prototype.getContent = function(){
+  return this.content_;
+};
 
+WIDGET3D.TitledWindow.prototype.setLocation = function(x, y, z){
+  
+  WIDGET3D.Window.prototype.setLocation.call( this, x, y, z);
+  
+  if(this.defaultControls_ && !this.start_){
+    this.start_ = this.controls_.startPositionChanged();
+  }
+};
+
+WIDGET3D.TitledWindow.prototype.setX = function(x){
+  
+  WIDGET3D.Window.prototype.setX.call( this, x );
+  
+  if(this.defaultControls_ && !this.start_){
+    this.start_ = this.controls_.startPositionChanged();
+  }
+};
+
+WIDGET3D.TitledWindow.prototype.setY = function(y){
+
+  WIDGET3D.Window.prototype.setY.call( this, y );
+  
+  if(this.defaultControls_ && !this.start_){
+    this.start_ = this.controls_.startPositionChanged();
+  }
+};
+
+WIDGET3D.TitledWindow.prototype.setZ = function(z){
+  WIDGET3D.Window.prototype.setZ.call( this, z );
+  
+  if(this.defaultControls_ && !this.start_){
+    this.start_ = this.controls_.startPositionChanged();
+  }
+};

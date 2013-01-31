@@ -791,23 +791,23 @@ WIDGET3D.Basic.prototype.setZ = function(z){
   this.mesh_.position.z = z;
 };
 
-WIDGET3D.Basic.prototype.getRot = function(){
+WIDGET3D.Basic.prototype.getRotation = function(){
   return {x: this.mesh_.rotation.x,
     y: this.mesh_.rotation.y,
     z: this.mesh_.rotation.z};
 };
 
-WIDGET3D.Basic.prototype.setRot = function(rotX, rotY, rotZ){
+WIDGET3D.Basic.prototype.setRotation = function(rotX, rotY, rotZ){
   this.mesh_.rotation.x = rotX;
   this.mesh_.rotation.y = rotY;
   this.mesh_.rotation.z = rotZ;
 };
 
-WIDGET3D.Basic.prototype.setRotX = function(rotX){
+WIDGET3D.Basic.prototype.setRotationX = function(rotX){
   this.mesh_.rotation.x = rotX;
 };
 
-WIDGET3D.Basic.prototype.setRotY = function(rotY){
+WIDGET3D.Basic.prototype.setRotationY = function(rotY){
   this.mesh_.rotation.y = rotY;
 };
 
@@ -1093,27 +1093,27 @@ WIDGET3D.Window.prototype.setZ = function(z){
   this.container_.position.z = z;
 };
 
-WIDGET3D.Window.prototype.getRot = function(){
+WIDGET3D.Window.prototype.getRotation = function(){
   return {x: this.container_.rotation.x,
     y: this.container_.rotation.y,
     z: this.container_.rotation.z};
 };
 
-WIDGET3D.Window.prototype.setRot = function(rotX, rotY, rotZ){
+WIDGET3D.Window.prototype.setRotation = function(rotX, rotY, rotZ){
   this.container_.rotation.x = rotX;
   this.container_.rotation.y = rotY;
   this.container_.rotation.z = rotZ;
 };
 
-WIDGET3D.Window.prototype.setRotX = function(rotX){
+WIDGET3D.Window.prototype.setRotationX = function(rotX){
   this.container_.rotation.x = rotX;
 };
 
-WIDGET3D.Window.prototype.setRotY = function(rotY){
+WIDGET3D.Window.prototype.setRotationY = function(rotY){
   this.container_.rotation.y = rotY;
 };
 
-WIDGET3D.Window.prototype.setRotZ = function(rotZ){
+WIDGET3D.Window.prototype.setRotationZ = function(rotZ){
   this.container_.rotation.z = rotZ;
 };
 
@@ -1360,13 +1360,13 @@ WIDGET3D.RollControls = function(parameters){
 //the change in components rotation
 WIDGET3D.RollControls.prototype.update = function(){
 
-  var rot = this.component_.getRot();
+  var rot = this.component_.getRotation();
   
   var newRotY = rot.y + ((this.modelRotationY_ - rot.y)*0.03);
   var newRotX = rot.x + ((this.modelRotationX_ - rot.x)*0.03);
   
-  this.component_.setRotY(newRotY);
-  this.component_.setRotX(newRotX);
+  this.component_.setRotationY(newRotY);
+  this.component_.setRotationX(newRotX);
 };
 
 
@@ -1824,6 +1824,8 @@ WIDGET3D.TitledWindow = function(parameters){
     
     this.controls_ = new WIDGET3D.DragControls({component : this, mouseButton : button, shiftKey : shift,
     width : (this.width_*2), height : ((this.height_+this.title_.height_)*2)});
+    
+    this.start_ = false;
   }
 };
 
@@ -1869,7 +1871,44 @@ WIDGET3D.TitledWindow.prototype.remove = function(){
   WIDGET3D.Window.prototype.remove.call( this );
 };
 
+WIDGET3D.TitledWindow.prototype.getContent = function(){
+  return this.content_;
+};
 
+WIDGET3D.TitledWindow.prototype.setLocation = function(x, y, z){
+  
+  WIDGET3D.Window.prototype.setLocation.call( this, x, y, z);
+  
+  if(this.defaultControls_ && !this.start_){
+    this.start_ = this.controls_.startPositionChanged();
+  }
+};
+
+WIDGET3D.TitledWindow.prototype.setX = function(x){
+  
+  WIDGET3D.Window.prototype.setX.call( this, x );
+  
+  if(this.defaultControls_ && !this.start_){
+    this.start_ = this.controls_.startPositionChanged();
+  }
+};
+
+WIDGET3D.TitledWindow.prototype.setY = function(y){
+
+  WIDGET3D.Window.prototype.setY.call( this, y );
+  
+  if(this.defaultControls_ && !this.start_){
+    this.start_ = this.controls_.startPositionChanged();
+  }
+};
+
+WIDGET3D.TitledWindow.prototype.setZ = function(z){
+  WIDGET3D.Window.prototype.setZ.call( this, z );
+  
+  if(this.defaultControls_ && !this.start_){
+    this.start_ = this.controls_.startPositionChanged();
+  }
+};
 //---------------------------------------------------
 //
 // 3D DIALOG
@@ -2299,7 +2338,7 @@ WIDGET3D.CameraGroup.prototype = WIDGET3D.Window.prototype.inheritance();
 //Adds the object to cameragroup.
 //objects place is its offset from camera (camera is in origo when component is added)
 WIDGET3D.CameraGroup.prototype.addChild = function(object, distance){
-  var rot = this.getRot();
+  var rot = this.getRotation();
   var loc = this.getLocation();
   
   var distance = distance || {};
@@ -2323,44 +2362,44 @@ WIDGET3D.CameraGroup.prototype.addChild = function(object, distance){
 //LOCATION
 WIDGET3D.CameraGroup.prototype.setLocation = function(x, y, z){
 
-  this.container_.position.set({x: x, y: y, z: z});
+  WIDGET3D.Window.prototype.setLocation.call( this, x, y, z);
   this.camera_.position.set({x: x, y: y, z: z});
 };
 
 WIDGET3D.CameraGroup.prototype.setX = function(x){
-  this.container_.position.x = x;
+  WIDGET3D.Window.prototype.setX.call( this, x);
   this.camera_.position.x = x;
 };
 
 WIDGET3D.CameraGroup.prototype.setY = function(y){
-  this.container_.position.y = y;
+  WIDGET3D.Window.prototype.setY.call( this, y );
   this.camera_.position.y = y;
 };
 
 WIDGET3D.CameraGroup.prototype.setZ = function(z){
-  this.container_.position.z = z;
+  WIDGET3D.Window.prototype.setZ.call( this, z );
   this.camera_.position.z = z;
 };
 
 //ROTATION
-WIDGET3D.CameraGroup.prototype.setRot = function(rotX, rotY, rotZ){
+WIDGET3D.CameraGroup.prototype.setRotation = function(rotX, rotY, rotZ){
   
-  this.container_.rotation.set({x: rotX, y: rotY, z: rotZ});
+  WIDGET3D.Window.prototype.setRotation.call( this, x, y, z);
   this.camera_.rotation.set({x: rotX, y: rotY, z: rotZ});
 };
 
-WIDGET3D.CameraGroup.prototype.setRotX = function(rotX){
-  this.container_.rotation.x = rotX;
+WIDGET3D.CameraGroup.prototype.setRotationX = function(rotX){
+  WIDGET3D.Window.prototype.setRotationX.call( this, x);
   this.camera_.rotation.x = rotX;
 };
 
-WIDGET3D.CameraGroup.prototype.setRotY = function(rotY){
-  this.container_.rotation.y = rotY;
+WIDGET3D.CameraGroup.prototype.setRotationY = function(rotY){
+  WIDGET3D.Window.prototype.setRotationY.call( this, y);
   this.camera_.rotation.y = rotY;
 };
 
-WIDGET3D.CameraGroup.prototype.setRotZ = function(rotZ){
-  this.container_.rotation.z = rotZ;
+WIDGET3D.CameraGroup.prototype.setRotationZ = function(rotZ){
+  WIDGET3D.Window.prototype.setRotationZ.call( this, z);
   this.camera_.rotation.z = rotZ;
 };
 // DRAG CONTROLS for WIDGET3D three.js version
@@ -2384,7 +2423,7 @@ WIDGET3D.DragControls = function(parameters){
   var height = parameters.height !== undefined ? parameters.height : 2000;
   
   this.drag_ = false;
-  this.offset_ = new THREE.Vector3(100, 100, 100);
+  this.offset_ = new THREE.Vector3();
   
   //invisible plane that is used as a "draging area".
   //the planes orientation is the same as the cameras orientation.
@@ -2392,16 +2431,16 @@ WIDGET3D.DragControls = function(parameters){
     new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true, side : THREE.DoubleSide } ) );
   this.plane_.position = this.component_.getLocation();
   that.plane_.rotation = WIDGET3D.camera.rotation;
-  //this.plane_.visible = false;
+  this.plane_.visible = false;
   WIDGET3D.scene.add( this.plane_ );
   
+  this.start_ = false;
   
   this.mouseupHandler = function(event){
     if(that.drag_){
       that.drag_ = false;
       
       that.plane_.position = that.component_.getLocation();
-      that.plane_.updateMatrix();
       
       WIDGET3D.getMainWindow().removeEventListener("mousemove", that.mousemoveHandler);
       WIDGET3D.getMainWindow().removeEventListener("mouseup", that.mouseupHandler);
@@ -2410,11 +2449,11 @@ WIDGET3D.DragControls = function(parameters){
   
   this.mousedownHandler = function(event){
     if(event.button === that.mouseButton_ && event.shiftKey === that.shiftKey_){
+      that.start_ = true;
       if(!that.drag_){
       
         that.plane_.position = that.component_.getLocation();
         that.plane_.rotation = WIDGET3D.camera.rotation;
-        that.plane_.updateMatrix();
         
         that.drag_ = true;
         that.component_.focus();
@@ -2450,11 +2489,17 @@ WIDGET3D.DragControls = function(parameters){
       }
       
       that.plane_.position = that.component_.getLocation();
-      that.plane_.updateMatrix();
-      
     }
   };
   
   this.component_.addEventListener("mousedown", this.mousedownHandler);
+  
+  this.startPositionChanged = function(){
+    if(!this.start_){
+      this.plane_.position = this.component_.getLocation();
+      return true;
+    }
+    return false;
+  };
 };
 

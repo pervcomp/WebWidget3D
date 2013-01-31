@@ -24,6 +24,7 @@ var init = function(){
   });
   
   WIDGET3D.camera.position.z = 2000;
+  WIDGET3D.camera.rotation.x = Math.PI/5;
   
   //--------------------------------------------
   // TITLED WINDOW WHERE WE SHOW THE VIDEO
@@ -44,6 +45,8 @@ var init = function(){
     title : "video",
     texture : texture,
     defaultControls : true});
+    
+  var rollControls = new WIDGET3D.RollControls({component : videoWindow, mouseButton : 0, shiftKey : true});
   
   //CALLBACK FOR UPDATING TEXTURE
   videoWindow.addUpdateCallback(function(texture){texture.needsUpdate = true}, texture);
@@ -51,15 +54,18 @@ var init = function(){
   videoWindow.closeButton_.addEventListener("click",
     function(event, p){p.video.pause(); p.window.remove()},
     {video : video, window : videoWindow});
+    
+  videoWindow.setLocation(100, -100, -100);
 
   mainWindow.addChild(videoWindow);
   
   var mainLoop = function(){
-    requestAnimationFrame( mainLoop );
 
+    requestAnimationFrame( mainLoop );
+    rollControls.update();
     videoWindow.update();
-    
     WIDGET3D.render();
+    
   };
   mainLoop();
 }

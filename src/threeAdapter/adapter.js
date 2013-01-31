@@ -137,7 +137,6 @@ var THREEJS_WIDGET3D = {
             event.objectCoordinates = objPos;
             event.worldCoordinates = intersects[m].point;
           }
-
           return found;
         }
       }

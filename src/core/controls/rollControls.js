@@ -58,6 +58,7 @@ WIDGET3D.RollControls = function(parameters){
       
       that.modelRotationY_ = that.rotationOnMouseDownY_ + ( mouse.x - that.clickLocation_.x );
       that.modelRotationX_ = that.rotationOnMouseDownX_ + ( mouse.y - that.clickLocation_.y );
+      
     }
 
   };
@@ -70,8 +71,12 @@ WIDGET3D.RollControls = function(parameters){
 WIDGET3D.RollControls.prototype.update = function(){
 
   var rot = this.component_.getRot();
-  this.component_.setRotY(rot.y + ((this.modelRotationY_ - rot.y)*0.03));
-  this.component_.setRotX(rot.x + ((this.modelRotationX_ - rot.x)*0.03));
   
+  var newRotY = rot.y + ((this.modelRotationY_ - rot.y)*0.03);
+  var newRotX = rot.x + ((this.modelRotationX_ - rot.x)*0.03);
+  
+  this.component_.setRotY(newRotY);
+  this.component_.setRotX(newRotX);
 };
+
 

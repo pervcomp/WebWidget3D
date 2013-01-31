@@ -1348,6 +1348,7 @@ WIDGET3D.RollControls = function(parameters){
       
       that.modelRotationY_ = that.rotationOnMouseDownY_ + ( mouse.x - that.clickLocation_.x );
       that.modelRotationX_ = that.rotationOnMouseDownX_ + ( mouse.y - that.clickLocation_.y );
+      
     }
 
   };
@@ -1360,10 +1361,14 @@ WIDGET3D.RollControls = function(parameters){
 WIDGET3D.RollControls.prototype.update = function(){
 
   var rot = this.component_.getRot();
-  this.component_.setRotY(rot.y + ((this.modelRotationY_ - rot.y)*0.03));
-  this.component_.setRotX(rot.x + ((this.modelRotationX_ - rot.x)*0.03));
   
+  var newRotY = rot.y + ((this.modelRotationY_ - rot.y)*0.03);
+  var newRotX = rot.x + ((this.modelRotationX_ - rot.x)*0.03);
+  
+  this.component_.setRotY(newRotY);
+  this.component_.setRotX(newRotX);
 };
+
 
 /*
 Copyright (C) 2012 Anna-Liisa Mattila
@@ -1504,7 +1509,6 @@ var THREEJS_WIDGET3D = {
             event.objectCoordinates = objPos;
             event.worldCoordinates = intersects[m].point;
           }
-
           return found;
         }
       }
@@ -1768,9 +1772,32 @@ WIDGET3D.TitledWindow = function(parameters){
   var texture = parameters.texture;
   var material = parameters.material !== undefined ? parameters.material :  new THREE.MeshBasicMaterial({color : color, map : texture, side : THREE.DoubleSide});
   
-  var mesh =  new THREE.Mesh( new THREE.PlaneGeometry( this.width_, this.height_ ), material);
+  //var mesh =  new THREE.Mesh( new THREE.PlaneGeometry( this.width_, this.height_ ), material);
+  //this.setMesh(mesh);
   
-  this.setMesh(mesh);
+  //---------------------------------------------------
+  //TITLEBAR
+  //---------------------------------------------------
+  //this.title_ = new WIDGET3D.Basic();
+  this.title_ = {};
+  
+  this.textureCanvas_ = document.createElement('canvas');
+  this.textureCanvas_.width = 512;
+  this.textureCanvas_.height = 128;
+  this.textureCanvas_.style.display = "none";
+  
+  document.body.appendChild(this.textureCanvas_);
+  this.titleContext_ = this.textureCanvas_.getContext('2d');
+  this.setTitle(title, material.side);
+  
+  //---------------------------------------------------
+  //CONTENT
+  //---------------------------------------------------
+  this.content_ =  new WIDGET3D.Basic();
+  var mesh =  new THREE.Mesh( new THREE.PlaneGeometry( this.width_, this.height_ ), material);
+  this.content_.setMesh(mesh);
+  this.addChild(this.content_);
+  
   
   //---------------------------------------------------
   //CLOSE BUTTON
@@ -1785,36 +1812,25 @@ WIDGET3D.TitledWindow = function(parameters){
   
   this.addChild(this.closeButton_);
   
+  
   //---------------------------------------------------
-  //TITLEBAR
+  //CONTROLS
   //---------------------------------------------------
-  this.title_ = new WIDGET3D.Basic();
-  
-  this.textureCanvas_ = document.createElement('canvas');
-  this.textureCanvas_.width = 512;
-  this.textureCanvas_.height = 128;
-  this.textureCanvas_.style.display = "none";
-  
-  document.body.appendChild(this.textureCanvas_);
-  this.titleContext_ = this.textureCanvas_.getContext('2d');
-  this.setTitle(title);
-  
-  this.addChild(this.title_);
-  
   this.defaultControls_ = parameters.defaultControls !== undefined ? parameters.defaultControls : false;
   
   if(this.defaultControls_){
     var button = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
     var shift = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
     
-    this.controls_ = new WIDGET3D.DragControls({component : this, mouseButton : button, shiftKey : shift});
+    this.controls_ = new WIDGET3D.DragControls({component : this, mouseButton : button, shiftKey : shift,
+    width : (this.width_*2), height : ((this.height_+this.title_.height_)*2)});
   }
 };
 
 WIDGET3D.TitledWindow.prototype = WIDGET3D.Window.prototype.inheritance();
 
 //sets titlebar text
-WIDGET3D.TitledWindow.prototype.setTitle = function(title){
+WIDGET3D.TitledWindow.prototype.setTitle = function(title, side){
 
   this.titleContext_.fillStyle = "#B3B3B3";
   this.titleContext_.fillRect(0, 0, this.textureCanvas_.width, this.textureCanvas_.height);
@@ -1826,17 +1842,16 @@ WIDGET3D.TitledWindow.prototype.setTitle = function(title){
   this.titleContext_.fillText(title, 10, this.textureCanvas_.height/2);
   var texture = new THREE.Texture(this.textureCanvas_);
   
-  var material = new THREE.MeshBasicMaterial({ map: texture, side : this.mesh_.material.side });
+  var material = new THREE.MeshBasicMaterial({ map: texture, side : side });
   
   this.title_.width_ = this.width_ - this.width_/10.0;
   this.title_.height_ = this.height_/10.0;
   
-  var mesh = new THREE.Mesh( new THREE.PlaneGeometry(this.title_.width_, this.title_.height_), material);
+  this.titleMesh_ = new THREE.Mesh( new THREE.PlaneGeometry(this.title_.width_, this.title_.height_), material);
+  this.titleMesh_.position.y = ((this.height_/2.0)+(this.height_/20.0));
+  this.titleMesh_.position.x =(((this.width_ - this.width_/10.0)/2.0) - (this.width_/2.0));
   
-  this.title_.setMesh(mesh);
-  
-  this.title_.setY((this.height_/2.0)+(this.height_/20.0));
-  this.title_.setX(((this.width_ - this.width_/10.0)/2.0) - (this.width_/2.0));
+  this.setMesh(this.titleMesh_);
   
   texture.needsUpdate = true;
 };
@@ -2365,13 +2380,19 @@ WIDGET3D.DragControls = function(parameters){
   this.mouseButton_ = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
   this.shiftKey_ = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
   
-  this.drag_ = false;
-  this.offset_ = new THREE.Vector3();
+  var width = parameters.width !== undefined ? parameters.width : 2000;
+  var height = parameters.height !== undefined ? parameters.height : 2000;
   
-  //invisible plane that is used to detect where the component should be draged.
-  this.plane_ = new THREE.Mesh( new THREE.PlaneGeometry( 2000, 2000, 8, 8 ), 
-    new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) );
-  this.plane_.visible = false;
+  this.drag_ = false;
+  this.offset_ = new THREE.Vector3(100, 100, 100);
+  
+  //invisible plane that is used as a "draging area".
+  //the planes orientation is the same as the cameras orientation.
+  this.plane_ = new THREE.Mesh( new THREE.PlaneGeometry( width, height, 8, 8 ), 
+    new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true, side : THREE.DoubleSide } ) );
+  this.plane_.position = this.component_.getLocation();
+  that.plane_.rotation = WIDGET3D.camera.rotation;
+  //this.plane_.visible = false;
   WIDGET3D.scene.add( this.plane_ );
   
   
@@ -2380,8 +2401,9 @@ WIDGET3D.DragControls = function(parameters){
       that.drag_ = false;
       
       that.plane_.position = that.component_.getLocation();
+      that.plane_.updateMatrix();
       
-      that.component_.removeEventListener("mousemove", that.mousemoveHandler);
+      WIDGET3D.getMainWindow().removeEventListener("mousemove", that.mousemoveHandler);
       WIDGET3D.getMainWindow().removeEventListener("mouseup", that.mouseupHandler);
     }
   };
@@ -2389,12 +2411,24 @@ WIDGET3D.DragControls = function(parameters){
   this.mousedownHandler = function(event){
     if(event.button === that.mouseButton_ && event.shiftKey === that.shiftKey_){
       if(!that.drag_){
+      
+        that.plane_.position = that.component_.getLocation();
+        that.plane_.rotation = WIDGET3D.camera.rotation;
+        that.plane_.updateMatrix();
+        
         that.drag_ = true;
         that.component_.focus();
-
-        that.offset_.copy(event.worldCoordinates).sub( that.plane_.position );
         
-        that.component_.addEventListener("mousemove", that.mousemoveHandler);
+        var mouse = WIDGET3D.mouseCoordinates(event);
+        var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
+        var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera);
+        
+        var intersects = ray.intersectObject( that.plane_ );
+        if(intersects.length > 0){
+          that.offset_.copy( intersects[ 0 ].point ).sub( that.plane_.position );
+        }
+        
+        WIDGET3D.getMainWindow().addEventListener("mousemove", that.mousemoveHandler);
         WIDGET3D.getMainWindow().addEventListener("mouseup", that.mouseupHandler);
       }
     }
@@ -2402,18 +2436,25 @@ WIDGET3D.DragControls = function(parameters){
 
   this.mousemoveHandler = function(event){
     if(that.drag_){
+    
+      var mouse = WIDGET3D.mouseCoordinates(event);
+      var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
+      var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera);
       
-      var pos = event.worldCoordinates.sub( that.offset_ );
-      that.component_.setLocation(pos.x, pos.y, pos.z);
+      var intersects = ray.intersectObject( that.plane_ );
+      if(intersects.length > 0){
+        
+        var pos = intersects[ 0 ].point.sub( that.offset_);
+        that.component_.setLocation(pos.x, pos.y, pos.z);
+        
+      }
+      
       that.plane_.position = that.component_.getLocation();
+      that.plane_.updateMatrix();
       
-      that.plane_.lookAt( WIDGET3D.camera.position );
     }
   };
   
   this.component_.addEventListener("mousedown", this.mousedownHandler);
-};
-
-WIDGET3D.DragControls.prototype.update = function(){
 };
 

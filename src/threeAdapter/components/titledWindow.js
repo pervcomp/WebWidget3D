@@ -36,9 +36,32 @@ WIDGET3D.TitledWindow = function(parameters){
   var texture = parameters.texture;
   var material = parameters.material !== undefined ? parameters.material :  new THREE.MeshBasicMaterial({color : color, map : texture, side : THREE.DoubleSide});
   
-  var mesh =  new THREE.Mesh( new THREE.PlaneGeometry( this.width_, this.height_ ), material);
+  //var mesh =  new THREE.Mesh( new THREE.PlaneGeometry( this.width_, this.height_ ), material);
+  //this.setMesh(mesh);
   
-  this.setMesh(mesh);
+  //---------------------------------------------------
+  //TITLEBAR
+  //---------------------------------------------------
+  //this.title_ = new WIDGET3D.Basic();
+  this.title_ = {};
+  
+  this.textureCanvas_ = document.createElement('canvas');
+  this.textureCanvas_.width = 512;
+  this.textureCanvas_.height = 128;
+  this.textureCanvas_.style.display = "none";
+  
+  document.body.appendChild(this.textureCanvas_);
+  this.titleContext_ = this.textureCanvas_.getContext('2d');
+  this.setTitle(title, material.side);
+  
+  //---------------------------------------------------
+  //CONTENT
+  //---------------------------------------------------
+  this.content_ =  new WIDGET3D.Basic();
+  var mesh =  new THREE.Mesh( new THREE.PlaneGeometry( this.width_, this.height_ ), material);
+  this.content_.setMesh(mesh);
+  this.addChild(this.content_);
+  
   
   //---------------------------------------------------
   //CLOSE BUTTON
@@ -53,36 +76,25 @@ WIDGET3D.TitledWindow = function(parameters){
   
   this.addChild(this.closeButton_);
   
+  
   //---------------------------------------------------
-  //TITLEBAR
+  //CONTROLS
   //---------------------------------------------------
-  this.title_ = new WIDGET3D.Basic();
-  
-  this.textureCanvas_ = document.createElement('canvas');
-  this.textureCanvas_.width = 512;
-  this.textureCanvas_.height = 128;
-  this.textureCanvas_.style.display = "none";
-  
-  document.body.appendChild(this.textureCanvas_);
-  this.titleContext_ = this.textureCanvas_.getContext('2d');
-  this.setTitle(title);
-  
-  this.addChild(this.title_);
-  
   this.defaultControls_ = parameters.defaultControls !== undefined ? parameters.defaultControls : false;
   
   if(this.defaultControls_){
     var button = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
     var shift = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
     
-    this.controls_ = new WIDGET3D.DragControls({component : this, mouseButton : button, shiftKey : shift});
+    this.controls_ = new WIDGET3D.DragControls({component : this, mouseButton : button, shiftKey : shift,
+    width : (this.width_*2), height : ((this.height_+this.title_.height_)*2)});
   }
 };
 
 WIDGET3D.TitledWindow.prototype = WIDGET3D.Window.prototype.inheritance();
 
 //sets titlebar text
-WIDGET3D.TitledWindow.prototype.setTitle = function(title){
+WIDGET3D.TitledWindow.prototype.setTitle = function(title, side){
 
   this.titleContext_.fillStyle = "#B3B3B3";
   this.titleContext_.fillRect(0, 0, this.textureCanvas_.width, this.textureCanvas_.height);
@@ -94,17 +106,16 @@ WIDGET3D.TitledWindow.prototype.setTitle = function(title){
   this.titleContext_.fillText(title, 10, this.textureCanvas_.height/2);
   var texture = new THREE.Texture(this.textureCanvas_);
   
-  var material = new THREE.MeshBasicMaterial({ map: texture, side : this.mesh_.material.side });
+  var material = new THREE.MeshBasicMaterial({ map: texture, side : side });
   
   this.title_.width_ = this.width_ - this.width_/10.0;
   this.title_.height_ = this.height_/10.0;
   
-  var mesh = new THREE.Mesh( new THREE.PlaneGeometry(this.title_.width_, this.title_.height_), material);
+  this.titleMesh_ = new THREE.Mesh( new THREE.PlaneGeometry(this.title_.width_, this.title_.height_), material);
+  this.titleMesh_.position.y = ((this.height_/2.0)+(this.height_/20.0));
+  this.titleMesh_.position.x =(((this.width_ - this.width_/10.0)/2.0) - (this.width_/2.0));
   
-  this.title_.setMesh(mesh);
-  
-  this.title_.setY((this.height_/2.0)+(this.height_/20.0));
-  this.title_.setX(((this.width_ - this.width_/10.0)/2.0) - (this.width_/2.0));
+  this.setMesh(this.titleMesh_);
   
   texture.needsUpdate = true;
 };

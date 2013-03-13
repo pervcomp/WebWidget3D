@@ -24,7 +24,7 @@ var init = function(){
     clearColor : 0xf9f9f9
   });
   
-  WIDGET3D.camera.position.z = 2000;
+  WIDGET3D.camera.setZ(2000);
   
   //--------------------------------------------
   // SUBWINDOW FOR SMALL IMAGES

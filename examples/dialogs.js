@@ -22,19 +22,20 @@ var init = function(){
     clearColor : 0xf9f9f9
   });
   
-  WIDGET3D.camera.position.z = 1500;
+  WIDGET3D.camera.setZ(1500);
   
   //--------------------------------------------
   // Example dialog
   //--------------------------------------------
   
   //styled window
-  var dialog = new WIDGET3D.Dialog({height : 1500, width : 1500, maxTextLength : 16});
+  var dialog = new WIDGET3D.Dialog({height : 1000, width : 1000, maxTextLength : 16});
   
   dialog.button_.addEventListener("click",
     function(event, dialog){dialog.remove()}, dialog);
     
-  dialog.setX(-800);
+  dialog.setX(-600);
+  dialog.setRotationX(-Math.PI/10);
   
   mainWindow.addChild(dialog);
   
@@ -42,26 +43,23 @@ var init = function(){
     {string : "choice1", onclick : {handler : function(){alert("clicked choice1");}}},
     {string : "choice2", onclick : {handler : function(){alert("clicked choice2");}}},
     {string : "choice3", onclick : {handler : function(){alert("clicked choice3");}}},
-    {string : "choice4", onclick : {handler : function(){alert("clicked choice4");}}},
-    {string : "choice5", onclick : {handler : function(){alert("clicked choice5");}}},
-    {string : "choice6", onclick : {handler : function(){alert("clicked choice6");}}}
-  ];
+    {string : "choice4", onclick : {handler : function(){alert("clicked choice4");}}}
   
   var select = new WIDGET3D.SelectDialog({text : "Menu",
     choices: choices,
     hasCancel : true,
-    width : 1500,
-    height : 1500});
+    width : 1200,
+    height : 1200,
+    depth : 30});
   
-  select.setX(800);
+  select.setX(600);
+  select.setRotationY(Math.PI/10);
   
   mainWindow.addChild(select);
   
   var mainLoop = function(){
     requestAnimationFrame( mainLoop );
-
     dialog.update();
-    
     WIDGET3D.render();
   };
   mainLoop();

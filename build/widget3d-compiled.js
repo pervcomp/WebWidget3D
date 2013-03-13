@@ -1349,6 +1349,8 @@ WIDGET3D.RollControls = function(parameters){
       that.modelRotationY_ = that.rotationOnMouseDownY_ + ( mouse.x - that.clickLocation_.x );
       that.modelRotationX_ = that.rotationOnMouseDownX_ + ( mouse.y - that.clickLocation_.y );
       
+      that.update();
+      
     }
 
   };
@@ -1362,8 +1364,8 @@ WIDGET3D.RollControls.prototype.update = function(){
 
   var rot = this.component_.getRotation();
   
-  var newRotY = rot.y + ((this.modelRotationY_ - rot.y)*0.03);
-  var newRotX = rot.x + ((this.modelRotationX_ - rot.x)*0.03);
+  var newRotY = rot.y + ((this.modelRotationY_ - rot.y)*0.04);
+  var newRotX = rot.x + ((this.modelRotationX_ - rot.x)*0.04);
   
   this.component_.setRotationY(newRotY);
   this.component_.setRotationX(newRotX);
@@ -1429,7 +1431,7 @@ var THREEJS_WIDGET3D = {
       }
       
       //setting three.js camera
-      WIDGET3D.camera = parameters.camera !== undefined ? parameters.camera  : 
+      var camera = parameters.camera !== undefined ? parameters.camera  : 
         new THREE.PerspectiveCamera(75, 
           WIDGET3D.renderer.domElement.width / WIDGET3D.renderer.domElement.height,
           1, 10000);
@@ -1457,11 +1459,14 @@ var THREEJS_WIDGET3D = {
       WIDGET3D.scene.add(mainWindow.container_);
       
       WIDGET3D.projector = new THREE.Projector();
+      WIDGET3D.camera = new WIDGET3D.CameraGroup({camera : camera});
+      
+      mainWindow.addChild(WIDGET3D.camera);
       
       //---------------------------------------------
       //CREATING RENDERING METHOD
       WIDGET3D.render = function(){
-        WIDGET3D.renderer.render(WIDGET3D.scene, WIDGET3D.camera);
+        WIDGET3D.renderer.render(WIDGET3D.scene, WIDGET3D.camera.camera_);
       };
       //---------------------------------------------
       
@@ -1480,7 +1485,7 @@ var THREEJS_WIDGET3D = {
     var mouse = WIDGET3D.mouseCoordinates(event);
     
     var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
-    var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera);
+    var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera.camera_);
     
     //intersects checks now all the meshes in scene. It might be good to construct
     // a datastructure that contains meshes of mainWindow.childEvents_.event array content
@@ -1602,15 +1607,6 @@ WIDGET3D.GridWindow = function(parameters){
 
 WIDGET3D.GridWindow.prototype = WIDGET3D.Window.prototype.inheritance();
 
-WIDGET3D.GridWindow.prototype.update = function(){
-  if(this.defaultControls_){
-    this.controls_.update();
-  }
-  
-  if(this.updateCallback_){
-    this.updateCallback_.callback(this.updateCallback_.arguments);
-  }
-};
 
 WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
   this.density_ = newDensity;
@@ -1772,23 +1768,13 @@ WIDGET3D.TitledWindow = function(parameters){
   var texture = parameters.texture;
   var material = parameters.material !== undefined ? parameters.material :  new THREE.MeshBasicMaterial({color : color, map : texture, side : THREE.DoubleSide});
   
-  //var mesh =  new THREE.Mesh( new THREE.PlaneGeometry( this.width_, this.height_ ), material);
-  //this.setMesh(mesh);
   
   //---------------------------------------------------
-  //TITLEBAR
+  //TITLEBAR, ACTS AS THE BODY FOR THE WINDOW
   //---------------------------------------------------
-  //this.title_ = new WIDGET3D.Basic();
   this.title_ = {};
-  
-  this.textureCanvas_ = document.createElement('canvas');
-  this.textureCanvas_.width = 512;
-  this.textureCanvas_.height = 128;
-  this.textureCanvas_.style.display = "none";
-  
-  document.body.appendChild(this.textureCanvas_);
-  this.titleContext_ = this.textureCanvas_.getContext('2d');
-  this.setTitle(title, material.side);
+  var mainMesh = this.createTitle(title, material.side);
+  this.setMesh(mainMesh);
   
   //---------------------------------------------------
   //CONTENT
@@ -1812,7 +1798,6 @@ WIDGET3D.TitledWindow = function(parameters){
   
   this.addChild(this.closeButton_);
   
-  
   //---------------------------------------------------
   //CONTROLS
   //---------------------------------------------------
@@ -1821,9 +1806,18 @@ WIDGET3D.TitledWindow = function(parameters){
   if(this.defaultControls_){
     var button = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
     var shift = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
+    var attached = parameters.attached !== undefined ? parameters.attached : false;
+    var debug = parameters.debug !== undefined ? parameters.debug : false;
     
-    this.controls_ = new WIDGET3D.DragControls({component : this, mouseButton : button, shiftKey : shift,
-    width : (this.width_*2), height : ((this.height_+this.title_.height_)*2)});
+    this.controls_ = new WIDGET3D.DragControls({
+      attached: attached,
+      debug: debug,
+      component : this,
+      mouseButton : button,
+      shiftKey : shift,
+      width : (this.width_*2),
+      height : ((this.height_+this.title_.height_)*2)
+    });
     
     this.start_ = false;
   }
@@ -1832,31 +1826,51 @@ WIDGET3D.TitledWindow = function(parameters){
 WIDGET3D.TitledWindow.prototype = WIDGET3D.Window.prototype.inheritance();
 
 //sets titlebar text
-WIDGET3D.TitledWindow.prototype.setTitle = function(title, side){
+WIDGET3D.TitledWindow.prototype.createTitle = function(title, side){
 
-  this.titleContext_.fillStyle = "#B3B3B3";
-  this.titleContext_.fillRect(0, 0, this.textureCanvas_.width, this.textureCanvas_.height);
+  this.textureCanvas_ = document.createElement('canvas');
+  this.textureCanvas_.width = 512;
+  this.textureCanvas_.height = 128;
+  this.textureCanvas_.style.display = "none";
   
-  this.titleContext_.fillStyle = "#000000";
-  this.titleContext_.font = "bold 60px Courier New";
-  this.titleContext_.align = "center";
-  this.titleContext_.textBaseline = "middle";
-  this.titleContext_.fillText(title, 10, this.textureCanvas_.height/2);
+  document.body.appendChild(this.textureCanvas_);
+  
+  this.setTitle(title);
+  
   var texture = new THREE.Texture(this.textureCanvas_);
+  texture.needsUpdate = true;
   
   var material = new THREE.MeshBasicMaterial({ map: texture, side : side });
   
   this.title_.width_ = this.width_ - this.width_/10.0;
   this.title_.height_ = this.height_/10.0;
   
-  this.titleMesh_ = new THREE.Mesh( new THREE.PlaneGeometry(this.title_.width_, this.title_.height_), material);
-  this.titleMesh_.position.y = ((this.height_/2.0)+(this.height_/20.0));
-  this.titleMesh_.position.x =(((this.width_ - this.width_/10.0)/2.0) - (this.width_/2.0));
+  var titleMesh = new THREE.Mesh( new THREE.PlaneGeometry(this.title_.width_, this.title_.height_), material);
+  titleMesh.position.y = ((this.height_/2.0)+(this.height_/20.0));
+  titleMesh.position.x =(((this.width_ - this.width_/10.0)/2.0) - (this.width_/2.0));
   
-  this.setMesh(this.titleMesh_);
-  
-  texture.needsUpdate = true;
+  return titleMesh;
 };
+
+WIDGET3D.TitledWindow.prototype.setTitle = function(title){
+
+  var titleContext = this.textureCanvas_.getContext('2d');
+
+  titleContext.fillStyle = "#B3B3B3";
+  titleContext.fillRect(0, 0, this.textureCanvas_.width, this.textureCanvas_.height);
+  
+  titleContext.fillStyle = "#000000";
+  titleContext.font = "bold 60px Courier New";
+  titleContext.align = "center";
+  titleContext.textBaseline = "middle";
+  titleContext.fillText(title, 10, this.textureCanvas_.height/2);
+};
+
+WIDGET3D.TitledWindow.prototype.updateTitle = function(title){
+
+  this.setTitle(title);
+  this.mesh_.material.map.needsUpdate = true;
+}
 
 
 WIDGET3D.TitledWindow.prototype.remove = function(){
@@ -1867,6 +1881,10 @@ WIDGET3D.TitledWindow.prototype.remove = function(){
   //removing texturecanvases from DOM
   var canvas = this.textureCanvas_;
   document.body.removeChild(canvas);
+  
+  if(this.defaultControls_){
+    this.controls_.remove();
+  }
   
   WIDGET3D.Window.prototype.remove.call( this );
 };
@@ -2134,6 +2152,7 @@ WIDGET3D.SelectDialog = function(parameters){
 
   this.width_ = parameters.width !== undefined ? parameters.width : 1000;
   this.height_ = parameters.height !== undefined ? parameters.height : 1000;
+  this.depth_ = parameters.depth !== undefined ? parameters.depth : 10;
   this.color_ = parameters.color !== undefined ? parameters.color : 0xC0D0D0;
   this.opacity_ = parameters.opacity !== undefined ? parameters.opacity : 0.9;
   this.choices_ = parameters.choices !== undefined ? parameters.choices : [];
@@ -2172,7 +2191,7 @@ WIDGET3D.SelectDialog.prototype.createText = function(){
   
   this.choiceHeight_ = this.height_/((this.choices_.length+1)*1.2);
   
-  var mesh = new THREE.Mesh(new THREE.CubeGeometry(this.width_, this.choiceHeight_, 10), material);
+  var mesh = new THREE.Mesh(new THREE.CubeGeometry(this.width_, this.choiceHeight_, this.depth_), material);
 
   mesh.position.y = this.height_*0.5 - this.choiceHeight_*0.5;
   
@@ -2196,7 +2215,7 @@ WIDGET3D.SelectDialog.prototype.createChoises = function(){
     var material = this.createButtonMaterial(this.choices_[i].string, choiceContext, choiceCanvas);
     var width = this.width_/1.2;
     var height = this.choiceHeight_;
-    var mesh = new THREE.Mesh( new THREE.CubeGeometry(width, height, 10), material);
+    var mesh = new THREE.Mesh( new THREE.CubeGeometry(width, height, this.depth_), material);
     
     choice.setMesh(mesh);
     
@@ -2327,82 +2346,13 @@ WIDGET3D.CameraGroup = function(parameters){
   
   var parameters = parameters || {};
   
-  this.camera_ = parameters.camera !== undefined ? parameters.camera : WIDGET3D.camera;
+  this.camera_ = parameters.camera;
+  
   this.camera_.position.set(0,0,0);
   this.container_.add(this.camera_);
 };
 
-WIDGET3D.CameraGroup.prototype = WIDGET3D.Window.prototype.inheritance();
-
-
-//Adds the object to cameragroup.
-//objects place is its offset from camera (camera is in origo when component is added)
-WIDGET3D.CameraGroup.prototype.addChild = function(object, distance){
-  var rot = this.getRotation();
-  var loc = this.getLocation();
-  
-  var distance = distance || {};
-  
-  var x = distance.x !== undefined ? distance.x : 0;
-  var y = distance.y !== undefined ? distance.y : 0;
-  var z = distance.z !== undefined ? distance.z : 0;
-  
-  var newX = loc.x + x;
-  var newY = loc.y + y;
-  var newZ = loc.z + z;
-  
-  object.setLocation(newX, newY, newZ);
-  object.setParent(this);
-  
-  return object;
-};
-
-//setters for location and rotation
-
-//LOCATION
-WIDGET3D.CameraGroup.prototype.setLocation = function(x, y, z){
-
-  WIDGET3D.Window.prototype.setLocation.call( this, x, y, z);
-  this.camera_.position.set({x: x, y: y, z: z});
-};
-
-WIDGET3D.CameraGroup.prototype.setX = function(x){
-  WIDGET3D.Window.prototype.setX.call( this, x);
-  this.camera_.position.x = x;
-};
-
-WIDGET3D.CameraGroup.prototype.setY = function(y){
-  WIDGET3D.Window.prototype.setY.call( this, y );
-  this.camera_.position.y = y;
-};
-
-WIDGET3D.CameraGroup.prototype.setZ = function(z){
-  WIDGET3D.Window.prototype.setZ.call( this, z );
-  this.camera_.position.z = z;
-};
-
-//ROTATION
-WIDGET3D.CameraGroup.prototype.setRotation = function(rotX, rotY, rotZ){
-  
-  WIDGET3D.Window.prototype.setRotation.call( this, x, y, z);
-  this.camera_.rotation.set({x: rotX, y: rotY, z: rotZ});
-};
-
-WIDGET3D.CameraGroup.prototype.setRotationX = function(rotX){
-  WIDGET3D.Window.prototype.setRotationX.call( this, x);
-  this.camera_.rotation.x = rotX;
-};
-
-WIDGET3D.CameraGroup.prototype.setRotationY = function(rotY){
-  WIDGET3D.Window.prototype.setRotationY.call( this, y);
-  this.camera_.rotation.y = rotY;
-};
-
-WIDGET3D.CameraGroup.prototype.setRotationZ = function(rotZ){
-  WIDGET3D.Window.prototype.setRotationZ.call( this, z);
-  this.camera_.rotation.z = rotZ;
-};
-// DRAG CONTROLS for WIDGET3D three.js version
+WIDGET3D.CameraGroup.prototype = WIDGET3D.Window.prototype.inheritance();// DRAG CONTROLS for WIDGET3D three.js version
 //
 //Parameters: component: WIDGET3D.Basic typed object to which the controlls are attached
 //                       COMPONENT MUST BE GIVEN!
@@ -2419,8 +2369,13 @@ WIDGET3D.DragControls = function(parameters){
   this.mouseButton_ = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
   this.shiftKey_ = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
   
+  this.camera_ = parameters.camera !== undefined ? parameters.camera : WIDGET3D.camera;
+  this.attached_ = parameters.attached !== undefined ? parameters.attached : false;
+  
   var width = parameters.width !== undefined ? parameters.width : 2000;
   var height = parameters.height !== undefined ? parameters.height : 2000;
+  
+  var debug = parameters.debug !== undefined ? parameters.debug : false;
   
   this.drag_ = false;
   this.offset_ = new THREE.Vector3();
@@ -2429,10 +2384,19 @@ WIDGET3D.DragControls = function(parameters){
   //the planes orientation is the same as the cameras orientation.
   this.plane_ = new THREE.Mesh( new THREE.PlaneGeometry( width, height, 8, 8 ), 
     new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true, side : THREE.DoubleSide } ) );
-  this.plane_.position = this.component_.getLocation();
-  that.plane_.rotation = WIDGET3D.camera.rotation;
-  this.plane_.visible = false;
-  WIDGET3D.scene.add( this.plane_ );
+  
+  that.plane_.visible = debug;
+
+  that.plane_.position = this.component_.getLocation();
+  that.plane_.rotation = WIDGET3D.camera.camera_.rotation;
+  
+  if(!that.attached_){  
+    WIDGET3D.scene.add( this.plane_ );
+  }
+  else{
+    that.camera_.container_.add(this.plane_);
+  }
+  
   
   this.start_ = false;
   
@@ -2441,7 +2405,7 @@ WIDGET3D.DragControls = function(parameters){
       that.drag_ = false;
       
       that.plane_.position = that.component_.getLocation();
-      
+
       WIDGET3D.getMainWindow().removeEventListener("mousemove", that.mousemoveHandler);
       WIDGET3D.getMainWindow().removeEventListener("mouseup", that.mouseupHandler);
     }
@@ -2453,14 +2417,14 @@ WIDGET3D.DragControls = function(parameters){
       if(!that.drag_){
       
         that.plane_.position = that.component_.getLocation();
-        that.plane_.rotation = WIDGET3D.camera.rotation;
+        that.plane_.rotation = WIDGET3D.camera.camera_.rotation;
         
         that.drag_ = true;
         that.component_.focus();
         
         var mouse = WIDGET3D.mouseCoordinates(event);
         var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
-        var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera);
+        var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera.camera_);
         
         var intersects = ray.intersectObject( that.plane_ );
         if(intersects.length > 0){
@@ -2478,7 +2442,7 @@ WIDGET3D.DragControls = function(parameters){
     
       var mouse = WIDGET3D.mouseCoordinates(event);
       var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
-      var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera);
+      var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera.camera_);
       
       var intersects = ray.intersectObject( that.plane_ );
       if(intersects.length > 0){
@@ -2493,7 +2457,7 @@ WIDGET3D.DragControls = function(parameters){
   };
   
   this.component_.addEventListener("mousedown", this.mousedownHandler);
-  
+
   this.startPositionChanged = function(){
     if(!this.start_){
       this.plane_.position = this.component_.getLocation();
@@ -2501,5 +2465,21 @@ WIDGET3D.DragControls = function(parameters){
     }
     return false;
   };
+  
+  
+  this.remove = function(){
+  
+    WIDGET3D.scene.remove( this.plane_ );
+    
+    this.plane_.geometry.dispose();
+    this.plane_.material.dispose();
+    this.plane_ = undefined;
+  };
+  
 };
+
+
+
+
+
 

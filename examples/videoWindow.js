@@ -3,7 +3,11 @@
 
 //INIT FUNCTION
 var init = function(){
-
+  
+  var that = this;
+  that.ANGLE = 0;
+  that.DISTANCE = 3000;
+  
   var WIDTH = window.InnerWidth;
   var HEIGHT = window.InnerHeight;
   
@@ -23,9 +27,9 @@ var init = function(){
     clearColor : 0xf9f9f9
   });
   
-  WIDGET3D.camera.position.z = 3000;
-  WIDGET3D.camera.rotation.x = Math.PI/5;
-  
+  var camera = WIDGET3D.camera;
+  camera.setRotationY(Math.PI/10);
+  camera.setRotationZ(Math.PI/10);
   //--------------------------------------------
   // TITLED WINDOW WHERE WE SHOW THE VIDEO
   //--------------------------------------------
@@ -40,11 +44,15 @@ var init = function(){
   
   
   //styled window
-  var videoWindow = new WIDGET3D.TitledWindow({width : 480*7,
+  var videoWindow = new WIDGET3D.TitledWindow({
+    width : 480*7,
     height : 204*7,
     title : "video",
     texture : texture,
-    defaultControls : true});
+    defaultControls : true,
+    debug : true,
+    attached : true
+  });
     
   var rollControls = new WIDGET3D.RollControls({component : videoWindow, mouseButton : 0, shiftKey : true});
   
@@ -55,16 +63,37 @@ var init = function(){
     function(event, p){p.video.pause(); p.window.remove()},
     {video : video, window : videoWindow});
     
-
   mainWindow.addChild(videoWindow);
+  videoWindow.setZ(-3000);
+  camera.addChild(videoWindow);
+  
+  
+  var cameraControls= function(event, camera){
+    var alpha = Math.PI/30;
+    
+    if(event.keyCode == 39){
+      that.ANGLE += alpha;
+      camera.setX(Math.cos( that.ANGLE ) * that.DISTANCE);
+      camera.setZ(Math.sin( that.ANGLE ) * that.DISTANCE);
+    }
+    else if(event.keyCode == 37){
+      that.ANGLE -= alpha;
+      camera.setX(Math.cos( that.ANGLE ) * that.DISTANCE);
+      camera.setZ(Math.sin( that.ANGLE ) * that.DISTANCE);
+    }
+  };
+  
+  mainWindow.addEventListener("keydown", cameraControls, camera);
   
   var mainLoop = function(){
 
     requestAnimationFrame( mainLoop );
-    rollControls.update();
     videoWindow.update();
     WIDGET3D.render();
     
   };
+  
   mainLoop();
 }
+
+

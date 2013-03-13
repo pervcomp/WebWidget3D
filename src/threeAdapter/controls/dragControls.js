@@ -15,8 +15,13 @@ WIDGET3D.DragControls = function(parameters){
   this.mouseButton_ = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
   this.shiftKey_ = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
   
+  this.camera_ = parameters.camera !== undefined ? parameters.camera : WIDGET3D.camera;
+  this.attached_ = parameters.attached !== undefined ? parameters.attached : false;
+  
   var width = parameters.width !== undefined ? parameters.width : 2000;
   var height = parameters.height !== undefined ? parameters.height : 2000;
+  
+  var debug = parameters.debug !== undefined ? parameters.debug : false;
   
   this.drag_ = false;
   this.offset_ = new THREE.Vector3();
@@ -25,10 +30,19 @@ WIDGET3D.DragControls = function(parameters){
   //the planes orientation is the same as the cameras orientation.
   this.plane_ = new THREE.Mesh( new THREE.PlaneGeometry( width, height, 8, 8 ), 
     new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true, side : THREE.DoubleSide } ) );
-  this.plane_.position = this.component_.getLocation();
-  that.plane_.rotation = WIDGET3D.camera.rotation;
-  this.plane_.visible = false;
-  WIDGET3D.scene.add( this.plane_ );
+  
+  that.plane_.visible = debug;
+
+  that.plane_.position = this.component_.getLocation();
+  that.plane_.rotation = WIDGET3D.camera.camera_.rotation;
+  
+  if(!that.attached_){  
+    WIDGET3D.scene.add( this.plane_ );
+  }
+  else{
+    that.camera_.container_.add(this.plane_);
+  }
+  
   
   this.start_ = false;
   
@@ -37,7 +51,7 @@ WIDGET3D.DragControls = function(parameters){
       that.drag_ = false;
       
       that.plane_.position = that.component_.getLocation();
-      
+
       WIDGET3D.getMainWindow().removeEventListener("mousemove", that.mousemoveHandler);
       WIDGET3D.getMainWindow().removeEventListener("mouseup", that.mouseupHandler);
     }
@@ -49,14 +63,14 @@ WIDGET3D.DragControls = function(parameters){
       if(!that.drag_){
       
         that.plane_.position = that.component_.getLocation();
-        that.plane_.rotation = WIDGET3D.camera.rotation;
+        that.plane_.rotation = WIDGET3D.camera.camera_.rotation;
         
         that.drag_ = true;
         that.component_.focus();
         
         var mouse = WIDGET3D.mouseCoordinates(event);
         var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
-        var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera);
+        var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera.camera_);
         
         var intersects = ray.intersectObject( that.plane_ );
         if(intersects.length > 0){
@@ -74,7 +88,7 @@ WIDGET3D.DragControls = function(parameters){
     
       var mouse = WIDGET3D.mouseCoordinates(event);
       var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
-      var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera);
+      var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera.camera_);
       
       var intersects = ray.intersectObject( that.plane_ );
       if(intersects.length > 0){
@@ -89,7 +103,7 @@ WIDGET3D.DragControls = function(parameters){
   };
   
   this.component_.addEventListener("mousedown", this.mousedownHandler);
-  
+
   this.startPositionChanged = function(){
     if(!this.start_){
       this.plane_.position = this.component_.getLocation();
@@ -97,5 +111,21 @@ WIDGET3D.DragControls = function(parameters){
     }
     return false;
   };
+  
+  
+  this.remove = function(){
+  
+    WIDGET3D.scene.remove( this.plane_ );
+    
+    this.plane_.geometry.dispose();
+    this.plane_.material.dispose();
+    this.plane_ = undefined;
+  };
+  
 };
+
+
+
+
+
 

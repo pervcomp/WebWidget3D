@@ -57,7 +57,7 @@ var THREEJS_WIDGET3D = {
       }
       
       //setting three.js camera
-      WIDGET3D.camera = parameters.camera !== undefined ? parameters.camera  : 
+      var camera = parameters.camera !== undefined ? parameters.camera  : 
         new THREE.PerspectiveCamera(75, 
           WIDGET3D.renderer.domElement.width / WIDGET3D.renderer.domElement.height,
           1, 10000);
@@ -85,11 +85,14 @@ var THREEJS_WIDGET3D = {
       WIDGET3D.scene.add(mainWindow.container_);
       
       WIDGET3D.projector = new THREE.Projector();
+      WIDGET3D.camera = new WIDGET3D.CameraGroup({camera : camera});
+      
+      mainWindow.addChild(WIDGET3D.camera);
       
       //---------------------------------------------
       //CREATING RENDERING METHOD
       WIDGET3D.render = function(){
-        WIDGET3D.renderer.render(WIDGET3D.scene, WIDGET3D.camera);
+        WIDGET3D.renderer.render(WIDGET3D.scene, WIDGET3D.camera.camera_);
       };
       //---------------------------------------------
       
@@ -108,7 +111,7 @@ var THREEJS_WIDGET3D = {
     var mouse = WIDGET3D.mouseCoordinates(event);
     
     var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
-    var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera);
+    var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera.camera_);
     
     //intersects checks now all the meshes in scene. It might be good to construct
     // a datastructure that contains meshes of mainWindow.childEvents_.event array content

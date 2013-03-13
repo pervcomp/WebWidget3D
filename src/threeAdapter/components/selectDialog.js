@@ -20,6 +20,7 @@ WIDGET3D.SelectDialog = function(parameters){
 
   this.width_ = parameters.width !== undefined ? parameters.width : 1000;
   this.height_ = parameters.height !== undefined ? parameters.height : 1000;
+  this.depth_ = parameters.depth !== undefined ? parameters.depth : 10;
   this.color_ = parameters.color !== undefined ? parameters.color : 0xC0D0D0;
   this.opacity_ = parameters.opacity !== undefined ? parameters.opacity : 0.9;
   this.choices_ = parameters.choices !== undefined ? parameters.choices : [];
@@ -58,7 +59,7 @@ WIDGET3D.SelectDialog.prototype.createText = function(){
   
   this.choiceHeight_ = this.height_/((this.choices_.length+1)*1.2);
   
-  var mesh = new THREE.Mesh(new THREE.CubeGeometry(this.width_, this.choiceHeight_, 10), material);
+  var mesh = new THREE.Mesh(new THREE.CubeGeometry(this.width_, this.choiceHeight_, this.depth_), material);
 
   mesh.position.y = this.height_*0.5 - this.choiceHeight_*0.5;
   
@@ -82,7 +83,7 @@ WIDGET3D.SelectDialog.prototype.createChoises = function(){
     var material = this.createButtonMaterial(this.choices_[i].string, choiceContext, choiceCanvas);
     var width = this.width_/1.2;
     var height = this.choiceHeight_;
-    var mesh = new THREE.Mesh( new THREE.CubeGeometry(width, height, 10), material);
+    var mesh = new THREE.Mesh( new THREE.CubeGeometry(width, height, this.depth_), material);
     
     choice.setMesh(mesh);
     

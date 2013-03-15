@@ -28,7 +28,7 @@ var init = function(){
   });
   
   var camera = WIDGET3D.camera;
-  camera.setRotation(Math.PI/10, Math.PI/10, Math.PI/10);
+  //camera.setRotation(Math.PI/10, Math.PI/10, Math.PI/10);
   camera.camera_.position.setZ(3000);
   camera.camera_.rotation.set(Math.PI/10, Math.PI/10, Math.PI/10);
   //--------------------------------------------
@@ -65,7 +65,7 @@ var init = function(){
     function(event, p){p.video.pause(); p.window.remove()},
     {video : video, window : videoWindow});
     
-  mainWindow.addChild(videoWindow);
+  //mainWindow.addChild(videoWindow);
   //camera.addChild(videoWindow);
   
   
@@ -73,8 +73,8 @@ var init = function(){
   tmpWindow.setX(600);
   tmpWindow.setRotationX(Math.PI/8);
   
-  //tmpWindow.addChild(videoWindow);
-  //camera.addChild(tmpWindow);
+  tmpWindow.addChild(videoWindow);
+  camera.addChild(tmpWindow);
   //mainWindow.addChild(tmpWindow);
   
   var cameraControls= function(event, camera){

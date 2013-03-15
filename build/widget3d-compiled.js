@@ -2323,13 +2323,15 @@ WIDGET3D.DragControls = function(parameters){
     var camRot = that.camera_.rotation.clone();
     var parent = that.camera_.parent;
     
-    while(parent != undefined){
-      console.log(camRot);
+    
+    while(parent != undefined && parent != that.component_.parent){
+    
       camRot.add(parent.rotation.clone());
       parent = parent.parent;
     }
     
     that.plane_.rotation.copy(camRot);
+    
   }; 
   
   that.component_ = parameters.component;

@@ -127,11 +127,11 @@ WIDGET3D.Dialog.prototype.createButtonText = function(string){
   
   this.button_.setMesh(mesh);
   
-  var parentLoc = this.getLocation();
+  var parentLoc = this.getPosition();
   
   var y = parentLoc.y - (this.height_/5.0);
   
-  this.button_.setLocation(parentLoc.x, y ,parentLoc.z);
+  this.button_.setPosition(parentLoc.x, y ,parentLoc.z);
   
   texture.needsUpdate = true;
 };
@@ -144,11 +144,11 @@ WIDGET3D.Dialog.prototype.createTextBox = function(){
   
   this.textBox_.setMesh(mesh);
   
-  var parentLoc = this.getLocation();
+  var parentLoc = this.getPosition();
   
   var y = parentLoc.y + this.height_/10;
   
-  this.textBox_.setLocation(parentLoc.x, y ,parentLoc.z+10);
+  this.textBox_.setPosition(parentLoc.x, y ,parentLoc.z+10);
   
   this.updateTextBox(this);
 }

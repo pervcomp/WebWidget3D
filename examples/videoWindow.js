@@ -28,8 +28,9 @@ var init = function(){
   });
   
   var camera = WIDGET3D.camera;
-  camera.setRotationY(Math.PI/10);
-  camera.setRotationZ(Math.PI/10);
+  camera.setRotation(Math.PI/10, Math.PI/10, Math.PI/10);
+  camera.camera_.position.setZ(3000);
+  camera.camera_.rotation.set(Math.PI/10, Math.PI/10, Math.PI/10);
   //--------------------------------------------
   // TITLED WINDOW WHERE WE SHOW THE VIDEO
   //--------------------------------------------
@@ -43,6 +44,8 @@ var init = function(){
   texture.generateMipmaps = false;
   
   
+  var testWindow
+  
   //styled window
   var videoWindow = new WIDGET3D.TitledWindow({
     width : 480*7,
@@ -50,10 +53,9 @@ var init = function(){
     title : "video",
     texture : texture,
     defaultControls : true,
-    debug : true,
-    attached : true
+    debug : true
   });
-    
+  
   var rollControls = new WIDGET3D.RollControls({component : videoWindow, mouseButton : 0, shiftKey : true});
   
   //CALLBACK FOR UPDATING TEXTURE
@@ -64,9 +66,16 @@ var init = function(){
     {video : video, window : videoWindow});
     
   mainWindow.addChild(videoWindow);
-  videoWindow.setZ(-3000);
-  camera.addChild(videoWindow);
+  //camera.addChild(videoWindow);
   
+  
+  var tmpWindow = new WIDGET3D.Window();
+  tmpWindow.setX(600);
+  tmpWindow.setRotationX(Math.PI/8);
+  
+  //tmpWindow.addChild(videoWindow);
+  //camera.addChild(tmpWindow);
+  //mainWindow.addChild(tmpWindow);
   
   var cameraControls= function(event, camera){
     var alpha = Math.PI/30;
@@ -84,6 +93,10 @@ var init = function(){
   };
   
   mainWindow.addEventListener("keydown", cameraControls, camera);
+  
+  
+  var cube = new THREE.Mesh( new THREE.CubeGeometry( 200, 200, 200 ), new THREE.MeshBasicMaterial( { color: Math.random() * 0xffffff } ));
+  WIDGET3D.scene.add(cube);
   
   var mainLoop = function(){
 

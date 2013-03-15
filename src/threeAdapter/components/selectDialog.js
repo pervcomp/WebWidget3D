@@ -87,7 +87,7 @@ WIDGET3D.SelectDialog.prototype.createChoises = function(){
     
     choice.setMesh(mesh);
     
-    var parentLoc = this.getLocation();
+    var parentLoc = this.getPosition();
     var y = 0;
     if(i == 0){
       if(this.text_){
@@ -102,7 +102,7 @@ WIDGET3D.SelectDialog.prototype.createChoises = function(){
     }
     lastY = y;
     
-    choice.setLocation(parentLoc.x, y ,parentLoc.z);
+    choice.setPosition(parentLoc.x, y ,parentLoc.z);
     
     choice.addEventListener("click", this.choices_[i].onclick.handler, this.choices_[i].onclick.parameters);
     choice.menuID_ = i;

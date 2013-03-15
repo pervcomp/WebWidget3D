@@ -113,52 +113,46 @@ WIDGET3D.Basic.prototype.remove = function(){
 
 //getters and setters for location and rotation
 //TODO: MOVE TO ADAPTER SIDE
-WIDGET3D.Basic.prototype.getLocation = function(){
-  return {x: this.mesh_.position.x,
-    y: this.mesh_.position.y,
-    z: this.mesh_.position.z};
+WIDGET3D.Basic.prototype.getPosition = function(){
+  return mesh_.position.x;
 };
 
-WIDGET3D.Basic.prototype.setLocation = function(x, y, z){
-  this.mesh_.position.x = x;
-  this.mesh_.position.y = y;
-  this.mesh_.position.z = z;
+WIDGET3D.Basic.prototype.setPosition = function(x, y, z){
+  
+  this.mesh_.position.set(x,y,z);
 };
 
 WIDGET3D.Basic.prototype.setX = function(x){
-  this.mesh_.position.x = x;
+  this.mesh_.position.setX(x);
 };
 
 WIDGET3D.Basic.prototype.setY = function(y){
-  this.mesh_.position.y = y;
+  this.mesh_.position.setY(y);
 };
 
 WIDGET3D.Basic.prototype.setZ = function(z){
-  this.mesh_.position.z = z;
+  this.mesh_.position.setZ(z);
 };
 
 WIDGET3D.Basic.prototype.getRotation = function(){
-  return {x: this.mesh_.rotation.x,
-    y: this.mesh_.rotation.y,
-    z: this.mesh_.rotation.z};
+  return this.mesh_rotation;
 };
 
 WIDGET3D.Basic.prototype.setRotation = function(rotX, rotY, rotZ){
-  this.mesh_.rotation.x = rotX;
-  this.mesh_.rotation.y = rotY;
-  this.mesh_.rotation.z = rotZ;
+  
+  this.mesh_.rotation.set(rotX, rotY, rotZ);
 };
 
 WIDGET3D.Basic.prototype.setRotationX = function(rotX){
-  this.mesh_.rotation.x = rotX;
+  this.mesh_.rotation.setX(rotX);
 };
 
 WIDGET3D.Basic.prototype.setRotationY = function(rotY){
-  this.mesh_.rotation.y = rotY;
+  this.mesh_.rotation.setY(rotY);
 };
 
-WIDGET3D.Basic.prototype.setRotZ = function(rotZ){
-  this.mesh_.rotation.z = rotZ;
+WIDGET3D.Basic.prototype.setRotationZ = function(rotZ){
+  this.mesh_.rotation.setZ(rotZ);
 };
 
 //--------------------------------------------------

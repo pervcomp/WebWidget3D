@@ -146,7 +146,7 @@ WIDGET3D.GridIcon.prototype = WIDGET3D.Basic.prototype.inheritance();
 
 WIDGET3D.GridIcon.prototype.setToPlace = function(){
 
-  var parentLoc = this.parent_.getLocation();
+  var parentLoc = this.parent_.getPosition();
   
   var parentLeft = -this.parent_.width_/2.0 + parentLoc.x/this.parent_.width_;
   var parentTop =  this.parent_.height_/2.0 + parentLoc.y/this.parent_.height_;
@@ -160,7 +160,7 @@ WIDGET3D.GridIcon.prototype.setToPlace = function(){
   if(this.parent_.children_.length-1 > 0){
   
     var lastIcon = this.parent_.children_[this.parent_.children_.length-2];
-    var lastIconLoc = lastIcon.getLocation();
+    var lastIconLoc = lastIcon.getPosition();
     
     if(((this.parent_.children_.length-1) % this.parent_.density_) == 0)
     {  
@@ -179,6 +179,6 @@ WIDGET3D.GridIcon.prototype.setToPlace = function(){
     var y = parentTop - slotCenterY;
     
   }
-  this.setLocation(x, y, parentLoc.z/this.parent_.height_);
+  this.setPosition(x, y, parentLoc.z/this.parent_.height_);
 };
 

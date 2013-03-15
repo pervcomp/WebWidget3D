@@ -135,52 +135,46 @@ WIDGET3D.Window.prototype.remove = function(){
 //setters and getters for location and rotation
 
 //TODO: MOVE TO THE ADAPTER SIDE
-WIDGET3D.Window.prototype.getLocation = function(){
-  return {x: this.container_.position.x,
-    y: this.container_.position.y,
-    z: this.container_.position.z};
+WIDGET3D.Window.prototype.getPosition = function(){
+  return this.container_.position;
 };
 
-WIDGET3D.Window.prototype.setLocation = function(x, y, z){
-  this.container_.position.x = x;
-  this.container_.position.y = y;
-  this.container_.position.z = z;
+WIDGET3D.Window.prototype.setPosition = function(x, y, z){
+  
+  this.container_.position.set(x,y,z);
 };
 
 WIDGET3D.Window.prototype.setX = function(x){
-  this.container_.position.x = x;
+  this.container_.position.setX(x);
 };
 
 WIDGET3D.Window.prototype.setY = function(y){
-  this.container_.position.y = y;
+  this.container_.position.setY(y);
 };
 
 WIDGET3D.Window.prototype.setZ = function(z){
-  this.container_.position.z = z;
+  this.container_.position.setZ(z);
 };
 
 WIDGET3D.Window.prototype.getRotation = function(){
-  return {x: this.container_.rotation.x,
-    y: this.container_.rotation.y,
-    z: this.container_.rotation.z};
+  return this.container_.rotation;
 };
 
 WIDGET3D.Window.prototype.setRotation = function(rotX, rotY, rotZ){
-  this.container_.rotation.x = rotX;
-  this.container_.rotation.y = rotY;
-  this.container_.rotation.z = rotZ;
+  
+  this.container_.rotation.set(rotX, rotY, rotZ);
 };
 
 WIDGET3D.Window.prototype.setRotationX = function(rotX){
-  this.container_.rotation.x = rotX;
+  this.container_.rotation.setX(rotX);
 };
 
 WIDGET3D.Window.prototype.setRotationY = function(rotY){
-  this.container_.rotation.y = rotY;
+  this.container_.rotation.setY(rotY);
 };
 
 WIDGET3D.Window.prototype.setRotationZ = function(rotZ){
-  this.container_.rotation.z = rotZ;
+  this.container_.rotation.setZ(rotZ);
 };
 
  

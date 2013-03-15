@@ -62,7 +62,7 @@ WIDGET3D.TitledWindow = function(parameters){
     new THREE.MeshBasicMaterial( { color: 0xAA0000, side : this.mesh_.material.side} ) );
   
   this.closeButton_.setMesh(buttonMesh);
-  this.closeButton_.setLocation(((this.width_/2.0)-(this.width_/20.0)), ((this.height_/2.0)+(this.height_/20.0)), 0);
+  this.closeButton_.setPosition(((this.width_/2.0)-(this.width_/20.0)), ((this.height_/2.0)+(this.height_/20.0)), 0);
   
   this.addChild(this.closeButton_);
   
@@ -78,7 +78,6 @@ WIDGET3D.TitledWindow = function(parameters){
     var debug = parameters.debug !== undefined ? parameters.debug : false;
     
     this.controls_ = new WIDGET3D.DragControls({
-      attached: attached,
       debug: debug,
       component : this,
       mouseButton : button,
@@ -159,39 +158,4 @@ WIDGET3D.TitledWindow.prototype.remove = function(){
 
 WIDGET3D.TitledWindow.prototype.getContent = function(){
   return this.content_;
-};
-
-WIDGET3D.TitledWindow.prototype.setLocation = function(x, y, z){
-  
-  WIDGET3D.Window.prototype.setLocation.call( this, x, y, z);
-  
-  if(this.defaultControls_ && !this.start_){
-    this.start_ = this.controls_.startPositionChanged();
-  }
-};
-
-WIDGET3D.TitledWindow.prototype.setX = function(x){
-  
-  WIDGET3D.Window.prototype.setX.call( this, x );
-  
-  if(this.defaultControls_ && !this.start_){
-    this.start_ = this.controls_.startPositionChanged();
-  }
-};
-
-WIDGET3D.TitledWindow.prototype.setY = function(y){
-
-  WIDGET3D.Window.prototype.setY.call( this, y );
-  
-  if(this.defaultControls_ && !this.start_){
-    this.start_ = this.controls_.startPositionChanged();
-  }
-};
-
-WIDGET3D.TitledWindow.prototype.setZ = function(z){
-  WIDGET3D.Window.prototype.setZ.call( this, z );
-  
-  if(this.defaultControls_ && !this.start_){
-    this.start_ = this.controls_.startPositionChanged();
-  }
 };

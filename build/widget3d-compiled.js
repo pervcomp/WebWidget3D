@@ -767,52 +767,46 @@ WIDGET3D.Basic.prototype.remove = function(){
 
 //getters and setters for location and rotation
 //TODO: MOVE TO ADAPTER SIDE
-WIDGET3D.Basic.prototype.getLocation = function(){
-  return {x: this.mesh_.position.x,
-    y: this.mesh_.position.y,
-    z: this.mesh_.position.z};
+WIDGET3D.Basic.prototype.getPosition = function(){
+  return mesh_.position.x;
 };
 
-WIDGET3D.Basic.prototype.setLocation = function(x, y, z){
-  this.mesh_.position.x = x;
-  this.mesh_.position.y = y;
-  this.mesh_.position.z = z;
+WIDGET3D.Basic.prototype.setPosition = function(x, y, z){
+  
+  this.mesh_.position.set(x,y,z);
 };
 
 WIDGET3D.Basic.prototype.setX = function(x){
-  this.mesh_.position.x = x;
+  this.mesh_.position.setX(x);
 };
 
 WIDGET3D.Basic.prototype.setY = function(y){
-  this.mesh_.position.y = y;
+  this.mesh_.position.setY(y);
 };
 
 WIDGET3D.Basic.prototype.setZ = function(z){
-  this.mesh_.position.z = z;
+  this.mesh_.position.setZ(z);
 };
 
 WIDGET3D.Basic.prototype.getRotation = function(){
-  return {x: this.mesh_.rotation.x,
-    y: this.mesh_.rotation.y,
-    z: this.mesh_.rotation.z};
+  return this.mesh_rotation;
 };
 
 WIDGET3D.Basic.prototype.setRotation = function(rotX, rotY, rotZ){
-  this.mesh_.rotation.x = rotX;
-  this.mesh_.rotation.y = rotY;
-  this.mesh_.rotation.z = rotZ;
+  
+  this.mesh_.rotation.set(rotX, rotY, rotZ);
 };
 
 WIDGET3D.Basic.prototype.setRotationX = function(rotX){
-  this.mesh_.rotation.x = rotX;
+  this.mesh_.rotation.setX(rotX);
 };
 
 WIDGET3D.Basic.prototype.setRotationY = function(rotY){
-  this.mesh_.rotation.y = rotY;
+  this.mesh_.rotation.setY(rotY);
 };
 
-WIDGET3D.Basic.prototype.setRotZ = function(rotZ){
-  this.mesh_.rotation.z = rotZ;
+WIDGET3D.Basic.prototype.setRotationZ = function(rotZ){
+  this.mesh_.rotation.setZ(rotZ);
 };
 
 //--------------------------------------------------
@@ -1069,52 +1063,46 @@ WIDGET3D.Window.prototype.remove = function(){
 //setters and getters for location and rotation
 
 //TODO: MOVE TO THE ADAPTER SIDE
-WIDGET3D.Window.prototype.getLocation = function(){
-  return {x: this.container_.position.x,
-    y: this.container_.position.y,
-    z: this.container_.position.z};
+WIDGET3D.Window.prototype.getPosition = function(){
+  return this.container_.position;
 };
 
-WIDGET3D.Window.prototype.setLocation = function(x, y, z){
-  this.container_.position.x = x;
-  this.container_.position.y = y;
-  this.container_.position.z = z;
+WIDGET3D.Window.prototype.setPosition = function(x, y, z){
+  
+  this.container_.position.set(x,y,z);
 };
 
 WIDGET3D.Window.prototype.setX = function(x){
-  this.container_.position.x = x;
+  this.container_.position.setX(x);
 };
 
 WIDGET3D.Window.prototype.setY = function(y){
-  this.container_.position.y = y;
+  this.container_.position.setY(y);
 };
 
 WIDGET3D.Window.prototype.setZ = function(z){
-  this.container_.position.z = z;
+  this.container_.position.setZ(z);
 };
 
 WIDGET3D.Window.prototype.getRotation = function(){
-  return {x: this.container_.rotation.x,
-    y: this.container_.rotation.y,
-    z: this.container_.rotation.z};
+  return this.container_.rotation;
 };
 
 WIDGET3D.Window.prototype.setRotation = function(rotX, rotY, rotZ){
-  this.container_.rotation.x = rotX;
-  this.container_.rotation.y = rotY;
-  this.container_.rotation.z = rotZ;
+  
+  this.container_.rotation.set(rotX, rotY, rotZ);
 };
 
 WIDGET3D.Window.prototype.setRotationX = function(rotX){
-  this.container_.rotation.x = rotX;
+  this.container_.rotation.setX(rotX);
 };
 
 WIDGET3D.Window.prototype.setRotationY = function(rotY){
-  this.container_.rotation.y = rotY;
+  this.container_.rotation.setY(rotY);
 };
 
 WIDGET3D.Window.prototype.setRotationZ = function(rotZ){
-  this.container_.rotation.z = rotZ;
+  this.container_.rotation.setZ(rotZ);
 };
 
  
@@ -1694,7 +1682,7 @@ WIDGET3D.GridIcon.prototype = WIDGET3D.Basic.prototype.inheritance();
 
 WIDGET3D.GridIcon.prototype.setToPlace = function(){
 
-  var parentLoc = this.parent_.getLocation();
+  var parentLoc = this.parent_.getPosition();
   
   var parentLeft = -this.parent_.width_/2.0 + parentLoc.x/this.parent_.width_;
   var parentTop =  this.parent_.height_/2.0 + parentLoc.y/this.parent_.height_;
@@ -1708,7 +1696,7 @@ WIDGET3D.GridIcon.prototype.setToPlace = function(){
   if(this.parent_.children_.length-1 > 0){
   
     var lastIcon = this.parent_.children_[this.parent_.children_.length-2];
-    var lastIconLoc = lastIcon.getLocation();
+    var lastIconLoc = lastIcon.getPosition();
     
     if(((this.parent_.children_.length-1) % this.parent_.density_) == 0)
     {  
@@ -1727,7 +1715,7 @@ WIDGET3D.GridIcon.prototype.setToPlace = function(){
     var y = parentTop - slotCenterY;
     
   }
-  this.setLocation(x, y, parentLoc.z/this.parent_.height_);
+  this.setPosition(x, y, parentLoc.z/this.parent_.height_);
 };
 
 //---------------------------------------------------
@@ -1794,7 +1782,7 @@ WIDGET3D.TitledWindow = function(parameters){
     new THREE.MeshBasicMaterial( { color: 0xAA0000, side : this.mesh_.material.side} ) );
   
   this.closeButton_.setMesh(buttonMesh);
-  this.closeButton_.setLocation(((this.width_/2.0)-(this.width_/20.0)), ((this.height_/2.0)+(this.height_/20.0)), 0);
+  this.closeButton_.setPosition(((this.width_/2.0)-(this.width_/20.0)), ((this.height_/2.0)+(this.height_/20.0)), 0);
   
   this.addChild(this.closeButton_);
   
@@ -1810,7 +1798,6 @@ WIDGET3D.TitledWindow = function(parameters){
     var debug = parameters.debug !== undefined ? parameters.debug : false;
     
     this.controls_ = new WIDGET3D.DragControls({
-      attached: attached,
       debug: debug,
       component : this,
       mouseButton : button,
@@ -1891,41 +1878,6 @@ WIDGET3D.TitledWindow.prototype.remove = function(){
 
 WIDGET3D.TitledWindow.prototype.getContent = function(){
   return this.content_;
-};
-
-WIDGET3D.TitledWindow.prototype.setLocation = function(x, y, z){
-  
-  WIDGET3D.Window.prototype.setLocation.call( this, x, y, z);
-  
-  if(this.defaultControls_ && !this.start_){
-    this.start_ = this.controls_.startPositionChanged();
-  }
-};
-
-WIDGET3D.TitledWindow.prototype.setX = function(x){
-  
-  WIDGET3D.Window.prototype.setX.call( this, x );
-  
-  if(this.defaultControls_ && !this.start_){
-    this.start_ = this.controls_.startPositionChanged();
-  }
-};
-
-WIDGET3D.TitledWindow.prototype.setY = function(y){
-
-  WIDGET3D.Window.prototype.setY.call( this, y );
-  
-  if(this.defaultControls_ && !this.start_){
-    this.start_ = this.controls_.startPositionChanged();
-  }
-};
-
-WIDGET3D.TitledWindow.prototype.setZ = function(z){
-  WIDGET3D.Window.prototype.setZ.call( this, z );
-  
-  if(this.defaultControls_ && !this.start_){
-    this.start_ = this.controls_.startPositionChanged();
-  }
 };
 //---------------------------------------------------
 //
@@ -2056,11 +2008,11 @@ WIDGET3D.Dialog.prototype.createButtonText = function(string){
   
   this.button_.setMesh(mesh);
   
-  var parentLoc = this.getLocation();
+  var parentLoc = this.getPosition();
   
   var y = parentLoc.y - (this.height_/5.0);
   
-  this.button_.setLocation(parentLoc.x, y ,parentLoc.z);
+  this.button_.setPosition(parentLoc.x, y ,parentLoc.z);
   
   texture.needsUpdate = true;
 };
@@ -2073,11 +2025,11 @@ WIDGET3D.Dialog.prototype.createTextBox = function(){
   
   this.textBox_.setMesh(mesh);
   
-  var parentLoc = this.getLocation();
+  var parentLoc = this.getPosition();
   
   var y = parentLoc.y + this.height_/10;
   
-  this.textBox_.setLocation(parentLoc.x, y ,parentLoc.z+10);
+  this.textBox_.setPosition(parentLoc.x, y ,parentLoc.z+10);
   
   this.updateTextBox(this);
 }
@@ -2219,7 +2171,7 @@ WIDGET3D.SelectDialog.prototype.createChoises = function(){
     
     choice.setMesh(mesh);
     
-    var parentLoc = this.getLocation();
+    var parentLoc = this.getPosition();
     var y = 0;
     if(i == 0){
       if(this.text_){
@@ -2234,7 +2186,7 @@ WIDGET3D.SelectDialog.prototype.createChoises = function(){
     }
     lastY = y;
     
-    choice.setLocation(parentLoc.x, y ,parentLoc.z);
+    choice.setPosition(parentLoc.x, y ,parentLoc.z);
     
     choice.addEventListener("click", this.choices_[i].onclick.handler, this.choices_[i].onclick.parameters);
     choice.menuID_ = i;
@@ -2365,115 +2317,117 @@ WIDGET3D.DragControls = function(parameters){
   
   var that = this;
   
-  this.component_ = parameters.component;
-  this.mouseButton_ = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
-  this.shiftKey_ = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
+  //To get the right orientation we need to have orientation of a cameras parent and camera and add these together
+  that.setPlaneRotation = function(){
+    
+    var camRot = that.camera_.rotation.clone();
+    var parent = that.camera_.parent;
+    
+    while(parent != undefined){
+      console.log(camRot);
+      camRot.add(parent.rotation.clone());
+      parent = parent.parent;
+    }
+    
+    that.plane_.rotation.copy(camRot);
+  }; 
   
-  this.camera_ = parameters.camera !== undefined ? parameters.camera : WIDGET3D.camera;
-  this.attached_ = parameters.attached !== undefined ? parameters.attached : false;
+  that.component_ = parameters.component;
+  that.mouseButton_ = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
+  that.shiftKey_ = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
+  
+  that.camera_ = WIDGET3D.camera.camera_;
   
   var width = parameters.width !== undefined ? parameters.width : 2000;
   var height = parameters.height !== undefined ? parameters.height : 2000;
   
   var debug = parameters.debug !== undefined ? parameters.debug : false;
   
-  this.drag_ = false;
-  this.offset_ = new THREE.Vector3();
+  that.drag_ = false;
+  that.offset_ = new THREE.Vector3();
   
   //invisible plane that is used as a "draging area".
   //the planes orientation is the same as the cameras orientation.
-  this.plane_ = new THREE.Mesh( new THREE.PlaneGeometry( width, height, 8, 8 ), 
+  that.plane_ = new THREE.Mesh( new THREE.PlaneGeometry( width, height, 8, 8 ), 
     new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true, side : THREE.DoubleSide } ) );
   
   that.plane_.visible = debug;
-
-  that.plane_.position = this.component_.getLocation();
-  that.plane_.rotation = WIDGET3D.camera.camera_.rotation;
   
-  if(!that.attached_){  
-    WIDGET3D.scene.add( this.plane_ );
-  }
-  else{
-    that.camera_.container_.add(this.plane_);
-  }
+  that.setPlaneRotation();
   
+  WIDGET3D.scene.add( that.plane_ );
   
-  this.start_ = false;
-  
-  this.mouseupHandler = function(event){
+  that.mouseupHandler = function(event){
     if(that.drag_){
       that.drag_ = false;
       
-      that.plane_.position = that.component_.getLocation();
+      //var pos = that.component_.getPosition();
+      that.plane_.position.copy(that.component_.parent_.container_.localToWorld(that.component_.getPosition().clone()));
 
       WIDGET3D.getMainWindow().removeEventListener("mousemove", that.mousemoveHandler);
       WIDGET3D.getMainWindow().removeEventListener("mouseup", that.mouseupHandler);
     }
   };
   
-  this.mousedownHandler = function(event){
+  that.mousedownHandler = function(event){
     if(event.button === that.mouseButton_ && event.shiftKey === that.shiftKey_){
       that.start_ = true;
       if(!that.drag_){
-      
-        that.plane_.position = that.component_.getLocation();
-        that.plane_.rotation = WIDGET3D.camera.camera_.rotation;
         
-        that.drag_ = true;
-        that.component_.focus();
+        that.setPlaneRotation();
+        //var pos = that.component_.getPosition();
+        that.plane_.position.copy(that.component_.parent_.container_.localToWorld(that.component_.getPosition().clone()));
+        //FORCE TO UPDATE MATRIXES OTHERWISE WE MAY GET INCORRECT VALUES FROM INTERSECTION
+        that.plane_.updateMatrixWorld(true);
         
         var mouse = WIDGET3D.mouseCoordinates(event);
         var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
-        var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera.camera_);
+        var ray = WIDGET3D.projector.pickingRay(vector, that.camera_);
         
         var intersects = ray.intersectObject( that.plane_ );
         if(intersects.length > 0){
           that.offset_.copy( intersects[ 0 ].point ).sub( that.plane_.position );
         }
         
+        
         WIDGET3D.getMainWindow().addEventListener("mousemove", that.mousemoveHandler);
         WIDGET3D.getMainWindow().addEventListener("mouseup", that.mouseupHandler);
+        
+        that.component_.focus();
+        that.drag_ = true;
       }
     }
   };
 
-  this.mousemoveHandler = function(event){
+  that.mousemoveHandler = function(event){
     if(that.drag_){
-    
+
       var mouse = WIDGET3D.mouseCoordinates(event);
       var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
-      var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera.camera_);
+      var ray = WIDGET3D.projector.pickingRay(vector, that.camera_);
       
       var intersects = ray.intersectObject( that.plane_ );
       if(intersects.length > 0){
-        
+      
         var pos = intersects[ 0 ].point.sub( that.offset_);
-        that.component_.setLocation(pos.x, pos.y, pos.z);
+        that.plane_.position.copy(pos);
+        var vec = that.component_.parent_.container_.worldToLocal(pos);
+        that.component_.setPosition(vec.x, vec.y, vec.z);
         
       }
-      
-      that.plane_.position = that.component_.getLocation();
     }
   };
   
-  this.component_.addEventListener("mousedown", this.mousedownHandler);
-
-  this.startPositionChanged = function(){
-    if(!this.start_){
-      this.plane_.position = this.component_.getLocation();
-      return true;
-    }
-    return false;
-  };
+  that.component_.addEventListener("mousedown", that.mousedownHandler);
   
   
-  this.remove = function(){
+  that.remove = function(){
   
-    WIDGET3D.scene.remove( this.plane_ );
+    WIDGET3D.scene.remove( that.plane_ );
     
-    this.plane_.geometry.dispose();
-    this.plane_.material.dispose();
-    this.plane_ = undefined;
+    that.plane_.geometry.dispose();
+    that.plane_.material.dispose();
+    that.plane_ = undefined;
   };
   
 };

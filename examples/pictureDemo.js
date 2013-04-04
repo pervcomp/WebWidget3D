@@ -59,9 +59,6 @@ var init = function(){
   
   var mainLoop = function(){
     requestAnimationFrame( mainLoop );
-
-    subWindow.update();
-    
     WIDGET3D.render();
   };
   mainLoop();

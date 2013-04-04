@@ -5,8 +5,9 @@
 var init = function(){
   
   var that = this;
-  that.ANGLE = 0;
+  
   that.DISTANCE = 3000;
+  that.ANGLE = 0;
   
   var WIDTH = window.InnerWidth;
   var HEIGHT = window.InnerHeight;
@@ -28,9 +29,8 @@ var init = function(){
   });
   
   var camera = WIDGET3D.camera;
-  //camera.setRotation(Math.PI/10, Math.PI/10, Math.PI/10);
-  camera.camera_.position.setZ(3000);
-  camera.camera_.rotation.set(Math.PI/10, Math.PI/10, Math.PI/10);
+  camera.setZ(that.DISTANCE);
+  camera.setRotation(Math.PI/10, Math.PI/10, Math.PI/10);
   //--------------------------------------------
   // TITLED WINDOW WHERE WE SHOW THE VIDEO
   //--------------------------------------------
@@ -52,8 +52,7 @@ var init = function(){
     height : 204*7,
     title : "video",
     texture : texture,
-    defaultControls : true,
-    debug : true
+    defaultControls : true
   });
   
   var rollControls = new WIDGET3D.RollControls({component : videoWindow, mouseButton : 0, shiftKey : true});
@@ -65,17 +64,17 @@ var init = function(){
     function(event, p){p.video.pause(); p.window.remove()},
     {video : video, window : videoWindow});
     
-  //mainWindow.addChild(videoWindow);
+  mainWindow.addChild(videoWindow);
   //camera.addChild(videoWindow);
   
   
-  var tmpWindow = new WIDGET3D.Window();
+  /*var tmpWindow = new WIDGET3D.Window();
   tmpWindow.setX(600);
   tmpWindow.setRotationX(Math.PI/8);
   
   tmpWindow.addChild(videoWindow);
   camera.addChild(tmpWindow);
-  //mainWindow.addChild(tmpWindow);
+  mainWindow.addChild(tmpWindow);*/
   
   var cameraControls= function(event, camera){
     var alpha = Math.PI/30;
@@ -95,15 +94,12 @@ var init = function(){
   mainWindow.addEventListener("keydown", cameraControls, camera);
   
   
-  var cube = new THREE.Mesh( new THREE.CubeGeometry( 200, 200, 200 ), new THREE.MeshBasicMaterial( { color: Math.random() * 0xffffff } ));
-  WIDGET3D.scene.add(cube);
+  //var cube = new THREE.Mesh( new THREE.CubeGeometry( 400, 400, 400 ), new THREE.MeshBasicMaterial( { color: Math.random() * 0xffffff } ));
+  //WIDGET3D.scene.add(cube);
   
   var mainLoop = function(){
-
     requestAnimationFrame( mainLoop );
-    videoWindow.update();
     WIDGET3D.render();
-    
   };
   
   mainLoop();

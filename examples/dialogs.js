@@ -36,6 +36,7 @@ var init = function(){
     
   dialog.setX(-600);
   dialog.setRotationX(-Math.PI/10);
+  var rollControls = new WIDGET3D.RollControls({component : dialog});
   
   mainWindow.addChild(dialog);
   
@@ -44,6 +45,7 @@ var init = function(){
     {string : "choice2", onclick : {handler : function(){alert("clicked choice2");}}},
     {string : "choice3", onclick : {handler : function(){alert("clicked choice3");}}},
     {string : "choice4", onclick : {handler : function(){alert("clicked choice4");}}}
+  ];
   
   var select = new WIDGET3D.SelectDialog({text : "Menu",
     choices: choices,
@@ -55,11 +57,12 @@ var init = function(){
   select.setX(600);
   select.setRotationY(Math.PI/10);
   
+  var rollControls2 = new WIDGET3D.RollControls({component : select});
+  
   mainWindow.addChild(select);
   
   var mainLoop = function(){
     requestAnimationFrame( mainLoop );
-    dialog.update();
     WIDGET3D.render();
   };
   mainLoop();

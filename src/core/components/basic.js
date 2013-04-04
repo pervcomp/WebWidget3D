@@ -114,7 +114,7 @@ WIDGET3D.Basic.prototype.remove = function(){
 //getters and setters for location and rotation
 //TODO: MOVE TO ADAPTER SIDE
 WIDGET3D.Basic.prototype.getPosition = function(){
-  return mesh_.position.x;
+  return this.mesh_.position;
 };
 
 WIDGET3D.Basic.prototype.setPosition = function(x, y, z){
@@ -135,7 +135,7 @@ WIDGET3D.Basic.prototype.setZ = function(z){
 };
 
 WIDGET3D.Basic.prototype.getRotation = function(){
-  return this.mesh_rotation;
+  return this.mesh_.rotation;
 };
 
 WIDGET3D.Basic.prototype.setRotation = function(rotX, rotY, rotZ){

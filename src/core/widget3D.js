@@ -96,6 +96,10 @@ WIDGET3D = {
       return allObjects_[id];
     };
     
+    WIDGET3D.getAllObjects = function(){
+      return allObjects_;
+    };
+    
     WIDGET3D.getFocused = function(){
       return focused_;
     };

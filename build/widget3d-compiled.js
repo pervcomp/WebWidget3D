@@ -96,6 +96,10 @@ WIDGET3D = {
       return allObjects_[id];
     };
     
+    WIDGET3D.getAllObjects = function(){
+      return allObjects_;
+    };
+    
     WIDGET3D.getFocused = function(){
       return focused_;
     };
@@ -1454,10 +1458,15 @@ var THREEJS_WIDGET3D = {
       //---------------------------------------------
       //CREATING RENDERING METHOD
       WIDGET3D.render = function(){
-        //could this be optimized?
-        for(var i = 0; i < mainWindow.children_.lenght; +i){
-          mainWindow.children_[i].update();
+        //updating all objects
+        var objects = WIDGET3D.getAllObjects();
+        
+        for(var i in objects){
+          if(objects.hasOwnProperty(i)){
+            objects[i].update();
+          }
         }
+        
         WIDGET3D.renderer.render(WIDGET3D.scene, WIDGET3D.camera.camera_);
       };
       //---------------------------------------------

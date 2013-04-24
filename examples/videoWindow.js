@@ -29,8 +29,8 @@ var init = function(){
   });
   
   var camera = WIDGET3D.camera;
-  camera.setZ(that.DISTANCE);
-  camera.setRotation(Math.PI/10, Math.PI/10, Math.PI/10);
+  //camera.setZ(that.DISTANCE);
+  //camera.setRotation(Math.PI/10, Math.PI/10, Math.PI/10);
   //--------------------------------------------
   // TITLED WINDOW WHERE WE SHOW THE VIDEO
   //--------------------------------------------
@@ -64,8 +64,10 @@ var init = function(){
     function(event, p){p.video.pause(); p.window.remove()},
     {video : video, window : videoWindow});
     
-  mainWindow.addChild(videoWindow);
-  //camera.addChild(videoWindow);
+  //mainWindow.addChild(videoWindow);
+  
+  videoWindow.setZ(-that.DISTANCE);
+  camera.addChild(videoWindow);
   
   
   /*var tmpWindow = new WIDGET3D.Window();

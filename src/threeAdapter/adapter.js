@@ -92,12 +92,15 @@ var THREEJS_WIDGET3D = {
       //---------------------------------------------
       //CREATING RENDERING METHOD
       WIDGET3D.render = function(){
-        //if object is a window, this won't work...
-        //if I wanted this to work I had to call in windows update method it's childrens update.
-        //maybe a update list?
-        for(var i = 0; i < mainWindow.children_.lenght; +i){
-          mainWindow.children_[i].update();
+        //updating all objects
+        var objects = WIDGET3D.getAllObjects();
+        
+        for(var i in objects){
+          if(objects.hasOwnProperty(i)){
+            objects[i].update();
+          }
         }
+        
         WIDGET3D.renderer.render(WIDGET3D.scene, WIDGET3D.camera.camera_);
       };
       //---------------------------------------------

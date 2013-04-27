@@ -59,6 +59,13 @@ WIDGET3D.GridWindow = function(parameters){
 
 WIDGET3D.GridWindow.prototype = WIDGET3D.Window.prototype.inheritance();
 
+WIDGET3D.GridWindow.prototype.update = function(){
+  if(this.defaultControls_){
+    this.controls_.update();
+  }
+  WIDGET3D.GuiObject.prototype.update(this);
+}
+
 
 WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
   this.density_ = newDensity;
@@ -113,7 +120,8 @@ WIDGET3D.GridIcon = function(parameters){
   }
   
   this.color_ = parameters.color !== undefined ? parameters.color : 0xFFFFFF;
-  this.picture_ = parameters.picture !== undefined ? parameters.picture : false;
+  this.url_ = parameters.url !== undefined ? parameters.url : false;
+  this.img_ = parameters.img !== undefined ? parameters.img : false;
   
   //object can store metadata in a format that user like
   this.metadata_ = parameters.metadata !== undefined ? parameters.metadata : false;
@@ -127,8 +135,12 @@ WIDGET3D.GridIcon = function(parameters){
   
   this.texture_ = false;
   
-  if(this.picture_){
-    this.texture_ = THREE.ImageUtils.loadTexture(this.picture_);
+  if(this.img_){
+    this.texture_ = new THREE.Texture(this.img_);
+    this.texture_.needsUpdate = true;
+  }
+  else if(this.url_){
+    this.texture_ = THREE.ImageUtils.loadTexture(this.url_);
   }
 
   this.material_ = new THREE.MeshBasicMaterial({map : this.texture_, color: this.color_});

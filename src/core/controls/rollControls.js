@@ -59,7 +59,7 @@ WIDGET3D.RollControls = function(parameters){
       that.modelRotationY_ = that.rotationOnMouseDownY_ + ( mouse.x - that.clickLocation_.x );
       that.modelRotationX_ = that.rotationOnMouseDownX_ + ( mouse.y - that.clickLocation_.y );
       
-      that.update();
+      //that.update();
       
     }
 

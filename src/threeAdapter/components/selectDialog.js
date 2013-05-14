@@ -14,7 +14,7 @@
 //
 WIDGET3D.SelectDialog = function(parameters){
   
-  WIDGET3D.Window.call( this );
+  WIDGET3D.Group.call( this );
   
   var parameters = parameters || {};
 
@@ -45,7 +45,7 @@ WIDGET3D.SelectDialog = function(parameters){
 
 };
 
-WIDGET3D.SelectDialog.prototype = WIDGET3D.Window.prototype.inheritance();
+WIDGET3D.SelectDialog.prototype = WIDGET3D.Group.prototype.inheritance();
 
 WIDGET3D.SelectDialog.prototype.createText = function(){
   this.textCanvas_ = document.createElement('canvas');
@@ -174,7 +174,7 @@ WIDGET3D.SelectDialog.prototype.changeChoiceText = function(text, index){
 
 WIDGET3D.SelectDialog.prototype.remove = function(){
 
-  //hiding the window from scene
+  //hiding the Group from scene
   this.hide();
   
   //removing child canvases from DOM
@@ -188,7 +188,7 @@ WIDGET3D.SelectDialog.prototype.remove = function(){
   var canvas = this.textCanvas_;
   document.body.removeChild(canvas);
   
-  WIDGET3D.Window.prototype.remove.call( this );
+  WIDGET3D.Group.prototype.remove.call( this );
 
 }
 

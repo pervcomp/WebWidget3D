@@ -25,7 +25,7 @@ SOFTWARE.
 
 WIDGET3D = {
 
-  ElementType : {"MAIN_WINDOW":0, "WINDOW":1, "BASIC":2, "TEXT":3, "UNDEFINED":666 },
+  ElementType : {"MAIN_WINDOW":0, "GROUP":1, "BASIC":2, "TEXT":3, "UNDEFINED":666 },
   
   //Container is a object that contains constructor method of container (eg. in three.js Object3D)
   // Container is used in windows to manage it's childs. Container has to provide

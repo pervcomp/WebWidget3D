@@ -11,8 +11,6 @@ WIDGET3D.Basic = function(){
   
   this.mesh_;
   this.parent_;
-  
-  console.log(this);
 };
 
 

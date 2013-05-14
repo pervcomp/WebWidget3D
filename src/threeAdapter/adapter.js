@@ -57,10 +57,17 @@ var THREEJS_WIDGET3D = {
       }
       
       //setting three.js camera
-      var camera = parameters.camera !== undefined ? parameters.camera  : 
-        new THREE.PerspectiveCamera(75, 
-          WIDGET3D.renderer.domElement.width / WIDGET3D.renderer.domElement.height,
-          1, 10000);
+      if(parameters.camera){
+        var camera = parameters.camera;
+      }
+      else{
+        var aspect = parameters.aspect !== undefined ? parameters.aspect : (WIDGET3D.renderer.domElement.width/WIDGET3D.renderer.domElement.height);
+        var fov = parameters.fov !== undefined ? parameters.fov : 75;
+        var near = parameters.near !== undefined ? parameters.near : 1;
+        var far = parameters.far !== undefined ? parameters.far : 10000;
+        
+        var camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+      }
       
       WIDGET3D.scene = parameters.scene !== undefined ? parameters.scene : new THREE.Scene();
       
@@ -102,6 +109,17 @@ var THREEJS_WIDGET3D = {
         }
         
         WIDGET3D.renderer.render(WIDGET3D.scene, WIDGET3D.camera.camera_);
+      };
+      //---------------------------------------------
+      
+      //---------------------------------------------
+      //CREATING RESIZEMETHOD
+      //sets the renderer and camera parameters when window is resized
+      //HAS TO BE IMPLICITILY CALLED
+      WIDGET3D.setViewport = function(width, height, aspect){
+        WIDGET3D.renderer.setSize( width, height );
+        WIDGET3D.camera.camera_.aspect = aspect;
+        camera.updateProjectionMatrix();
       };
       //---------------------------------------------
       

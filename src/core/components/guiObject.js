@@ -84,12 +84,9 @@ WIDGET3D.GuiObject = function(){
     }
   };
   
-  WIDGET3D.addObject(this);//TESTAA!!!
-  
-  console.log(this);
+  WIDGET3D.addObject(this);
 };
 
-//TODO: FIX SO THAT MULTIPLE TARGETS CAN BE FOCUSED
 //set focus on object
 WIDGET3D.GuiObject.prototype.focus = function(){
   if(!this.inFocus_){

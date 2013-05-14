@@ -47,7 +47,7 @@ var srcFiles = {
 	Widget3D: ["../src/core/widget3D.js", "../src/core/common.js", "../src/core/events.js",
   
     "../src/core/components/guiObject.js", "../src/core/components/basic.js", "../src/core/components/windowBase.js",
-    "../src/core/components/mainWindow.js", "../src/core/components/window.js", "../src/core/components/text.js",
+    "../src/core/components/mainWindow.js", "../src/core/components/group.js", "../src/core/components/text.js",
     
     "../src/core/controls/rollControls.js",
     
@@ -71,7 +71,7 @@ var deps = {
   "../src/core/components/basic.js" : ["../src/core/widget3D.js", "../src/core/components/guiObject.js"],
   "../src/core/components/windowBase.js" : ["../src/core/widget3D.js", "../src/core/components/guiObject.js"],
   "../src/core/components/mainWindow.js" : ["../src/core/widget3D.js", "../src/core/components/guiObject.js", "../src/core/components/windowBase.js"],
-  "../src/core/components/window.js" : ["../src/core/widget3D.js", "../src/core/components/guiObject.js", "../src/core/components/basic.js", "../src/core/components/windowBase.js"],
+  "../src/core/components/group.js" : ["../src/core/widget3D.js", "../src/core/components/guiObject.js", "../src/core/components/basic.js", "../src/core/components/windowBase.js"],
   "../src/core/components/text.js" : ["../src/core/widget3D.js", "../src/core/components/guiObject.js", "../src/core/components/basic.js"],
 
   "../src/core/controls/rollControls.js": ["../src/core/widget3D.js"],

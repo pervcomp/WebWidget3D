@@ -61,6 +61,17 @@ var init = function(){
   
   mainWindow.addChild(select);
   
+  var onResize = function(){
+    WIDTH = window.innerWidth;
+    HEIGHT = window.innerHeight;
+    
+    var aspect = WIDTH / HEIGHT;
+    
+    WIDGET3D.setViewport(WIDTH, HEIGHT, aspect);
+  };
+  window.addEventListener("resize", onResize, false);
+  
+  
   var mainLoop = function(){
     requestAnimationFrame( mainLoop );
     WIDGET3D.render();

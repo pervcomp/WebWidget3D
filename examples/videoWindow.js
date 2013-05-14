@@ -43,9 +43,6 @@ var init = function(){
   texture.format = THREE.RGBFormat;
   texture.generateMipmaps = false;
   
-  
-  var testWindow
-  
   //styled window
   var videoWindow = new WIDGET3D.TitledWindow({
     width : 480*7,
@@ -61,8 +58,8 @@ var init = function(){
   videoWindow.addUpdateCallback(function(texture){texture.needsUpdate = true}, texture);
   
   videoWindow.closeButton_.addEventListener("click",
-    function(event, p){p.video.pause(); p.window.remove()},
-    {video : video, window : videoWindow});
+    function(event, p){p.video.pause(); p.screen.remove()},
+    {video : video, screen : videoWindow});
 
   videoWindow.setZ(-that.DISTANCE);
   camera.addChild(videoWindow);
@@ -81,12 +78,17 @@ var init = function(){
       camera.setZ(Math.sin( that.ANGLE ) * that.DISTANCE);
     }
   };
-  
   mainWindow.addEventListener("keydown", cameraControls, camera);
   
-  
-  //var cube = new THREE.Mesh( new THREE.CubeGeometry( 400, 400, 400 ), new THREE.MeshBasicMaterial( { color: Math.random() * 0xffffff } ));
-  //WIDGET3D.scene.add(cube);
+  var onResize = function(){
+    WIDTH = window.innerWidth;
+    HEIGHT = window.innerHeight;
+    
+    var aspect = WIDTH / HEIGHT;
+    
+    WIDGET3D.setViewport(WIDTH, HEIGHT, aspect);
+  };
+  window.addEventListener("resize", onResize, false);
   
   var mainLoop = function(){
     requestAnimationFrame( mainLoop );

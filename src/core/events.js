@@ -144,7 +144,8 @@ WIDGET3D.DomEvents.prototype.enableEvent = function(name){
       document.addEventListener(name, this.keyboardEvent, false);
     }
     else{
-      this.domElement_.addEventListener(name, this.mouseEvent, false);
+      //this.domElement_.addEventListener(name, this.mouseEvent, false);
+      document.addEventListener(name, this.mouseEvent, false);
     }
     this.enabled_[name.toString()] = true;
   }
@@ -155,12 +156,11 @@ WIDGET3D.DomEvents.prototype.disableEvent = function(name){
 
   if(this.enabled_.hasOwnProperty(name.toString()) && this.enabled_[name.toString()] === true){
     if(name == "keyup" || name == "keydown" || name == "keypress"){
-      //console.log("removed keyboard listener from event "+name);
       document.removeEventListener(name, this.keyboardEvent, false);
     }
     else{
-      //console.log("removed mouse listener from event "+name);
-      this.domElement_.removeEventListener(name, this.mouseEvent, false);
+      //this.domElement_.removeEventListener(name, this.mouseEvent, false);
+      document.removeEventListener(name, this.mouseEvent, false);
     }
     this.enabled_[name.toString()] = false;
     return true;

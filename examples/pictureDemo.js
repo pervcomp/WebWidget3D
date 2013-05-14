@@ -56,7 +56,15 @@ var init = function(){
   mainWindow.addEventListener("dragover", drag);
   mainWindow.addEventListener("drop", drop, {parent: subWindow, display: pictureDisplay});
   
-  console.log(WIDGET3D.getAllObjects());
+  var onResize = function(){
+    WIDTH = 0.90 * window.innerWidth;
+    HEIGHT = 0.83 * window.innerHeight;
+    
+    var aspect = WIDTH / HEIGHT;
+    
+    WIDGET3D.setViewport(WIDTH, HEIGHT, aspect);
+  };
+  window.addEventListener("resize", onResize, false);
   
   var mainLoop = function(){
     requestAnimationFrame( mainLoop );
@@ -100,7 +108,6 @@ var drop = function(event, parameters){
   event.preventDefault();
 
   var files = event.dataTransfer.files;
-  console.log(files);
 
   for(var i = 0; i < files.length; ++i){
     var file = files[i];
@@ -115,8 +122,6 @@ var drop = function(event, parameters){
     
     var reader = new FileReader();
     reader.onload = (function(aImg) { return function(e) {
-      
-      console.log("a new Image!");
       
       aImg.onload = function(){
         displayPicture(parameters.parent, parameters.display, aImg);
@@ -136,7 +141,6 @@ var displayPicture = function(subWindow, pictureDisplay, img){
   var button = new WIDGET3D.GridIcon({parent: subWindow, img : img});
   button.addEventListener("click", mouseclickHandler, {button: button, pictureDisplay : pictureDisplay});
 }
-
 
 
 

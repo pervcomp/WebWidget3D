@@ -16,7 +16,7 @@
 //
 WIDGET3D.CameraGroup = function(parameters){
   
-  WIDGET3D.Window.call( this );
+  WIDGET3D.Group.call( this );
   
   var parameters = parameters || {};
   
@@ -24,4 +24,4 @@ WIDGET3D.CameraGroup = function(parameters){
   this.container_.add(this.camera_);
 };
 
-WIDGET3D.CameraGroup.prototype = WIDGET3D.Window.prototype.inheritance();
+WIDGET3D.CameraGroup.prototype = WIDGET3D.Group.prototype.inheritance();

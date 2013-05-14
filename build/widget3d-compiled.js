@@ -25,7 +25,7 @@ SOFTWARE.
 
 WIDGET3D = {
 
-  ElementType : {"MAIN_WINDOW":0, "WINDOW":1, "BASIC":2, "TEXT":3, "UNDEFINED":666 },
+  ElementType : {"MAIN_WINDOW":0, "GROUP":1, "BASIC":2, "TEXT":3, "UNDEFINED":666 },
   
   //Container is a object that contains constructor method of container (eg. in three.js Object3D)
   // Container is used in windows to manage it's childs. Container has to provide
@@ -402,7 +402,8 @@ WIDGET3D.DomEvents.prototype.enableEvent = function(name){
       document.addEventListener(name, this.keyboardEvent, false);
     }
     else{
-      this.domElement_.addEventListener(name, this.mouseEvent, false);
+      //this.domElement_.addEventListener(name, this.mouseEvent, false);
+      document.addEventListener(name, this.mouseEvent, false);
     }
     this.enabled_[name.toString()] = true;
   }
@@ -413,12 +414,11 @@ WIDGET3D.DomEvents.prototype.disableEvent = function(name){
 
   if(this.enabled_.hasOwnProperty(name.toString()) && this.enabled_[name.toString()] === true){
     if(name == "keyup" || name == "keydown" || name == "keypress"){
-      //console.log("removed keyboard listener from event "+name);
       document.removeEventListener(name, this.keyboardEvent, false);
     }
     else{
-      //console.log("removed mouse listener from event "+name);
-      this.domElement_.removeEventListener(name, this.mouseEvent, false);
+      //this.domElement_.removeEventListener(name, this.mouseEvent, false);
+      document.removeEventListener(name, this.mouseEvent, false);
     }
     this.enabled_[name.toString()] = false;
     return true;
@@ -442,7 +442,7 @@ WIDGET3D.GuiObject = function(){
   this.inFocus_ = false;
   this.id_ = WIDGET3D.id();
   
-  this.updateCallback_ = [];
+  this.updateCallbacks_ = [];
   
   this.events_ = {
   
@@ -512,12 +512,9 @@ WIDGET3D.GuiObject = function(){
     }
   };
   
-  WIDGET3D.addObject(this);//TESTAA!!!
-  
-  console.log(this);
+  WIDGET3D.addObject(this);
 };
 
-//TODO: FIX SO THAT MULTIPLE TARGETS CAN BE FOCUSED
 //set focus on object
 WIDGET3D.GuiObject.prototype.focus = function(){
   if(!this.inFocus_){
@@ -639,19 +636,12 @@ WIDGET3D.GuiObject.prototype.setNewEventIndex = function(name, index){
 }
 
 WIDGET3D.GuiObject.prototype.addUpdateCallback = function(callback, args){
-  
-  this.updateCallback_.push({callback: callback, arguments: args});
-  
-  //this.updateCallback_ = {callback: callback, arguments: args};
+  this.updateCallbacks_.push({callback: callback, arguments: args});
 };
 
 WIDGET3D.GuiObject.prototype.update = function(){
-  /*if(this.updateCallback_){
-    this.updateCallback_.callback(this.updateCallback_.arguments);
-  }*/
-  
-  for(var i = 0; i < this.updateCallback_.length; ++i){
-    this.updateCallback_[i].callback(this.updateCallback_[i].arguments);
+  for(var i = 0; i < this.updateCallbacks_.length; ++i){
+    this.updateCallbacks_[i].callback(this.updateCallbacks_[i].arguments);
   }
 };
 
@@ -679,8 +669,6 @@ WIDGET3D.Basic = function(){
   
   this.mesh_;
   this.parent_;
-  
-  console.log(this);
 };
 
 
@@ -943,38 +931,37 @@ WIDGET3D.MainWindow.prototype.removeMesh = function(mesh){
 
 
 //---------------------------------------------
-// GUI OBJECT: WINDOW
+// GUI OBJECT: Group
 //---------------------------------------------
-// Basic window that can has children.
+// Basic Group that can has children.
 // Extends WIDGET3D.Basic object.
 //---------------------------------------------
-WIDGET3D.Window = function(){
+WIDGET3D.Group = function(){
   WIDGET3D.Basic.call( this );
   WIDGET3D.WindowBase.call( this );
   
-  console.log(this);
 };
 
 
 //-----------------------------------------------------------------------------------------
-// inheriting window from Basic object
-WIDGET3D.Window.prototype = WIDGET3D.Basic.prototype.inheritance();
+// inheriting Group from Basic object
+WIDGET3D.Group.prototype = WIDGET3D.Basic.prototype.inheritance();
 
 //inheriting some methods from WindowInterface
 
-// adds new child to window
-WIDGET3D.Window.prototype.addChild= WIDGET3D.WindowBase.prototype.addChild;
-// hides unfocused objects in window
-WIDGET3D.Window.prototype.hideNotFocused = WIDGET3D.WindowBase.prototype.hideNotFocused;
-// removes object from window
-WIDGET3D.Window.prototype.removeFromObjects = WIDGET3D.WindowBase.prototype.removeFromObjects;
+// adds new child to Group
+WIDGET3D.Group.prototype.addChild= WIDGET3D.WindowBase.prototype.addChild;
+// hides unfocused objects in Group
+WIDGET3D.Group.prototype.hideNotFocused = WIDGET3D.WindowBase.prototype.hideNotFocused;
+// removes object from Group
+WIDGET3D.Group.prototype.removeFromObjects = WIDGET3D.WindowBase.prototype.removeFromObjects;
 
 //-----------------------------------------------------------------------------------------
-WIDGET3D.Window.prototype.type_ = WIDGET3D.ElementType.WINDOW;
+WIDGET3D.Group.prototype.type_ = WIDGET3D.ElementType.GROUP;
 //-----------------------------------------------------------------------------------------
 
-//sets parent window for object
-WIDGET3D.Window.prototype.setParent = function(widget){
+//sets parent Group for object
+WIDGET3D.Group.prototype.setParent = function(widget){
   
   // if parent is allready set we have to do some things
   // to keep datastructures up to date.
@@ -994,8 +981,8 @@ WIDGET3D.Window.prototype.setParent = function(widget){
   }
 };
 
-//sets mesh for window
-WIDGET3D.Window.prototype.setMesh = function(mesh){
+//sets mesh for Group
+WIDGET3D.Group.prototype.setMesh = function(mesh){
   var mainWindow =  WIDGET3D.getMainWindow();
   
   if(this.mesh_){
@@ -1019,8 +1006,8 @@ WIDGET3D.Window.prototype.setMesh = function(mesh){
   }
 };
 
-// shows window
-WIDGET3D.Window.prototype.show = function(){
+// shows Group
+WIDGET3D.Group.prototype.show = function(){
 
   if(!this.isVisible_){
     for(var i = 0; i < this.children_.length; ++i){
@@ -1035,8 +1022,8 @@ WIDGET3D.Window.prototype.show = function(){
   }
 };
 
-// hides window
-WIDGET3D.Window.prototype.hide = function(){
+// hides Group
+WIDGET3D.Group.prototype.hide = function(){
 
   if(this.isVisible_){
     for(var i = 0; i < this.children_.length; ++i){
@@ -1055,18 +1042,18 @@ WIDGET3D.Window.prototype.hide = function(){
   }
 };
 
-//removes window and it's children
-WIDGET3D.Window.prototype.remove = function(){
+//removes Group and it's children
+WIDGET3D.Group.prototype.remove = function(){
   //children needs to be removed  
   while(this.children_.length > 0){
     this.children_[0].remove();
   }
-  //hiding the window from scene
+  //hiding the Group from scene
   this.hide();
   //removing event listeners
   this.removeAllListeners();
   
-  //If window has a mesh, it has to be removed allso
+  //If Group has a mesh, it has to be removed allso
   if(this.mesh_){
     WIDGET3D.getMainWindow().removeMesh(this.mesh_);
   }
@@ -1081,53 +1068,53 @@ WIDGET3D.Window.prototype.remove = function(){
 //setters and getters for location and rotation
 
 //TODO: MOVE TO THE ADAPTER SIDE
-WIDGET3D.Window.prototype.getPosition = function(){
+WIDGET3D.Group.prototype.getPosition = function(){
   return this.container_.position;
 };
 
-WIDGET3D.Window.prototype.setPosition = function(x, y, z){
+WIDGET3D.Group.prototype.setPosition = function(x, y, z){
   
   this.container_.position.set(x,y,z);
 };
 
-WIDGET3D.Window.prototype.setX = function(x){
+WIDGET3D.Group.prototype.setX = function(x){
   this.container_.position.setX(x);
 };
 
-WIDGET3D.Window.prototype.setY = function(y){
+WIDGET3D.Group.prototype.setY = function(y){
   this.container_.position.setY(y);
 };
 
-WIDGET3D.Window.prototype.setZ = function(z){
+WIDGET3D.Group.prototype.setZ = function(z){
   this.container_.position.setZ(z);
 };
 
-WIDGET3D.Window.prototype.getRotation = function(){
+WIDGET3D.Group.prototype.getRotation = function(){
   return this.container_.rotation;
 };
 
-WIDGET3D.Window.prototype.setRotation = function(rotX, rotY, rotZ){
+WIDGET3D.Group.prototype.setRotation = function(rotX, rotY, rotZ){
   
   this.container_.rotation.set(rotX, rotY, rotZ);
 };
 
-WIDGET3D.Window.prototype.setRotationX = function(rotX){
+WIDGET3D.Group.prototype.setRotationX = function(rotX){
   this.container_.rotation.setX(rotX);
 };
 
-WIDGET3D.Window.prototype.setRotationY = function(rotY){
+WIDGET3D.Group.prototype.setRotationY = function(rotY){
   this.container_.rotation.setY(rotY);
 };
 
-WIDGET3D.Window.prototype.setRotationZ = function(rotZ){
+WIDGET3D.Group.prototype.setRotationZ = function(rotZ){
   this.container_.rotation.setZ(rotZ);
 };
 
  
 //--------------------------------------------------
-// PROTOTYPAL INHERITANCE FUNCTION FOR WINDOW OBJECT
+// PROTOTYPAL INHERITANCE FUNCTION FOR Group OBJECT
 //--------------------------------------------------
-WIDGET3D.Window.prototype.inheritance = function(){
+WIDGET3D.Group.prototype.inheritance = function(){
   function guiWindowPrototype(){}
   guiWindowPrototype.prototype = this;
   var created = new guiWindowPrototype();
@@ -1314,8 +1301,11 @@ WIDGET3D.RollControls = function(parameters){
   this.clickLocation_;
   this.rotationOnMouseDownY_;
   this.rotationOnMousedownX_;
-  this.modelRotationY_ = 0;
-  this.modelRotationX_ = 0;
+  
+  var initialRotation = this.component_.getRotation();
+  this.modelRotationY_ = initialRotation.y;
+  this.modelRotationX_ = initialRotation.x;
+  
   this.rotate_ = false;
 
   this.mouseupHandler = function(event){
@@ -1438,10 +1428,17 @@ var THREEJS_WIDGET3D = {
       }
       
       //setting three.js camera
-      var camera = parameters.camera !== undefined ? parameters.camera  : 
-        new THREE.PerspectiveCamera(75, 
-          WIDGET3D.renderer.domElement.width / WIDGET3D.renderer.domElement.height,
-          1, 10000);
+      if(parameters.camera){
+        var camera = parameters.camera;
+      }
+      else{
+        var aspect = parameters.aspect !== undefined ? parameters.aspect : (WIDGET3D.renderer.domElement.width/WIDGET3D.renderer.domElement.height);
+        var fov = parameters.fov !== undefined ? parameters.fov : 75;
+        var near = parameters.near !== undefined ? parameters.near : 1;
+        var far = parameters.far !== undefined ? parameters.far : 10000;
+        
+        var camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+      }
       
       WIDGET3D.scene = parameters.scene !== undefined ? parameters.scene : new THREE.Scene();
       
@@ -1483,6 +1480,17 @@ var THREEJS_WIDGET3D = {
         }
         
         WIDGET3D.renderer.render(WIDGET3D.scene, WIDGET3D.camera.camera_);
+      };
+      //---------------------------------------------
+      
+      //---------------------------------------------
+      //CREATING RESIZEMETHOD
+      //sets the renderer and camera parameters when window is resized
+      //HAS TO BE IMPLICITILY CALLED
+      WIDGET3D.setViewport = function(width, height, aspect){
+        WIDGET3D.renderer.setSize( width, height );
+        WIDGET3D.camera.camera_.aspect = aspect;
+        camera.updateProjectionMatrix();
       };
       //---------------------------------------------
       
@@ -1569,7 +1577,7 @@ WIDGET3D.createMainWindow_THREE = THREEJS_WIDGET3D.init;
 //---------------------------------------------------
 
 //---------------------------------------------------
-// GRID LAYOUTED WINDOW
+// GRID LAYOUTED Group
 //---------------------------------------------------
 //
 // PARAMETERS:  width = width in world coordinates
@@ -1580,7 +1588,7 @@ WIDGET3D.GridWindow = function(parameters){
   
   var that = this;
   
-  WIDGET3D.Window.call( this );
+  WIDGET3D.Group.call( this );
   
   var parameters = parameters || {};
   
@@ -1621,7 +1629,7 @@ WIDGET3D.GridWindow = function(parameters){
   
 };
 
-WIDGET3D.GridWindow.prototype = WIDGET3D.Window.prototype.inheritance();
+WIDGET3D.GridWindow.prototype = WIDGET3D.Group.prototype.inheritance();
 
 WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
   this.density_ = newDensity;
@@ -1755,14 +1763,14 @@ WIDGET3D.GridIcon.prototype.setToPlace = function(){
 //---------------------------------------------------
 
 //---------------------------------------------------
-// TITLED WINDOW
+// TITLED Group
 //---------------------------------------------------
 //
 // PARAMETERS:  title :           title string
 //              width :           widht in world coordinate space
 //              height:           height in world coordinate space
 //              defaultControls : boolean that tells if the default mouse controls are used
-//              *color:           hexadecimal color for window
+//              *color:           hexadecimal color for Group
 //              *texture :        three.js texture object
 //              *material :       three.js material object
 //              * if material is given texture and color doens't apply
@@ -1771,7 +1779,7 @@ WIDGET3D.GridIcon.prototype.setToPlace = function(){
 //
 WIDGET3D.TitledWindow = function(parameters){
   
-  WIDGET3D.Window.call( this );
+  WIDGET3D.Group.call( this );
   
   var that = this;
   
@@ -1840,7 +1848,7 @@ WIDGET3D.TitledWindow = function(parameters){
   }
 };
 
-WIDGET3D.TitledWindow.prototype = WIDGET3D.Window.prototype.inheritance();
+WIDGET3D.TitledWindow.prototype = WIDGET3D.Group.prototype.inheritance();
 
 //sets titlebar text
 WIDGET3D.TitledWindow.prototype.createTitle = function(title, side){
@@ -1903,7 +1911,7 @@ WIDGET3D.TitledWindow.prototype.remove = function(){
     this.controls_.remove();
   }
   
-  WIDGET3D.Window.prototype.remove.call( this );
+  WIDGET3D.Group.prototype.remove.call( this );
 };
 
 WIDGET3D.TitledWindow.prototype.getContent = function(){
@@ -1924,7 +1932,7 @@ WIDGET3D.TitledWindow.prototype.getContent = function(){
 //
 WIDGET3D.Dialog = function(parameters){
   
-  WIDGET3D.Window.call( this );
+  WIDGET3D.Group.call( this );
   
   var parameters = parameters || {};
 
@@ -1986,15 +1994,7 @@ WIDGET3D.Dialog = function(parameters){
   this.textBox_.addEventListener("keydown", this.textBoxOnkeypress, this);
 };
 
-WIDGET3D.Dialog.prototype = WIDGET3D.Window.prototype.inheritance();
-
-/*WIDGET3D.Dialog.prototype.update = function(){
-  this.textBox_.update();
-  
-  if(this.updateCallback_){
-    this.updateCallback_.callback(this.updateCallback_.arguments);
-  }
-}*/
+WIDGET3D.Dialog.prototype = WIDGET3D.Group.prototype.inheritance();
 
 WIDGET3D.Dialog.prototype.createDialogText = function(string){
 
@@ -2064,43 +2064,43 @@ WIDGET3D.Dialog.prototype.createTextBox = function(){
   this.updateTextBox(this);
 }
 
-WIDGET3D.Dialog.prototype.updateTextBox = function(window){
+WIDGET3D.Dialog.prototype.updateTextBox = function(dialog){
 
-  window.textContext_.fillStyle = "#FFFFFF";
-  window.textContext_.fillRect(0, 0, window.textCanvas_.width, window.textCanvas_.height);
+  dialog.textContext_.fillStyle = "#FFFFFF";
+  dialog.textContext_.fillRect(0, 0, dialog.textCanvas_.width, dialog.textCanvas_.height);
   
-  window.textContext_.fillStyle = "#000000";
-  window.textContext_.font = "bold 50px Courier New";
-  window.textContext_.align = "center";
-  window.textContext_.textBaseline = "middle";
+  dialog.textContext_.fillStyle = "#000000";
+  dialog.textContext_.font = "bold 50px Courier New";
+  dialog.textContext_.align = "center";
+  dialog.textContext_.textBaseline = "middle";
   
-  window.textContext_.fillText(window.textBox_.textHandle_, 5, window.textCanvas_.height/2);
+  dialog.textContext_.fillText(dialog.textBox_.textHandle_, 5, dialog.textCanvas_.height/2);
   
-  window.textBox_.mesh_.material.map.needsUpdate = true;
+  dialog.textBox_.mesh_.material.map.needsUpdate = true;
   
 };
 
-WIDGET3D.Dialog.prototype.textBoxOnclick = function(event, window){
-  window.textBox_.focus();
+WIDGET3D.Dialog.prototype.textBoxOnclick = function(event, dialog){
+  dialog.textBox_.focus();
 };
 
-WIDGET3D.Dialog.prototype.textBoxOnkeypress = function(event, window){
+WIDGET3D.Dialog.prototype.textBoxOnkeypress = function(event, dialog){
   
   if(event.charCode != 0){
     //if event is a character key press
     var letter = String.fromCharCode(event.charCode);
-    window.textBox_.addLetter(letter);
+    dialog.textBox_.addLetter(letter);
   }
   else if(event.type == "keydown" && (event.keyCode == 8 || event.keyCode == 46)){
     //if event is a backspace or delete key press
-    window.textBox_.erase(1);
+    dialog.textBox_.erase(1);
   }
 
 };
 
 WIDGET3D.Dialog.prototype.remove = function(){
   
-  //hiding the window from scene
+  //hiding the Group from scene
   this.hide();
   
   //removing texturecanvases from dom
@@ -2109,7 +2109,7 @@ WIDGET3D.Dialog.prototype.remove = function(){
   document.body.removeChild(canvas1);
   document.body.removeChild(canvas2);
   
-  WIDGET3D.Window.prototype.remove.call( this );
+  WIDGET3D.Group.prototype.remove.call( this );
 }
 
 //---------------------------------------------------
@@ -2128,7 +2128,7 @@ WIDGET3D.Dialog.prototype.remove = function(){
 //
 WIDGET3D.SelectDialog = function(parameters){
   
-  WIDGET3D.Window.call( this );
+  WIDGET3D.Group.call( this );
   
   var parameters = parameters || {};
 
@@ -2159,7 +2159,7 @@ WIDGET3D.SelectDialog = function(parameters){
 
 };
 
-WIDGET3D.SelectDialog.prototype = WIDGET3D.Window.prototype.inheritance();
+WIDGET3D.SelectDialog.prototype = WIDGET3D.Group.prototype.inheritance();
 
 WIDGET3D.SelectDialog.prototype.createText = function(){
   this.textCanvas_ = document.createElement('canvas');
@@ -2288,7 +2288,7 @@ WIDGET3D.SelectDialog.prototype.changeChoiceText = function(text, index){
 
 WIDGET3D.SelectDialog.prototype.remove = function(){
 
-  //hiding the window from scene
+  //hiding the Group from scene
   this.hide();
   
   //removing child canvases from DOM
@@ -2302,7 +2302,7 @@ WIDGET3D.SelectDialog.prototype.remove = function(){
   var canvas = this.textCanvas_;
   document.body.removeChild(canvas);
   
-  WIDGET3D.Window.prototype.remove.call( this );
+  WIDGET3D.Group.prototype.remove.call( this );
 
 }
 
@@ -2324,7 +2324,7 @@ WIDGET3D.SelectDialog.prototype.remove = function(){
 //
 WIDGET3D.CameraGroup = function(parameters){
   
-  WIDGET3D.Window.call( this );
+  WIDGET3D.Group.call( this );
   
   var parameters = parameters || {};
   
@@ -2332,7 +2332,7 @@ WIDGET3D.CameraGroup = function(parameters){
   this.container_.add(this.camera_);
 };
 
-WIDGET3D.CameraGroup.prototype = WIDGET3D.Window.prototype.inheritance();// DRAG CONTROLS for WIDGET3D three.js version
+WIDGET3D.CameraGroup.prototype = WIDGET3D.Group.prototype.inheritance();// DRAG CONTROLS for WIDGET3D three.js version
 //
 //Parameters: component: WIDGET3D.Basic typed object to which the controlls are attached
 //                       COMPONENT MUST BE GIVEN!

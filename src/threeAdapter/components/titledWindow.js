@@ -5,14 +5,14 @@
 //---------------------------------------------------
 
 //---------------------------------------------------
-// TITLED WINDOW
+// TITLED Group
 //---------------------------------------------------
 //
 // PARAMETERS:  title :           title string
 //              width :           widht in world coordinate space
 //              height:           height in world coordinate space
 //              defaultControls : boolean that tells if the default mouse controls are used
-//              *color:           hexadecimal color for window
+//              *color:           hexadecimal color for Group
 //              *texture :        three.js texture object
 //              *material :       three.js material object
 //              * if material is given texture and color doens't apply
@@ -21,7 +21,7 @@
 //
 WIDGET3D.TitledWindow = function(parameters){
   
-  WIDGET3D.Window.call( this );
+  WIDGET3D.Group.call( this );
   
   var that = this;
   
@@ -90,7 +90,7 @@ WIDGET3D.TitledWindow = function(parameters){
   }
 };
 
-WIDGET3D.TitledWindow.prototype = WIDGET3D.Window.prototype.inheritance();
+WIDGET3D.TitledWindow.prototype = WIDGET3D.Group.prototype.inheritance();
 
 //sets titlebar text
 WIDGET3D.TitledWindow.prototype.createTitle = function(title, side){
@@ -153,7 +153,7 @@ WIDGET3D.TitledWindow.prototype.remove = function(){
     this.controls_.remove();
   }
   
-  WIDGET3D.Window.prototype.remove.call( this );
+  WIDGET3D.Group.prototype.remove.call( this );
 };
 
 WIDGET3D.TitledWindow.prototype.getContent = function(){

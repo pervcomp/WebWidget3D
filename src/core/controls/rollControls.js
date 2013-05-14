@@ -18,8 +18,11 @@ WIDGET3D.RollControls = function(parameters){
   this.clickLocation_;
   this.rotationOnMouseDownY_;
   this.rotationOnMousedownX_;
-  this.modelRotationY_ = 0;
-  this.modelRotationX_ = 0;
+  
+  var initialRotation = this.component_.getRotation();
+  this.modelRotationY_ = initialRotation.y;
+  this.modelRotationX_ = initialRotation.x;
+  
   this.rotate_ = false;
 
   this.mouseupHandler = function(event){

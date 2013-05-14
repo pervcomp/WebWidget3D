@@ -21,8 +21,6 @@ WIDGET3D.CameraGroup = function(parameters){
   var parameters = parameters || {};
   
   this.camera_ = parameters.camera;
-  
-  this.camera_.position.set(0,0,0);
   this.container_.add(this.camera_);
 };
 

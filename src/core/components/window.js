@@ -7,6 +7,8 @@
 WIDGET3D.Window = function(){
   WIDGET3D.Basic.call( this );
   WIDGET3D.WindowBase.call( this );
+  
+  console.log(this);
 };
 
 

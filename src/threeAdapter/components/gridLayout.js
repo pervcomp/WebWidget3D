@@ -59,14 +59,6 @@ WIDGET3D.GridWindow = function(parameters){
 
 WIDGET3D.GridWindow.prototype = WIDGET3D.Window.prototype.inheritance();
 
-WIDGET3D.GridWindow.prototype.update = function(){
-  if(this.defaultControls_){
-    this.controls_.update();
-  }
-  WIDGET3D.GuiObject.prototype.update(this);
-}
-
-
 WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
   this.density_ = newDensity;
   this.maxChildren_ = newDensity * newDensity;
@@ -93,10 +85,8 @@ WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
     var mesh = new THREE.Mesh( geometry, icon.material_);
     icon.setMesh(mesh);
     icon.setToPlace();
-  }
-  
+  } 
 }
-
 
 //---------------------------------------------------
 // ICONS FOR GRIDWINDOW

@@ -56,6 +56,8 @@ var init = function(){
   mainWindow.addEventListener("dragover", drag);
   mainWindow.addEventListener("drop", drop, {parent: subWindow, display: pictureDisplay});
   
+  console.log(WIDGET3D.getAllObjects());
+  
   var mainLoop = function(){
     requestAnimationFrame( mainLoop );
     WIDGET3D.render();

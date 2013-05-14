@@ -51,7 +51,7 @@ var THREEJS_WIDGET3D = {
         var clearColor = parameters.clearColor !== undefined ? parameters.clearColor : 0x333333;
         var opacity = parameters.opacity !== undefined ? parameters.opacity : 1;
         
-        WIDGET3D.renderer.setClearColorHex( clearColor, opacity );
+        WIDGET3D.renderer.setClearColor( clearColor, opacity );
         
         domParent.appendChild(WIDGET3D.renderer.domElement);
       }

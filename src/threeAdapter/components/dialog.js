@@ -77,14 +77,6 @@ WIDGET3D.Dialog = function(parameters){
 
 WIDGET3D.Dialog.prototype = WIDGET3D.Window.prototype.inheritance();
 
-WIDGET3D.Dialog.prototype.update = function(){
-  this.textBox_.update();
-  
-  if(this.updateCallback_){
-    this.updateCallback_.callback(this.updateCallback_.arguments);
-  }
-}
-
 WIDGET3D.Dialog.prototype.createDialogText = function(string){
 
   this.context_.fillStyle = "#FFFFFF";

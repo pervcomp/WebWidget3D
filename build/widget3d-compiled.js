@@ -442,6 +442,8 @@ WIDGET3D.GuiObject = function(){
   this.inFocus_ = false;
   this.id_ = WIDGET3D.id();
   
+  this.updateCallback_ = [];
+  
   this.events_ = {
   
     checkEvent : function(name){
@@ -512,6 +514,7 @@ WIDGET3D.GuiObject = function(){
   
   WIDGET3D.addObject(this);//TESTAA!!!
   
+  console.log(this);
 };
 
 //TODO: FIX SO THAT MULTIPLE TARGETS CAN BE FOCUSED
@@ -635,13 +638,20 @@ WIDGET3D.GuiObject.prototype.setNewEventIndex = function(name, index){
   WIDGET3D.getMainWindow().childEvents_[name.toString()][index] = this;
 }
 
-WIDGET3D.GuiObject.prototype.addUpdateCallback = function(callback, args){ 
-  this.updateCallback_ = {callback: callback, arguments: args};
+WIDGET3D.GuiObject.prototype.addUpdateCallback = function(callback, args){
+  
+  this.updateCallback_.push({callback: callback, arguments: args});
+  
+  //this.updateCallback_ = {callback: callback, arguments: args};
 };
 
 WIDGET3D.GuiObject.prototype.update = function(){
-  if(this.updateCallback_){
+  /*if(this.updateCallback_){
     this.updateCallback_.callback(this.updateCallback_.arguments);
+  }*/
+  
+  for(var i = 0; i < this.updateCallback_.length; ++i){
+    this.updateCallback_[i].callback(this.updateCallback_[i].arguments);
   }
 };
 
@@ -669,6 +679,8 @@ WIDGET3D.Basic = function(){
   
   this.mesh_;
   this.parent_;
+  
+  console.log(this);
 };
 
 
@@ -939,6 +951,8 @@ WIDGET3D.MainWindow.prototype.removeMesh = function(mesh){
 WIDGET3D.Window = function(){
   WIDGET3D.Basic.call( this );
   WIDGET3D.WindowBase.call( this );
+  
+  console.log(this);
 };
 
 
@@ -1335,33 +1349,34 @@ WIDGET3D.RollControls = function(parameters){
   this.mousemoveHandler = function(event){
 
     if (that.rotate_){
-    
       var mouse = WIDGET3D.mouseCoordinates(event);
-      
       that.modelRotationY_ = that.rotationOnMouseDownY_ + ( mouse.x - that.clickLocation_.x );
       that.modelRotationX_ = that.rotationOnMouseDownX_ + ( mouse.y - that.clickLocation_.y );
-      
-      //that.update();
-      
     }
 
   };
   
   this.component_.addEventListener("mousedown", this.mousedownHandler);
+  
+  
+  //Animate must be called before the component is rendered to apply
+  //the change in components rotation
+  this.animate = function(){
+
+    var rot = that.component_.getRotation();
+    
+    var newRotY = rot.y + ((that.modelRotationY_ - rot.y)*0.04);
+    var newRotX = rot.x + ((that.modelRotationX_ - rot.x)*0.04);
+    
+    that.component_.setRotationY(newRotY);
+    that.component_.setRotationX(newRotX);
+  };
+  
+  this.component_.addUpdateCallback(this.animate);
+  
 };
 
-//Update must be called before the component is rendered to apply
-//the change in components rotation
-WIDGET3D.RollControls.prototype.update = function(){
 
-  var rot = this.component_.getRotation();
-  
-  var newRotY = rot.y + ((this.modelRotationY_ - rot.y)*0.04);
-  var newRotX = rot.x + ((this.modelRotationX_ - rot.x)*0.04);
-  
-  this.component_.setRotationY(newRotY);
-  this.component_.setRotationX(newRotX);
-};
 
 
 /*
@@ -1417,7 +1432,7 @@ var THREEJS_WIDGET3D = {
         var clearColor = parameters.clearColor !== undefined ? parameters.clearColor : 0x333333;
         var opacity = parameters.opacity !== undefined ? parameters.opacity : 1;
         
-        WIDGET3D.renderer.setClearColorHex( clearColor, opacity );
+        WIDGET3D.renderer.setClearColor( clearColor, opacity );
         
         domParent.appendChild(WIDGET3D.renderer.domElement);
       }
@@ -1608,14 +1623,6 @@ WIDGET3D.GridWindow = function(parameters){
 
 WIDGET3D.GridWindow.prototype = WIDGET3D.Window.prototype.inheritance();
 
-WIDGET3D.GridWindow.prototype.update = function(){
-  if(this.defaultControls_){
-    this.controls_.update();
-  }
-  WIDGET3D.GuiObject.prototype.update(this);
-}
-
-
 WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
   this.density_ = newDensity;
   this.maxChildren_ = newDensity * newDensity;
@@ -1642,10 +1649,8 @@ WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
     var mesh = new THREE.Mesh( geometry, icon.material_);
     icon.setMesh(mesh);
     icon.setToPlace();
-  }
-  
+  } 
 }
-
 
 //---------------------------------------------------
 // ICONS FOR GRIDWINDOW
@@ -1983,13 +1988,13 @@ WIDGET3D.Dialog = function(parameters){
 
 WIDGET3D.Dialog.prototype = WIDGET3D.Window.prototype.inheritance();
 
-WIDGET3D.Dialog.prototype.update = function(){
+/*WIDGET3D.Dialog.prototype.update = function(){
   this.textBox_.update();
   
   if(this.updateCallback_){
     this.updateCallback_.callback(this.updateCallback_.arguments);
   }
-}
+}*/
 
 WIDGET3D.Dialog.prototype.createDialogText = function(string){
 
@@ -2324,8 +2329,6 @@ WIDGET3D.CameraGroup = function(parameters){
   var parameters = parameters || {};
   
   this.camera_ = parameters.camera;
-  
-  this.camera_.position.set(0,0,0);
   this.container_.add(this.camera_);
 };
 

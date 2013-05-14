@@ -14,6 +14,8 @@ WIDGET3D.GuiObject = function(){
   this.inFocus_ = false;
   this.id_ = WIDGET3D.id();
   
+  this.updateCallbacks_ = [];
+  
   this.events_ = {
   
     checkEvent : function(name){
@@ -84,6 +86,7 @@ WIDGET3D.GuiObject = function(){
   
   WIDGET3D.addObject(this);//TESTAA!!!
   
+  console.log(this);
 };
 
 //TODO: FIX SO THAT MULTIPLE TARGETS CAN BE FOCUSED
@@ -207,13 +210,13 @@ WIDGET3D.GuiObject.prototype.setNewEventIndex = function(name, index){
   WIDGET3D.getMainWindow().childEvents_[name.toString()][index] = this;
 }
 
-WIDGET3D.GuiObject.prototype.addUpdateCallback = function(callback, args){ 
-  this.updateCallback_ = {callback: callback, arguments: args};
+WIDGET3D.GuiObject.prototype.addUpdateCallback = function(callback, args){
+  this.updateCallbacks_.push({callback: callback, arguments: args});
 };
 
 WIDGET3D.GuiObject.prototype.update = function(){
-  if(this.updateCallback_){
-    this.updateCallback_.callback(this.updateCallback_.arguments);
+  for(var i = 0; i < this.updateCallbacks_.length; ++i){
+    this.updateCallbacks_[i].callback(this.updateCallbacks_[i].arguments);
   }
 };
 

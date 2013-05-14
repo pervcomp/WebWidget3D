@@ -53,32 +53,33 @@ WIDGET3D.RollControls = function(parameters){
   this.mousemoveHandler = function(event){
 
     if (that.rotate_){
-    
       var mouse = WIDGET3D.mouseCoordinates(event);
-      
       that.modelRotationY_ = that.rotationOnMouseDownY_ + ( mouse.x - that.clickLocation_.x );
       that.modelRotationX_ = that.rotationOnMouseDownX_ + ( mouse.y - that.clickLocation_.y );
-      
-      //that.update();
-      
     }
 
   };
   
   this.component_.addEventListener("mousedown", this.mousedownHandler);
+  
+  
+  //Animate must be called before the component is rendered to apply
+  //the change in components rotation
+  this.animate = function(){
+
+    var rot = that.component_.getRotation();
+    
+    var newRotY = rot.y + ((that.modelRotationY_ - rot.y)*0.04);
+    var newRotX = rot.x + ((that.modelRotationX_ - rot.x)*0.04);
+    
+    that.component_.setRotationY(newRotY);
+    that.component_.setRotationX(newRotX);
+  };
+  
+  this.component_.addUpdateCallback(this.animate);
+  
 };
 
-//Update must be called before the component is rendered to apply
-//the change in components rotation
-WIDGET3D.RollControls.prototype.update = function(){
 
-  var rot = this.component_.getRotation();
-  
-  var newRotY = rot.y + ((this.modelRotationY_ - rot.y)*0.04);
-  var newRotX = rot.x + ((this.modelRotationX_ - rot.x)*0.04);
-  
-  this.component_.setRotationY(newRotY);
-  this.component_.setRotationX(newRotX);
-};
 
 

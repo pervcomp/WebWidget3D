@@ -63,20 +63,9 @@ var init = function(){
   videoWindow.closeButton_.addEventListener("click",
     function(event, p){p.video.pause(); p.window.remove()},
     {video : video, window : videoWindow});
-    
-  //mainWindow.addChild(videoWindow);
-  
+
   videoWindow.setZ(-that.DISTANCE);
   camera.addChild(videoWindow);
-  
-  
-  /*var tmpWindow = new WIDGET3D.Window();
-  tmpWindow.setX(600);
-  tmpWindow.setRotationX(Math.PI/8);
-  
-  tmpWindow.addChild(videoWindow);
-  camera.addChild(tmpWindow);
-  mainWindow.addChild(tmpWindow);*/
   
   var cameraControls= function(event, camera){
     var alpha = Math.PI/30;

@@ -4,14 +4,9 @@ widget3D
 
 3D widget library for the web.
 
-Experimenting ways to make 3D UIs in the web. At the moment library can be used with the [three.js](http://github.com/mrdoob/three.js) 3D-engine version 55.
+Experimenting ways to make 3D UIs in the web. At the moment library can be used with the [three.js](http://github.com/mrdoob/three.js) 3D-engine.
 
 Work in progress.
-
-Some examples:
--------
-* [Picture demo](http://www.cs.tut.fi/~mattila3/rimina)
-* [Lively3D](http://lively3d.cs.tut.fi/dev)
 
 Features:
 -------
@@ -37,7 +32,7 @@ For building the library you need nodejs. Then just run command "node build.js" 
 
 TODO:
 -------
-* Example pages
-* Drag controls needs some work. At the moment drag works only along the objects xy-axis.
-This isn't intuitive if camera or the object have rotation.
-* Adapters to other 3D engines
+* Example pages.
+* More controls.
+* Finnishing drag control so that it works even if cameras ancesters have rotations.
+* Adapters to other 3D engines.

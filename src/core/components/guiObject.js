@@ -91,7 +91,7 @@ WIDGET3D.GuiObject = function(){
 WIDGET3D.GuiObject.prototype.focus = function(){
   if(!this.inFocus_){
   
-    WIDGET3D.unfocusFocused();
+    //WIDGET3D.unfocusFocused();
     this.inFocus_ = true;
     WIDGET3D.addFocus(this);
     
@@ -99,10 +99,10 @@ WIDGET3D.GuiObject.prototype.focus = function(){
 };
 
 //unfocus object
-//TODO FIX
 WIDGET3D.GuiObject.prototype.unfocus = function(){
   if(this.inFocus_){
     this.inFocus_ = false; 
+    WIDGET3D.removeFocus(this);
   }
 };
 

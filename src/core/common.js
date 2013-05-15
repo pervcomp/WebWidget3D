@@ -5,19 +5,19 @@
 
 //returns the real width of the canvas element
 WIDGET3D.getRealWidth = function(){
-  return parseInt(window.getComputedStyle(WIDGET3D.getEvents().domElement_,null).getPropertyValue("width"));
+  return parseInt(window.getComputedStyle(WIDGET3D.getCanvas(),null).getPropertyValue("width"));
 };
 
 WIDGET3D.getRealHeight = function(){
-  return parseInt(window.getComputedStyle(WIDGET3D.getEvents().domElement_,null).getPropertyValue("height"));
+  return parseInt(window.getComputedStyle(WIDGET3D.getCanvas(),null).getPropertyValue("height"));
 };
 
 WIDGET3D.getCanvasWidth = function(){
-  return WIDGET3D.getEvents().domElement_.width;
+  return WIDGET3D.getCanvas().width;
 };
 
 WIDGET3D.getCanvasHeight = function(){
-  return WIDGET3D.getEvents().domElement_.height;
+  return WIDGET3D.getCanvas().height;
 };
 
 //calculates mouseScreenCoordinates from domEvent
@@ -51,8 +51,8 @@ WIDGET3D.mouseCoordinates = function(domEvent){
 
   var coords = WIDGET3D.mouseScreenCoordinates(domEvent);
   
-  //If canvas element size has been manipulated with CSS the domElement.width and domElement.height aren't the
-  // values of the height and width used showing the canvas. In here we need the real screen coordinatelimits
+  //If canvas element size has been manipulated with CSS the canvas.width and canvas.height aren't the
+  //values of the height and width used showing the canvas. In here we need the real screen coordinatelimits
   //to calculate mouse position correctly.
   
   var CSSwidth = WIDGET3D.getRealWidth();

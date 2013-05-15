@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2012 Anna-Liisa Mattila
+Copyright (C) 2012 Anna-Liisa Mattila / Deparment of Pervasive Computing, Tampere University of Technology
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -29,17 +29,9 @@ SOFTWARE.
 
 //Eventhandler abstraction for WIDGET3D's objects
 // needs the gui's main window (root window)
-//For mouse events uses mainwindows renderer as domElement!
-WIDGET3D.DomEvents = function(collisionCallback, domElement){
+WIDGET3D.DomEvents = function(collisionCallback){
 
   var _that_ = this;
-  
-  if(domElement){
-    _that_.domElement_ = domElement;
-  }
-  else{
-    _that_.domElement_ = document;
-  }
   
   _that_.collisions_ = {
     callback: collisionCallback.callback,
@@ -47,6 +39,26 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
   };
   
   _that_.enabled_ = {};
+  
+  //Function for checking the event prototype
+  // if event is mouse event mouseEvent function is called
+  // if it is a keyboard event keyboarEvent is called and
+  // if the event is neither of these triggerEvent is called.
+  _that_.mainEventHandler = function(domEvent){
+    
+    var proto = Object.getPrototypeOf(domEvent);
+    
+    if(proto.hasOwnProperty(String("initMouseEvent"))){
+      _that_.mouseEvent(domEvent);
+    }
+    else if(proto.hasOwnProperty(String("initKeyboardEvent"))){
+      _that_.keyboardEvent(domEvent);
+    }
+    else{
+      _that_.triggerEvent(domEvent);
+    }
+    
+  };
   
   _that_.mouseEvent = function(domEvent){
     
@@ -76,6 +88,7 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
     var name = domEvent.type;
     var mainWindow = WIDGET3D.getMainWindow();
     
+    //Focused widgets get the event
     for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
       if(mainWindow.childEvents_[name.toString()][k] != mainWindow &&
         mainWindow.childEvents_[name.toString()][k].inFocus_)
@@ -90,13 +103,12 @@ WIDGET3D.DomEvents = function(collisionCallback, domElement){
       }
     }
     
-    //then we call main windows onkeydown callback if there is one
-    if(mainWindow.events_.hasOwnProperty(name.toString())){      
+    /*if(mainWindow.events_.hasOwnProperty(name.toString())){      
       for(var l = 0; l < mainWindow.events_[name.toString()].length; ++l){
         mainWindow.events_[name.toString()][l].callback(domEvent,
           mainWindow.events_[name.toString()][l].arguments);
       }
-    }
+    }*/
   };
   
   // This method can be used to trigger an event
@@ -140,13 +152,7 @@ WIDGET3D.DomEvents.prototype.enableEvent = function(name){
   if(!this.enabled_.hasOwnProperty(name.toString()) || 
     (this.enabled_.hasOwnProperty(name.toString()) && this.enabled_[name.toString()] === false))
   {
-    if(name == "keyup" || name == "keydown" || name == "keypress"){
-      document.addEventListener(name, this.keyboardEvent, false);
-    }
-    else{
-      //this.domElement_.addEventListener(name, this.mouseEvent, false);
-      document.addEventListener(name, this.mouseEvent, false);
-    }
+    window.addEventListener(name, this.mainEventHandler, false); 
     this.enabled_[name.toString()] = true;
   }
 };
@@ -155,13 +161,9 @@ WIDGET3D.DomEvents.prototype.enableEvent = function(name){
 WIDGET3D.DomEvents.prototype.disableEvent = function(name){
 
   if(this.enabled_.hasOwnProperty(name.toString()) && this.enabled_[name.toString()] === true){
-    if(name == "keyup" || name == "keydown" || name == "keypress"){
-      document.removeEventListener(name, this.keyboardEvent, false);
-    }
-    else{
-      //this.domElement_.removeEventListener(name, this.mouseEvent, false);
-      document.removeEventListener(name, this.mouseEvent, false);
-    }
+    
+    window.removeEventListener(name, this.mainEventHandler, false);
+    
     this.enabled_[name.toString()] = false;
     return true;
   }

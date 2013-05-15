@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2012 Anna-Liisa Mattila
+Copyright (C) 2012 Anna-Liisa Mattila / Deparment of Pervasive Computing, Tampere University of Technology
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -27,18 +27,8 @@ WIDGET3D = {
 
   ElementType : {"MAIN_WINDOW":0, "GROUP":1, "BASIC":2, "TEXT":3, "UNDEFINED":666 },
   
-  //Container is a object that contains constructor method of container (eg. in three.js Object3D)
-  // Container is used in windows to manage it's childs. Container has to provide
-  // add and remove methods for meshes and other containers it allso needs to provide
-  // mutable position.x, position.y position.z and rotation.x, rotation.y, rotation.z values.
-  // position value changes has to be inherited to containers children.
-  // This interface is mandatory!!!
-  Container : undefined,
-  
-  initialized : false,
-  
   isInitialized : function(){
-    return this.initialized;
+    return false;
   },
   
   //Initializes the widget system core
@@ -51,11 +41,9 @@ WIDGET3D = {
   //    collisionCallback is used detecting mouse events on guiObjects. collisionCallback should return
   //    the mesh which was hit by cursor or false if hit weren't occured.
   //
-  //  domElement: DOM element where the mouse events are arised. Passing canvas where the
-  //    app is rendered is recomended. This parameter is optional, but if it's not specified
-  //    mouse event detection will use document as it's domElement!
-  //
   //  container: object containing constructor method of container (descriped above).
+  //  
+  //  canvas : the canvas element where the WebGL context is rendered
   //
   //RETURNS:
   //  root window which is Window typed gui object.
@@ -66,7 +54,9 @@ WIDGET3D = {
     var focused_ = [];
     var allObjects_ = {};
     var mainWindow_;
+    var container_;
     var events_;
+    var canvas_;
     
     var makeId = function(){
       var i = 0;
@@ -79,6 +69,10 @@ WIDGET3D = {
     WIDGET3D.getEvents = function(){
       return events_;
     };
+    
+    WIDGET3D.getCanvas = function(){
+      return canvas_;
+    }
     
     WIDGET3D.getMainWindow = function(){
       return mainWindow_;
@@ -130,12 +124,32 @@ WIDGET3D = {
     var parameters = parameters || {};
     
     //INITIALIZING CODE
+    
+    //Container is a object that contains constructor method of container (eg. in three.js Object3D)
+    // Container is used in group to manage it's childs. Container has to provide
+    // add and remove methods for meshes and other containers it allso needs to provide
+    // mutable position.x, position.y position.z and rotation.x, rotation.y, rotation.z values.
+    // position value changes has to be inherited to containers children.
+    // This interface is mandatory!!!
     if(parameters.container != undefined){
       WIDGET3D.Container = parameters.container;
     }
     else{
       console.log("Container must be specified!");
       console.log("Container has to be constructor method of container of used 3D-engine (eg. in three.js THREE.Object3D");
+      console.log("Initializing WIDGET3D failed!");
+      
+      return false;
+    }
+    
+    if(parameters.canvas != undefined){
+      canvas_ = parameters.canvas;
+    }
+    else{
+      console.log("Canvas must be specified!");
+      console.log("Initializing WIDGET3D failed!");
+      
+      return false;
     }
     
     mainWindow_ = new WIDGET3D.MainWindow();
@@ -143,16 +157,18 @@ WIDGET3D = {
     if(parameters.collisionCallback != undefined && 
       parameters.collisionCallback.callback != undefined){
       
-      events_ = new WIDGET3D.DomEvents(parameters.collisionCallback, parameters.domElement);
+      events_ = new WIDGET3D.DomEvents(parameters.collisionCallback);
     }
     else{
       console.log("CollisionCallback has to be JSON object containing attributes callback (and args, optional)");
       console.log("Initializing WIDGET3D failed!");
+      
       return false;
     }
     
-    
-    WIDGET3D.initialized = true;
+    WIDGET3D.isInitialized = function(){
+      return true;
+    }
 
     return mainWindow_;
   }

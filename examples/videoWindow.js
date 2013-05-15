@@ -6,7 +6,7 @@ var init = function(){
   
   var that = this;
   
-  that.DISTANCE = 3000;
+  that.DISTANCE = 500;
   that.ANGLE = 0;
   
   var WIDTH = window.InnerWidth;
@@ -29,7 +29,7 @@ var init = function(){
   });
   
   var camera = WIDGET3D.getCameraGroup();
-  //camera.setZ(that.DISTANCE);
+  camera.setZ(that.DISTANCE);
   //camera.setRotation(Math.PI/10, Math.PI/10, Math.PI/10);
   //--------------------------------------------
   // TITLED WINDOW WHERE WE SHOW THE VIDEO
@@ -45,8 +45,8 @@ var init = function(){
   
   //styled window
   var videoWindow = new WIDGET3D.TitledWindow({
-    width : 480*7,
-    height : 204*7,
+    width : 480,
+    height : 204,
     title : "video",
     texture : texture,
     defaultControls : true
@@ -61,8 +61,8 @@ var init = function(){
     function(event, p){p.video.pause(); p.screen.remove()},
     {video : video, screen : videoWindow});
 
-  videoWindow.setZ(-that.DISTANCE);
-  camera.addChild(videoWindow);
+  
+  mainWindow.addChild(videoWindow);
   
   var cameraControls= function(event, camera){
     var alpha = Math.PI/30;

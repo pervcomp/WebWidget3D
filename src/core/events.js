@@ -103,12 +103,16 @@ WIDGET3D.DomEvents = function(collisionCallback){
       }
     }
     
-    /*if(mainWindow.events_.hasOwnProperty(name.toString())){      
-      for(var l = 0; l < mainWindow.events_[name.toString()].length; ++l){
-        mainWindow.events_[name.toString()][l].callback(domEvent,
-          mainWindow.events_[name.toString()][l].arguments);
+    //TODO REFACTOR
+    //If mainwindow handler wasn't called yet it will be called now.
+    if(!mainWindow.inFocus_){
+      if(mainWindow.events_.hasOwnProperty(name.toString())){      
+        for(var l = 0; l < mainWindow.events_[name.toString()].length; ++l){
+          mainWindow.events_[name.toString()][l].callback(domEvent,
+            mainWindow.events_[name.toString()][l].arguments);
+        }
       }
-    }*/
+    }
   };
   
   // This method can be used to trigger an event

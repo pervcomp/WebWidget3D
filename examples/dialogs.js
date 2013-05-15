@@ -69,7 +69,7 @@ var init = function(){
     
     WIDGET3D.setViewport(WIDTH, HEIGHT, aspect);
   };
-  window.addEventListener("resize", onResize, false);
+  mainWindow.addEventListener("resize", onResize);
   
   
   var mainLoop = function(){

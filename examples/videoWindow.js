@@ -28,7 +28,7 @@ var init = function(){
     clearColor : 0xf9f9f9
   });
   
-  var camera = WIDGET3D.camera;
+  var camera = WIDGET3D.getCameraGroup();
   //camera.setZ(that.DISTANCE);
   //camera.setRotation(Math.PI/10, Math.PI/10, Math.PI/10);
   //--------------------------------------------

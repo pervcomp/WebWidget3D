@@ -21,18 +21,18 @@ var init = function(){
     antialias : true,
     width : WIDTH,
     height : HEIGHT,
-    clearColor : 0xf9f9f9
+    clearColor : 0xf9f9f9,
   });
   
-  WIDGET3D.camera.setZ(2000);
+  WIDGET3D.getCameraGroup().setZ(1000);
   
   //--------------------------------------------
   // SUBWINDOW FOR SMALL IMAGES
   //--------------------------------------------
   
   //styled window
-  var subWindow = new WIDGET3D.GridWindow({width : 2400,
-    height : 2000,
+  var subWindow = new WIDGET3D.GridWindow({width : 600,
+    height : 500,
     color : 0x000000,
     defaultControls: true});
   
@@ -42,7 +42,7 @@ var init = function(){
   // PICUTRE DISPLAY FOR LARGE PICTURE
   //--------------------------------------------
   
-  var display = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000, 10, 10),
+  var display = new THREE.Mesh(new THREE.PlaneGeometry(250, 250, 10, 10),
     new THREE.MeshBasicMaterial({color: 0xFFFFFF}));
   
   var pictureDisplay = new WIDGET3D.Basic();
@@ -75,17 +75,20 @@ var init = function(){
 
 //event handlers
 
+var DISPLAY_DISTANCE = 400;
+var SCALEFACTOR = 525;
+
 //mouse click handler for small pictures
 var mouseclickHandler = function(event, parameters){
   
   var width = parameters.button.mesh_.material.map.image.naturalWidth;
   var height = parameters.button.mesh_.material.map.image.naturalHeight;
-  var scale = 1050/height;
+  var scale = SCALEFACTOR/height;
   
   var display = new THREE.Mesh(new THREE.PlaneGeometry(width*scale, height*scale),
     parameters.button.mesh_.material);
   
-  display.position.z = 1250;
+  display.position.z = DISPLAY_DISTANCE;
   
   parameters.pictureDisplay.setMesh(display);
   parameters.pictureDisplay.show();

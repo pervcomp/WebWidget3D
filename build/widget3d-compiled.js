@@ -1468,9 +1468,9 @@ var THREEJS_WIDGET3D = {
       else{        
         var aspect = parameters.aspect !== undefined ? parameters.aspect : (renderer_.domElement.width/renderer_.domElement.height);
         
-        var fov = parameters.fov !== undefined ? parameters.fov : 75;
-        var near = parameters.near !== undefined ? parameters.near : 1;
-        var far = parameters.far !== undefined ? parameters.far : 10000;
+        var fov = parameters.fov !== undefined ? parameters.fov : 50;
+        var near = parameters.near !== undefined ? parameters.near : 0.1;
+        var far = parameters.far !== undefined ? parameters.far : 2000;
         
         camera_ = new THREE.PerspectiveCamera(fov, aspect, near, far);
       }
@@ -1501,8 +1501,8 @@ var THREEJS_WIDGET3D = {
       projector_ = new THREE.Projector();
       
       //Constructing camera group
-      WIDGET3D.camera = new WIDGET3D.CameraGroup({camera : camera_});
-      mainWindow.addChild(WIDGET3D.camera);
+      cameraGroup_ = new WIDGET3D.CameraGroup({camera : camera_});
+      mainWindow.addChild(cameraGroup_);
       
       //---------------------------------------------
       //CREATING RENDERING METHOD
@@ -1580,6 +1580,8 @@ var THREEJS_WIDGET3D = {
     
     var closest = false;
     
+    var found = [];
+    
     if(intersects.length > 0){
       //finding closest
       //closest object is the first visible object in intersects
@@ -1592,16 +1594,17 @@ var THREEJS_WIDGET3D = {
           
           //position where the click happened in object coordinates
           var objPos = intersects[m].point.clone().applyProjection(inv);
-          var found = THREEJS_WIDGET3D.findObject(closest, event.type);
+          var hit = THREEJS_WIDGET3D.findObject(closest, event.type);
           
-          if(found){
+          if(hit){
             //Info about object and world coordinates are atached to
             //the event object so that the data may be used in eventhandlers like
             //controls.
             event.objectCoordinates = objPos;
             event.worldCoordinates = intersects[m].point;
+            
           }
-          return found;
+          return hit;
         }
       }
     }
@@ -1658,6 +1661,7 @@ WIDGET3D.GridWindow = function(parameters){
   this.width_ = parameters.width !== undefined ? parameters.width : 1000;
   this.height_ = parameters.height !== undefined ? parameters.height : 1000;
   this.density_ = parameters.density !== undefined ? parameters.density : 6;
+  this.depth_ = (this.width_/(this.density_*2.0));
   
   this.maxChildren_ = this.density_ * this.density_;
   
@@ -1673,7 +1677,9 @@ WIDGET3D.GridWindow = function(parameters){
     wireframeLinewidth : this.lineWidth_
   });
   
-  var geometry = new THREE.PlaneGeometry( this.width_, this.height_, this.density_, this.density_ );
+  //var geometry = new THREE.PlaneGeometry( this.width_, this.height_, this.density_, this.density_ );
+  //width, height, depth, widthSegments, heightSegments, depthSegments
+  var geometry = new THREE.CubeGeometry( this.width_, this.height_, this.depth_, this.density_, this.density_, 1 );
   
   var mesh =  new THREE.Mesh(geometry, this.material_);
   
@@ -1697,8 +1703,12 @@ WIDGET3D.GridWindow.prototype = WIDGET3D.Group.prototype.inheritance();
 WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
   this.density_ = newDensity;
   this.maxChildren_ = newDensity * newDensity;
+  this.depth_ = (this.width_/(this.density_*2.0));
   
-  var grid = new THREE.PlaneGeometry( this.width_, this.height_, this.density_, this.density_ );
+  //var grid = new THREE.PlaneGeometry( this.width_, this.height_, this.density_, this.density_ );
+  
+  //width, height, depth, widthSegments, heightSegments, depthSegments
+  var grid = new THREE.CubeGeometry( this.width_, this.height_, this.depth_, this.density_, this.density_, 1 );
   
   var gridMesh =  new THREE.Mesh(grid, this.material_);
   
@@ -1754,7 +1764,7 @@ WIDGET3D.GridIcon = function(parameters){
   this.width_ = parent.width_/(parent.density_ + 3.3);
   this.height_ = parent.height_/(parent.density_ + 3.3);
   
-  this.depth_ = parameters.depth !== undefined ? parameters.depth : (this.height_/4);
+  this.depth_ = parameters.depth !== undefined ? parameters.depth : this.height_;
   
   var geometry = new THREE.CubeGeometry(this.width_, this.height_, this.depth_);
   
@@ -2045,7 +2055,6 @@ WIDGET3D.Dialog = function(parameters){
   document.body.appendChild(this.textCanvas_);
   this.textContext_ = this.textCanvas_.getContext('2d');
   
-  
   this.createTextBox();
   this.textBox_.addUpdateCallback(this.updateTextBox, this);
   
@@ -2073,7 +2082,7 @@ WIDGET3D.Dialog.prototype.createDialogText = function(string){
   this.context_.fillText(string, this.canvas_.width/2-(textWidth/2), 40);
   var texture = new THREE.Texture(this.canvas_);
   
-  var material = new THREE.MeshBasicMaterial({ map: texture, color: this.color_, opacity: this.opacity_});
+  var material = new THREE.MeshBasicMaterial({ map: texture, color: this.color_, opacity: this.opacity_, side : THREE.DoubleSide});
   
   texture.needsUpdate = true;
   
@@ -2113,8 +2122,8 @@ WIDGET3D.Dialog.prototype.createButtonText = function(string){
 WIDGET3D.Dialog.prototype.createTextBox = function(){
   
   var texture = new THREE.Texture(this.textCanvas_);
-  var material = new THREE.MeshBasicMaterial({ map: texture });
-  var mesh = new THREE.Mesh( new THREE.PlaneGeometry(this.width_/1.5, this.height_/10.0), material);
+  var material = new THREE.MeshBasicMaterial({ map: texture});
+  var mesh = new THREE.Mesh( new THREE.CubeGeometry(this.width_/1.5, this.height_/10.0, 20), material);
   
   this.textBox_.setMesh(mesh);
   
@@ -2122,7 +2131,7 @@ WIDGET3D.Dialog.prototype.createTextBox = function(){
   
   var y = parentLoc.y + this.height_/10;
   
-  this.textBox_.setPosition(parentLoc.x, y ,parentLoc.z+10);
+  this.textBox_.setPosition(parentLoc.x, y ,parentLoc.z);
   
   this.updateTextBox(this);
 }

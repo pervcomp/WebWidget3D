@@ -22,19 +22,19 @@ var init = function(){
     clearColor : 0xf9f9f9
   });
   
-  WIDGET3D.camera.setZ(1500);
+  WIDGET3D.getCameraGroup().setZ(1000);
   
   //--------------------------------------------
   // Example dialog
   //--------------------------------------------
   
   //styled window
-  var dialog = new WIDGET3D.Dialog({height : 1000, width : 1000, maxTextLength : 16});
+  var dialog = new WIDGET3D.Dialog({height : 500, width : 500, maxTextLength : 16});
   
   dialog.button_.addEventListener("click",
     function(event, dialog){dialog.remove()}, dialog);
     
-  dialog.setX(-600);
+  dialog.setX(-300);
   dialog.setRotationX(-Math.PI/10);
   var rollControls = new WIDGET3D.RollControls({component : dialog});
   
@@ -50,11 +50,11 @@ var init = function(){
   var select = new WIDGET3D.SelectDialog({text : "Menu",
     choices: choices,
     hasCancel : true,
-    width : 1200,
-    height : 1200,
+    width : 600,
+    height : 600,
     depth : 30});
   
-  select.setX(600);
+  select.setX(300);
   select.setRotationY(Math.PI/10);
   
   var rollControls2 = new WIDGET3D.RollControls({component : select});

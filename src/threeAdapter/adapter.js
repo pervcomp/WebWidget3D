@@ -79,9 +79,9 @@ var THREEJS_WIDGET3D = {
       else{        
         var aspect = parameters.aspect !== undefined ? parameters.aspect : (renderer_.domElement.width/renderer_.domElement.height);
         
-        var fov = parameters.fov !== undefined ? parameters.fov : 75;
-        var near = parameters.near !== undefined ? parameters.near : 1;
-        var far = parameters.far !== undefined ? parameters.far : 10000;
+        var fov = parameters.fov !== undefined ? parameters.fov : 50;
+        var near = parameters.near !== undefined ? parameters.near : 0.1;
+        var far = parameters.far !== undefined ? parameters.far : 2000;
         
         camera_ = new THREE.PerspectiveCamera(fov, aspect, near, far);
       }
@@ -112,8 +112,8 @@ var THREEJS_WIDGET3D = {
       projector_ = new THREE.Projector();
       
       //Constructing camera group
-      WIDGET3D.camera = new WIDGET3D.CameraGroup({camera : camera_});
-      mainWindow.addChild(WIDGET3D.camera);
+      cameraGroup_ = new WIDGET3D.CameraGroup({camera : camera_});
+      mainWindow.addChild(cameraGroup_);
       
       //---------------------------------------------
       //CREATING RENDERING METHOD
@@ -191,6 +191,8 @@ var THREEJS_WIDGET3D = {
     
     var closest = false;
     
+    var found = [];
+    
     if(intersects.length > 0){
       //finding closest
       //closest object is the first visible object in intersects
@@ -203,16 +205,17 @@ var THREEJS_WIDGET3D = {
           
           //position where the click happened in object coordinates
           var objPos = intersects[m].point.clone().applyProjection(inv);
-          var found = THREEJS_WIDGET3D.findObject(closest, event.type);
+          var hit = THREEJS_WIDGET3D.findObject(closest, event.type);
           
-          if(found){
+          if(hit){
             //Info about object and world coordinates are atached to
             //the event object so that the data may be used in eventhandlers like
             //controls.
             event.objectCoordinates = objPos;
             event.worldCoordinates = intersects[m].point;
+            
           }
-          return found;
+          return hit;
         }
       }
     }

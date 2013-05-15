@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2012 Anna-Liisa Mattila
+Copyright (C) 2012 Anna-Liisa Mattila / Deparment of Pervasive Computing, Tampere University of Technology
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -28,14 +28,30 @@ var THREEJS_WIDGET3D = {
 
   initialized : false,
   
+  
+  //parameters:
+  //    rensrer: THREE renderer object
+  //      if renderer no specified width, height, antialias, domParent, clearColor and opacity can be given
+  //
+  //    camera: THREE camera object
+  //      if camera not specified aspect, fow, near and far can be given
+  //
+  //    scene: THREE scene object
+  //
   init : function(parameters){
+  
+    var renderer_;
+    var camera_;
+    var cameraGroup_;
+    var scene_;
+    var projector_;
 
     if(WIDGET3D != undefined && !THREEJS_WIDGET3D.initialized){
       var parameters = parameters || {};
       
       //seting the three.js renderer
       if(parameters.renderer){
-        WIDGET3D.renderer = parameters.renderer;
+        renderer_ = parameters.renderer;
       }
       else{
         //if there were no renderer given as a parameter, we create one
@@ -45,40 +61,43 @@ var THREEJS_WIDGET3D = {
         var antialias = parameters.antialias !== undefined ? parameters.antialias : true;
         var domParent = parameters.domParent !== undefined ? parameters.domParent : document.body;
         
-        WIDGET3D.renderer = new THREE.WebGLRenderer({antialias: antialias});
-        WIDGET3D.renderer.setSize( width, height );
+        renderer_ = new THREE.WebGLRenderer({antialias: antialias});
+        renderer_.setSize( width, height );
         
         var clearColor = parameters.clearColor !== undefined ? parameters.clearColor : 0x333333;
         var opacity = parameters.opacity !== undefined ? parameters.opacity : 1;
+
+        renderer_.setClearColor( clearColor, opacity );
         
-        WIDGET3D.renderer.setClearColor( clearColor, opacity );
-        
-        domParent.appendChild(WIDGET3D.renderer.domElement);
+        domParent.appendChild(renderer_.domElement);
       }
       
       //setting three.js camera
       if(parameters.camera){
-        var camera = parameters.camera;
+        camera_ = parameters.camera;
       }
-      else{
-        var aspect = parameters.aspect !== undefined ? parameters.aspect : (WIDGET3D.renderer.domElement.width/WIDGET3D.renderer.domElement.height);
+      else{        
+        var aspect = parameters.aspect !== undefined ? parameters.aspect : (renderer_.domElement.width/renderer_.domElement.height);
+        
         var fov = parameters.fov !== undefined ? parameters.fov : 75;
         var near = parameters.near !== undefined ? parameters.near : 1;
         var far = parameters.far !== undefined ? parameters.far : 10000;
         
-        var camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+        camera_ = new THREE.PerspectiveCamera(fov, aspect, near, far);
       }
       
-      WIDGET3D.scene = parameters.scene !== undefined ? parameters.scene : new THREE.Scene();
+      scene_ = parameters.scene !== undefined ? parameters.scene : new THREE.Scene();
       
       var mainWindow = false;
       
       //initializing WIDGET3D
       if(!WIDGET3D.isInitialized()){
       
-        mainWindow = WIDGET3D.init({collisionCallback: {callback: THREEJS_WIDGET3D.checkIfHits},
+        mainWindow = WIDGET3D.init({
+          collisionCallback: {callback: THREEJS_WIDGET3D.checkIfHits},
           container: THREE.Object3D,
-          domElement: WIDGET3D.renderer.domElement});
+          canvas: renderer_.domElement
+        });
         
         if(!mainWindow){
           console.log("Widget3D init failed!");
@@ -89,11 +108,11 @@ var THREEJS_WIDGET3D = {
         mainWindow = WIDGET3D.getMainWindow();
       }
       
-      WIDGET3D.scene.add(mainWindow.container_);
+      scene_.add(mainWindow.container_);
+      projector_ = new THREE.Projector();
       
-      WIDGET3D.projector = new THREE.Projector();
-      WIDGET3D.camera = new WIDGET3D.CameraGroup({camera : camera});
-      
+      //Constructing camera group
+      WIDGET3D.camera = new WIDGET3D.CameraGroup({camera : camera_});
       mainWindow.addChild(WIDGET3D.camera);
       
       //---------------------------------------------
@@ -101,14 +120,12 @@ var THREEJS_WIDGET3D = {
       WIDGET3D.render = function(){
         //updating all objects
         var objects = WIDGET3D.getAllObjects();
-        
         for(var i in objects){
           if(objects.hasOwnProperty(i)){
             objects[i].update();
           }
         }
-        
-        WIDGET3D.renderer.render(WIDGET3D.scene, WIDGET3D.camera.camera_);
+        renderer_.render(scene_, camera_);
       };
       //---------------------------------------------
       
@@ -117,11 +134,39 @@ var THREEJS_WIDGET3D = {
       //sets the renderer and camera parameters when window is resized
       //HAS TO BE IMPLICITILY CALLED
       WIDGET3D.setViewport = function(width, height, aspect){
-        WIDGET3D.renderer.setSize( width, height );
-        WIDGET3D.camera.camera_.aspect = aspect;
-        camera.updateProjectionMatrix();
+        renderer_.setSize( width, height );
+        camera_.aspect = aspect;
+        camera_.updateProjectionMatrix();
+        
       };
       //---------------------------------------------
+      
+      //---------------------------------------------
+      //returns the renderer object
+      WIDGET3D.getRenderer = function(){
+        return renderer_;
+      }
+      //---------------------------------------------
+      
+      //returns three.js camera object
+      WIDGET3D.getCamera = function(){
+        return camera_;
+      }
+      
+      //return WIDGET3D camera group object
+      WIDGET3D.getCameraGroup = function(){
+        return cameraGroup_;
+      }
+      
+      //returns three.js projector
+      WIDGET3D.getProjector = function(){
+        return projector_;
+      }
+      
+      //returns three.js scene
+      WIDGET3D.getScene = function(){
+        return scene_;
+      }
       
       THREEJS_WIDGET3D.initialized = true;
       
@@ -138,7 +183,7 @@ var THREEJS_WIDGET3D = {
     var mouse = WIDGET3D.mouseCoordinates(event);
     
     var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
-    var ray = WIDGET3D.projector.pickingRay(vector, WIDGET3D.camera.camera_);
+    var ray = WIDGET3D.getProjector().pickingRay(vector, WIDGET3D.getCamera());
     
     //intersects checks now all the meshes in scene. It might be good to construct
     // a datastructure that contains meshes of mainWindow.childEvents_.event array content

@@ -31,8 +31,8 @@ WIDGET3D.DragControls = function(parameters){
   that.component_ = parameters.component;
   that.mouseButton_ = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
   that.shiftKey_ = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
-  
-  that.camera_ = WIDGET3D.camera.camera_;
+
+  that.camera_ = WIDGET3D.getCamera();
   
   var width = parameters.width !== undefined ? parameters.width : 2000;
   var height = parameters.height !== undefined ? parameters.height : 2000;
@@ -51,7 +51,9 @@ WIDGET3D.DragControls = function(parameters){
   
   that.setPlaneRotation();
   
-  WIDGET3D.scene.add( that.plane_ );
+ //WIDGET3D.scene.add( that.plane_ );
+  
+  WIDGET3D.getScene().add( that.plane_ );
   
   that.mouseupHandler = function(event){
     if(that.drag_){
@@ -78,7 +80,7 @@ WIDGET3D.DragControls = function(parameters){
         
         var mouse = WIDGET3D.mouseCoordinates(event);
         var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
-        var ray = WIDGET3D.projector.pickingRay(vector, that.camera_);
+        var ray = WIDGET3D.getProjector().pickingRay(vector, that.camera_);
         
         var intersects = ray.intersectObject( that.plane_ );
         if(intersects.length > 0){
@@ -100,7 +102,7 @@ WIDGET3D.DragControls = function(parameters){
 
       var mouse = WIDGET3D.mouseCoordinates(event);
       var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
-      var ray = WIDGET3D.projector.pickingRay(vector, that.camera_);
+      var ray = WIDGET3D.getProjector().pickingRay(vector, that.camera_);
       
       var intersects = ray.intersectObject( that.plane_ );
       if(intersects.length > 0){
@@ -119,7 +121,8 @@ WIDGET3D.DragControls = function(parameters){
   
   that.remove = function(){
   
-    WIDGET3D.scene.remove( that.plane_ );
+    //WIDGET3D.scene.remove( that.plane_ );
+    WIDGET3D.getScene().remove( that.plane_ );
     
     that.plane_.geometry.dispose();
     that.plane_.material.dispose();

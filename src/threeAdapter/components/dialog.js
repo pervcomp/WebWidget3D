@@ -63,7 +63,6 @@ WIDGET3D.Dialog = function(parameters){
   document.body.appendChild(this.textCanvas_);
   this.textContext_ = this.textCanvas_.getContext('2d');
   
-  
   this.createTextBox();
   this.textBox_.addUpdateCallback(this.updateTextBox, this);
   
@@ -91,7 +90,7 @@ WIDGET3D.Dialog.prototype.createDialogText = function(string){
   this.context_.fillText(string, this.canvas_.width/2-(textWidth/2), 40);
   var texture = new THREE.Texture(this.canvas_);
   
-  var material = new THREE.MeshBasicMaterial({ map: texture, color: this.color_, opacity: this.opacity_});
+  var material = new THREE.MeshBasicMaterial({ map: texture, color: this.color_, opacity: this.opacity_, side : THREE.DoubleSide});
   
   texture.needsUpdate = true;
   
@@ -131,8 +130,8 @@ WIDGET3D.Dialog.prototype.createButtonText = function(string){
 WIDGET3D.Dialog.prototype.createTextBox = function(){
   
   var texture = new THREE.Texture(this.textCanvas_);
-  var material = new THREE.MeshBasicMaterial({ map: texture });
-  var mesh = new THREE.Mesh( new THREE.PlaneGeometry(this.width_/1.5, this.height_/10.0), material);
+  var material = new THREE.MeshBasicMaterial({ map: texture});
+  var mesh = new THREE.Mesh( new THREE.CubeGeometry(this.width_/1.5, this.height_/10.0, 20), material);
   
   this.textBox_.setMesh(mesh);
   
@@ -140,7 +139,7 @@ WIDGET3D.Dialog.prototype.createTextBox = function(){
   
   var y = parentLoc.y + this.height_/10;
   
-  this.textBox_.setPosition(parentLoc.x, y ,parentLoc.z+10);
+  this.textBox_.setPosition(parentLoc.x, y ,parentLoc.z);
   
   this.updateTextBox(this);
 }

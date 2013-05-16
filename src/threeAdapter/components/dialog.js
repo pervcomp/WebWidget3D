@@ -11,6 +11,9 @@
 //              buttonText = string
 //              maxTextLength = integer
 //
+
+
+//TODO: REFACTOR SO THAT AMOUNT OF TEXTBOXES AND BUTTONS CAN BE PARAMETRISIZED
 WIDGET3D.Dialog = function(parameters){
   
   WIDGET3D.Group.call( this );
@@ -19,6 +22,7 @@ WIDGET3D.Dialog = function(parameters){
 
   this.width_ = parameters.width !== undefined ? parameters.width : 1000;
   this.height_ = parameters.height !== undefined ? parameters.height : 1000;
+  this.depth_ = parameters.depth !== undefined ? parameters.depth : 20;
   this.color_ = parameters.color !== undefined ? parameters.color : 0xC0D0D0;
   this.opacity_ = parameters.opacity !== undefined ? parameters.opacity : 0.9;
   this.text_ = parameters.text !== undefined ? parameters.text : "This is a dialog";
@@ -33,10 +37,15 @@ WIDGET3D.Dialog = function(parameters){
   this.context_ = this.canvas_.getContext('2d');
   
   this.material_ = this.createDialogText(this.text_);
-  
-  var mesh = new THREE.Mesh(new THREE.PlaneGeometry(this.width_, this.height_), this.material_);
+  var mesh = new THREE.Mesh(new THREE.CubeGeometry(this.width_, this.height_, this.depth_*0.75), this.material_);
   
   this.setMesh(mesh);
+  this.addEventListener("click",
+    function(event){
+      event.stopPropagation();
+      event.preventDefault();
+    }, 
+  false);
   
   //CREATING DIALOG BUTTON
   this.button_ = new WIDGET3D.Basic();
@@ -70,7 +79,9 @@ WIDGET3D.Dialog = function(parameters){
   this.textBox_.setText("");
   
   var textBoxClickFactory = function(t){
-    return function(){
+    return function(event){
+      event.stopPropagation();
+      event.preventDefault();
       t.focus();
     }
   };
@@ -80,6 +91,9 @@ WIDGET3D.Dialog = function(parameters){
   
   var textBoxKeyFactory = function(t){
     return function(event){
+    
+      event.stopPropagation();
+      
       if(event.charCode != 0){
         //if event is a character key press
         var letter = String.fromCharCode(event.charCode);
@@ -113,7 +127,11 @@ WIDGET3D.Dialog.prototype.createDialogText = function(string){
   this.context_.fillText(string, this.canvas_.width/2-(textWidth/2), 40);
   var texture = new THREE.Texture(this.canvas_);
   
-  var material = new THREE.MeshBasicMaterial({ map: texture, color: this.color_, opacity: this.opacity_, side : THREE.DoubleSide});
+  var material = new THREE.MeshBasicMaterial({
+    map: texture,
+    color: this.color_,
+    opacity: this.opacity_
+  });
   
   texture.needsUpdate = true;
   
@@ -137,7 +155,7 @@ WIDGET3D.Dialog.prototype.createButtonText = function(string){
   
   var material = new THREE.MeshBasicMaterial({ map: texture });
   
-  var mesh = new THREE.Mesh( new THREE.CubeGeometry(this.width_/2.0, this.height_/10.0, 20), material);
+  var mesh = new THREE.Mesh( new THREE.CubeGeometry(this.width_/2.0, this.height_/10.0, this.depth_), material);
   
   this.button_.setMesh(mesh);
   
@@ -154,7 +172,7 @@ WIDGET3D.Dialog.prototype.createTextBox = function(){
   
   var texture = new THREE.Texture(this.textCanvas_);
   var material = new THREE.MeshBasicMaterial({ map: texture});
-  var mesh = new THREE.Mesh( new THREE.CubeGeometry(this.width_/1.5, this.height_/10.0, 20), material);
+  var mesh = new THREE.Mesh( new THREE.CubeGeometry(this.width_/1.5, this.height_/10.0, this.depth_), material);
   
   this.textBox_.setMesh(mesh);
   

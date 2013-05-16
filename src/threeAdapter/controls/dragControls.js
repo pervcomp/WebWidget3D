@@ -84,8 +84,8 @@ WIDGET3D.DragControls = function(parameters){
         }
         
         
-        WIDGET3D.getMainWindow().addEventListener("mousemove", that.mousemoveHandler);
-        WIDGET3D.getMainWindow().addEventListener("mouseup", that.mouseupHandler);
+        WIDGET3D.getMainWindow().addEventListener("mousemove", that.mousemoveHandler, false);
+        WIDGET3D.getMainWindow().addEventListener("mouseup", that.mouseupHandler, false);
         
         that.component_.focus();
         that.drag_ = true;
@@ -112,7 +112,7 @@ WIDGET3D.DragControls = function(parameters){
     }
   };
   
-  that.component_.addEventListener("mousedown", that.mousedownHandler);
+  that.component_.addEventListener("mousedown", that.mousedownHandler, false);
   
   
   that.remove = function(){

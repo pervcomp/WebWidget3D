@@ -324,6 +324,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
     
     if(proto.hasOwnProperty(String("initMouseEvent"))){
       _that_.mouseEvent(domEvent);
+      return false;
     }
     else if(proto.hasOwnProperty(String("initKeyboardEvent"))){
       return _that_.keyboardEvent(domEvent);
@@ -381,6 +382,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
     return bubbles;
   };
   
+  //NOTICE KEYBOARD EVENTS DOESN'T CARE ON BUBBLES PARAMETER!
   _that_.keyboardEvent = function(domEvent){
     
     var name = domEvent.type;
@@ -561,7 +563,6 @@ WIDGET3D.GuiObject = function(){
 WIDGET3D.GuiObject.prototype.focus = function(){
   if(!this.inFocus_){
   
-    //WIDGET3D.unfocusFocused();
     this.inFocus_ = true;
     WIDGET3D.addFocus(this);
     
@@ -578,9 +579,7 @@ WIDGET3D.GuiObject.prototype.unfocus = function(){
 
 // Adds event listner to object
 // callback: callback function that is called when the event is triggered to object
-// (args: arguments for callback)
-//
-// NOTE: event object IS ALLWAYS PASSED TO CALLBACKFUNCTION AS ITS FIRST ARGUMENT
+// bubbles: preventing event from bubbling to other widgets set bubbles to false
 //
 WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, bubbles){
 
@@ -1350,25 +1349,28 @@ WIDGET3D.RollControls = function(parameters){
   this.modelRotationX_ = initialRotation.x;
   
   this.rotate_ = false;
-  
-  this.clickHandler = function(event){
-    //preventing click while drag
-  };
 
   this.mouseupHandler = function(event){
     if(that.rotate_){
+      
+      event.stopPropagation();
+      event.preventDefault();
+      
       that.rotate_ = false;
       
       var mainWindow = WIDGET3D.getMainWindow();
       mainWindow.removeEventListener("mousemove", that.mousemoveHandler);
       mainWindow.removeEventListener("mouseup", that.mouseupHandler);
-      mainWindow.removeEventListener("click", that.clickHandler);
     }
   };
   
   this.mousedownHandler = function(event){
     
     if(event.button === that.mouseButton_ && event.shiftKey === that.shiftKey_){
+      
+      event.stopPropagation();
+      event.preventDefault();
+      
       that.component_.focus();
       if(!that.rotate_){
         that.rotate_ = true;
@@ -1378,9 +1380,8 @@ WIDGET3D.RollControls = function(parameters){
         that.rotationOnMouseDownX_ = that.modelRotationX_;
         
         var mainWindow = WIDGET3D.getMainWindow();
-        mainWindow.addEventListener("mousemove", that.mousemoveHandler, false, false);
-        mainWindow.addEventListener("mouseup", that.mouseupHandler, false, false);
-        mainWindow.addEventListener("click", that.clickHandler, false, false);
+        mainWindow.addEventListener("mousemove", that.mousemoveHandler, false);
+        mainWindow.addEventListener("mouseup", that.mouseupHandler, false);
       }
     }
   };
@@ -1388,13 +1389,17 @@ WIDGET3D.RollControls = function(parameters){
   this.mousemoveHandler = function(event){
 
     if (that.rotate_){
+    
+      event.stopPropagation();
+      event.preventDefault();
+      
       var mouse = WIDGET3D.mouseCoordinates(event);
       that.modelRotationY_ = that.rotationOnMouseDownY_ + ( mouse.x - that.clickLocation_.x );
       that.modelRotationX_ = that.rotationOnMouseDownX_ + ( mouse.y - that.clickLocation_.y );
     }
   };
   
-  this.component_.addEventListener("mousedown", this.mousedownHandler, false, false);
+  this.component_.addEventListener("mousedown", this.mousedownHandler, false);
   
   
   //Animate must be called before the component is rendered to apply
@@ -2041,6 +2046,9 @@ WIDGET3D.TitledWindow.prototype.getContent = function(){
 //              buttonText = string
 //              maxTextLength = integer
 //
+
+
+//TODO: REFACTOR SO THAT AMOUNT OF TEXTBOXES AND BUTTONS CAN BE PARAMETRISIZED
 WIDGET3D.Dialog = function(parameters){
   
   WIDGET3D.Group.call( this );
@@ -2049,6 +2057,7 @@ WIDGET3D.Dialog = function(parameters){
 
   this.width_ = parameters.width !== undefined ? parameters.width : 1000;
   this.height_ = parameters.height !== undefined ? parameters.height : 1000;
+  this.depth_ = parameters.depth !== undefined ? parameters.depth : 20;
   this.color_ = parameters.color !== undefined ? parameters.color : 0xC0D0D0;
   this.opacity_ = parameters.opacity !== undefined ? parameters.opacity : 0.9;
   this.text_ = parameters.text !== undefined ? parameters.text : "This is a dialog";
@@ -2063,10 +2072,15 @@ WIDGET3D.Dialog = function(parameters){
   this.context_ = this.canvas_.getContext('2d');
   
   this.material_ = this.createDialogText(this.text_);
-  
-  var mesh = new THREE.Mesh(new THREE.PlaneGeometry(this.width_, this.height_), this.material_);
+  var mesh = new THREE.Mesh(new THREE.CubeGeometry(this.width_, this.height_, this.depth_*0.75), this.material_);
   
   this.setMesh(mesh);
+  this.addEventListener("click",
+    function(event){
+      event.stopPropagation();
+      event.preventDefault();
+    }, 
+  false);
   
   //CREATING DIALOG BUTTON
   this.button_ = new WIDGET3D.Basic();
@@ -2100,7 +2114,9 @@ WIDGET3D.Dialog = function(parameters){
   this.textBox_.setText("");
   
   var textBoxClickFactory = function(t){
-    return function(){
+    return function(event){
+      event.stopPropagation();
+      event.preventDefault();
       t.focus();
     }
   };
@@ -2110,6 +2126,9 @@ WIDGET3D.Dialog = function(parameters){
   
   var textBoxKeyFactory = function(t){
     return function(event){
+    
+      event.stopPropagation();
+      
       if(event.charCode != 0){
         //if event is a character key press
         var letter = String.fromCharCode(event.charCode);
@@ -2143,7 +2162,11 @@ WIDGET3D.Dialog.prototype.createDialogText = function(string){
   this.context_.fillText(string, this.canvas_.width/2-(textWidth/2), 40);
   var texture = new THREE.Texture(this.canvas_);
   
-  var material = new THREE.MeshBasicMaterial({ map: texture, color: this.color_, opacity: this.opacity_, side : THREE.DoubleSide});
+  var material = new THREE.MeshBasicMaterial({
+    map: texture,
+    color: this.color_,
+    opacity: this.opacity_
+  });
   
   texture.needsUpdate = true;
   
@@ -2167,7 +2190,7 @@ WIDGET3D.Dialog.prototype.createButtonText = function(string){
   
   var material = new THREE.MeshBasicMaterial({ map: texture });
   
-  var mesh = new THREE.Mesh( new THREE.CubeGeometry(this.width_/2.0, this.height_/10.0, 20), material);
+  var mesh = new THREE.Mesh( new THREE.CubeGeometry(this.width_/2.0, this.height_/10.0, this.depth_), material);
   
   this.button_.setMesh(mesh);
   
@@ -2184,7 +2207,7 @@ WIDGET3D.Dialog.prototype.createTextBox = function(){
   
   var texture = new THREE.Texture(this.textCanvas_);
   var material = new THREE.MeshBasicMaterial({ map: texture});
-  var mesh = new THREE.Mesh( new THREE.CubeGeometry(this.width_/1.5, this.height_/10.0, 20), material);
+  var mesh = new THREE.Mesh( new THREE.CubeGeometry(this.width_/1.5, this.height_/10.0, this.depth_), material);
   
   this.textBox_.setMesh(mesh);
   
@@ -2241,6 +2264,8 @@ WIDGET3D.Dialog.prototype.remove = function(){
 //                {string: choice name displayed, 
 //                 onclick : {handler : function, parameters : object}}
 //
+//
+// TODO: ENABLE DIFFERENT LAYOUT
 WIDGET3D.SelectDialog = function(parameters){
   
   WIDGET3D.Group.call( this );
@@ -2301,6 +2326,13 @@ WIDGET3D.SelectDialog.prototype.createText = function(){
   mesh.position.y = this.height_*0.5 - this.choiceHeight_*0.5;
   
   this.setMesh(mesh);
+  
+  this.addEventListener("click",
+    function(event){
+      event.stopPropagation();
+      event.preventDefault();
+    }, 
+  false);
 }
 
 WIDGET3D.SelectDialog.prototype.createChoises = function(){
@@ -2541,8 +2573,8 @@ WIDGET3D.DragControls = function(parameters){
         }
         
         
-        WIDGET3D.getMainWindow().addEventListener("mousemove", that.mousemoveHandler);
-        WIDGET3D.getMainWindow().addEventListener("mouseup", that.mouseupHandler);
+        WIDGET3D.getMainWindow().addEventListener("mousemove", that.mousemoveHandler, false);
+        WIDGET3D.getMainWindow().addEventListener("mouseup", that.mouseupHandler, false);
         
         that.component_.focus();
         that.drag_ = true;
@@ -2569,7 +2601,7 @@ WIDGET3D.DragControls = function(parameters){
     }
   };
   
-  that.component_.addEventListener("mousedown", that.mousedownHandler);
+  that.component_.addEventListener("mousedown", that.mousedownHandler, false);
   
   
   that.remove = function(){

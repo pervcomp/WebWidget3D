@@ -91,7 +91,6 @@ WIDGET3D.GuiObject = function(){
 WIDGET3D.GuiObject.prototype.focus = function(){
   if(!this.inFocus_){
   
-    //WIDGET3D.unfocusFocused();
     this.inFocus_ = true;
     WIDGET3D.addFocus(this);
     
@@ -108,9 +107,7 @@ WIDGET3D.GuiObject.prototype.unfocus = function(){
 
 // Adds event listner to object
 // callback: callback function that is called when the event is triggered to object
-// (args: arguments for callback)
-//
-// NOTE: event object IS ALLWAYS PASSED TO CALLBACKFUNCTION AS ITS FIRST ARGUMENT
+// bubbles: preventing event from bubbling to other widgets set bubbles to false
 //
 WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, bubbles){
 

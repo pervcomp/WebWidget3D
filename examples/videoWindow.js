@@ -30,7 +30,7 @@ var init = function(){
   
   var camera = WIDGET3D.getCameraGroup();
   camera.setZ(that.DISTANCE);
-  //camera.setRotation(Math.PI/10, Math.PI/10, Math.PI/10);
+  
   //--------------------------------------------
   // TITLED WINDOW WHERE WE SHOW THE VIDEO
   //--------------------------------------------
@@ -66,22 +66,6 @@ var init = function(){
   videoWindow.closeButton_.addEventListener("click", pauseFunction);
   
   mainWindow.addChild(videoWindow);
-  
-  /*var cameraControls= function(event, camera){
-    var alpha = Math.PI/30;
-    
-    if(event.keyCode == 39){
-      that.ANGLE += alpha;
-      camera.setX(Math.cos( that.ANGLE ) * that.DISTANCE);
-      camera.setZ(Math.sin( that.ANGLE ) * that.DISTANCE);
-    }
-    else if(event.keyCode == 37){
-      that.ANGLE -= alpha;
-      camera.setX(Math.cos( that.ANGLE ) * that.DISTANCE);
-      camera.setZ(Math.sin( that.ANGLE ) * that.DISTANCE);
-    }
-  };
-  mainWindow.addEventListener("keydown", cameraControls, camera);*/
   
   var onResize = function(){
     WIDTH = window.innerWidth;

@@ -12,6 +12,8 @@
 //                {string: choice name displayed, 
 //                 onclick : {handler : function, parameters : object}}
 //
+//
+// TODO: ENABLE DIFFERENT LAYOUT
 WIDGET3D.SelectDialog = function(parameters){
   
   WIDGET3D.Group.call( this );
@@ -72,6 +74,13 @@ WIDGET3D.SelectDialog.prototype.createText = function(){
   mesh.position.y = this.height_*0.5 - this.choiceHeight_*0.5;
   
   this.setMesh(mesh);
+  
+  this.addEventListener("click",
+    function(event){
+      event.stopPropagation();
+      event.preventDefault();
+    }, 
+  false);
 }
 
 WIDGET3D.SelectDialog.prototype.createChoises = function(){

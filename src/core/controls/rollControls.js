@@ -24,25 +24,28 @@ WIDGET3D.RollControls = function(parameters){
   this.modelRotationX_ = initialRotation.x;
   
   this.rotate_ = false;
-  
-  this.clickHandler = function(event){
-    //preventing click while drag
-  };
 
   this.mouseupHandler = function(event){
     if(that.rotate_){
+      
+      event.stopPropagation();
+      event.preventDefault();
+      
       that.rotate_ = false;
       
       var mainWindow = WIDGET3D.getMainWindow();
       mainWindow.removeEventListener("mousemove", that.mousemoveHandler);
       mainWindow.removeEventListener("mouseup", that.mouseupHandler);
-      mainWindow.removeEventListener("click", that.clickHandler);
     }
   };
   
   this.mousedownHandler = function(event){
     
     if(event.button === that.mouseButton_ && event.shiftKey === that.shiftKey_){
+      
+      event.stopPropagation();
+      event.preventDefault();
+      
       that.component_.focus();
       if(!that.rotate_){
         that.rotate_ = true;
@@ -52,9 +55,8 @@ WIDGET3D.RollControls = function(parameters){
         that.rotationOnMouseDownX_ = that.modelRotationX_;
         
         var mainWindow = WIDGET3D.getMainWindow();
-        mainWindow.addEventListener("mousemove", that.mousemoveHandler, false, false);
-        mainWindow.addEventListener("mouseup", that.mouseupHandler, false, false);
-        mainWindow.addEventListener("click", that.clickHandler, false, false);
+        mainWindow.addEventListener("mousemove", that.mousemoveHandler, false);
+        mainWindow.addEventListener("mouseup", that.mouseupHandler, false);
       }
     }
   };
@@ -62,13 +64,17 @@ WIDGET3D.RollControls = function(parameters){
   this.mousemoveHandler = function(event){
 
     if (that.rotate_){
+    
+      event.stopPropagation();
+      event.preventDefault();
+      
       var mouse = WIDGET3D.mouseCoordinates(event);
       that.modelRotationY_ = that.rotationOnMouseDownY_ + ( mouse.x - that.clickLocation_.x );
       that.modelRotationX_ = that.rotationOnMouseDownX_ + ( mouse.y - that.clickLocation_.y );
     }
   };
   
-  this.component_.addEventListener("mousedown", this.mousedownHandler, false, false);
+  this.component_.addEventListener("mousedown", this.mousedownHandler, false);
   
   
   //Animate must be called before the component is rendered to apply

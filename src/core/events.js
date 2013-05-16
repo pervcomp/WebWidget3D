@@ -50,6 +50,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
     
     if(proto.hasOwnProperty(String("initMouseEvent"))){
       _that_.mouseEvent(domEvent);
+      return false;
     }
     else if(proto.hasOwnProperty(String("initKeyboardEvent"))){
       return _that_.keyboardEvent(domEvent);
@@ -107,6 +108,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
     return bubbles;
   };
   
+  //NOTICE KEYBOARD EVENTS DOESN'T CARE ON BUBBLES PARAMETER!
   _that_.keyboardEvent = function(domEvent){
     
     var name = domEvent.type;

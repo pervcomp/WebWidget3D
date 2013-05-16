@@ -57,14 +57,17 @@ var init = function(){
   //CALLBACK FOR UPDATING TEXTURE
   videoWindow.addUpdateCallback(function(texture){texture.needsUpdate = true}, texture);
   
-  videoWindow.closeButton_.addEventListener("click",
-    function(event, p){p.video.pause(); p.screen.remove()},
-    {video : video, screen : videoWindow});
-
+  var createPauseFunction = function(v){
+    return function(){
+      v.pause();
+    }
+  }
+  var pauseFunction = createPauseFunction(video);
+  videoWindow.closeButton_.addEventListener("click", pauseFunction);
   
   mainWindow.addChild(videoWindow);
   
-  var cameraControls= function(event, camera){
+  /*var cameraControls= function(event, camera){
     var alpha = Math.PI/30;
     
     if(event.keyCode == 39){
@@ -78,7 +81,7 @@ var init = function(){
       camera.setZ(Math.sin( that.ANGLE ) * that.DISTANCE);
     }
   };
-  mainWindow.addEventListener("keydown", cameraControls, camera);
+  mainWindow.addEventListener("keydown", cameraControls, camera);*/
   
   var onResize = function(){
     WIDTH = window.innerWidth;

@@ -69,9 +69,32 @@ WIDGET3D.Dialog = function(parameters){
   this.addChild(this.textBox_);
   this.textBox_.setText("");
   
-  this.textBox_.addEventListener("click", this.textBoxOnclick, this);
-  this.textBox_.addEventListener("keypress", this.textBoxOnkeypress, this);
-  this.textBox_.addEventListener("keydown", this.textBoxOnkeypress, this);
+  var textBoxClickFactory = function(t){
+    return function(){
+      t.focus();
+    }
+  };
+  var textBoxOnclick = textBoxClickFactory(this.textBox_);
+  
+  this.textBox_.addEventListener("click", textBoxOnclick, false);
+  
+  var textBoxKeyFactory = function(t){
+    return function(event){
+      if(event.charCode != 0){
+        //if event is a character key press
+        var letter = String.fromCharCode(event.charCode);
+        t.addLetter(letter);
+      }
+      else if(event.type == "keydown" && (event.keyCode == 8 || event.keyCode == 46)){
+        //if event is a backspace or delete key press
+        t.erase(1);
+      }
+    }
+  }
+  var textBoxOnkeypress = textBoxKeyFactory(this.textBox_);
+  
+  this.textBox_.addEventListener("keypress", textBoxOnkeypress);
+  this.textBox_.addEventListener("keydown", textBoxOnkeypress);
 };
 
 WIDGET3D.Dialog.prototype = WIDGET3D.Group.prototype.inheritance();
@@ -158,24 +181,6 @@ WIDGET3D.Dialog.prototype.updateTextBox = function(dialog){
   
   dialog.textBox_.mesh_.material.map.needsUpdate = true;
   
-};
-
-WIDGET3D.Dialog.prototype.textBoxOnclick = function(event, dialog){
-  dialog.textBox_.focus();
-};
-
-WIDGET3D.Dialog.prototype.textBoxOnkeypress = function(event, dialog){
-  
-  if(event.charCode != 0){
-    //if event is a character key press
-    var letter = String.fromCharCode(event.charCode);
-    dialog.textBox_.addLetter(letter);
-  }
-  else if(event.type == "keydown" && (event.keyCode == 8 || event.keyCode == 46)){
-    //if event is a backspace or delete key press
-    dialog.textBox_.erase(1);
-  }
-
 };
 
 WIDGET3D.Dialog.prototype.remove = function(){

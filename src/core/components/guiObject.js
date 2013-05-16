@@ -27,21 +27,21 @@ WIDGET3D.GuiObject = function(){
       }
     },
     
-    addCallback : function(name, callback, arguments, index){
+    addCallback : function(name, callback, bubbles, index){
       if(!this.hasOwnProperty(name.toString()) ||
       (this.hasOwnProperty(name.toString()) && this[name.toString()] === false))
       {
         this[name.toString()] = [];  
       }
-      this[name.toString()].push({callback : callback, arguments : arguments, index : index});
+      this[name.toString()].push({callback : callback, bubbles: bubbles, index : index});
     },
     
-    removeCallback : function(name, callback, arguments){
+    removeCallback : function(name, callback){
       if(this.hasOwnProperty(name.toString()) &&
       Object.prototype.toString.apply(this[name.toString()]) === '[object Array]')
       {
         for(var i = 0; i < this[name.toString()].length; ++i){
-          if(this[name.toString()][i].callback === callback && this[name.toString()][i].arguments === arguments){
+          if(this[name.toString()][i].callback === callback){
             
             var index = this[name.toString()][i].index;
             this[name.toString()].splice(i, 1);
@@ -112,7 +112,7 @@ WIDGET3D.GuiObject.prototype.unfocus = function(){
 //
 // NOTE: event object IS ALLWAYS PASSED TO CALLBACKFUNCTION AS ITS FIRST ARGUMENT
 //
-WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, args){
+WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, bubbles){
 
   if(!WIDGET3D.getEvents().enabled_[name.toString()]){
     WIDGET3D.getEvents().enableEvent(name);
@@ -123,17 +123,19 @@ WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, args){
   else{
     var index = this.events_[name.toString()][0].index;
   }
-  this.events_.addCallback(name, callback, args, index);
+  
+  if(bubbles == undefined){
+    bubbles = true;
+  }
+  this.events_.addCallback(name, callback, bubbles, index);
 };
 
 // Removes eventlistener from object
 // Parameters: event = event name
 //             callback = binded callbackfunction
-//             args = binded arguments for callback
-//             custom = boolean flag that tells if the event is dom event or custom event (message)
-WIDGET3D.GuiObject.prototype.removeEventListener = function(name, callback, args){
+WIDGET3D.GuiObject.prototype.removeEventListener = function(name, callback){
 
-  var index = this.events_.removeCallback(name, callback, args);
+  var index = this.events_.removeCallback(name, callback);
   
   if(index === false){
     return false;
@@ -147,7 +149,6 @@ WIDGET3D.GuiObject.prototype.removeEventListener = function(name, callback, args
     if(mainWindow.childEvents_[name.toString()].length == 0){
       mainWindow.childEvents_.removeEvent(name);
     }
-        
     for(var i = 0; i < mainWindow.childEvents_[name.toString()].length; ++i){
       mainWindow.childEvents_[name.toString()][i].setNewEventIndex(name, i);
     }

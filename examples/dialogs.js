@@ -31,12 +31,17 @@ var init = function(){
   //styled window
   var dialog = new WIDGET3D.Dialog({height : 500, width : 500, maxTextLength : 16});
   
-  dialog.button_.addEventListener("click",
-    function(event, dialog){dialog.remove()}, dialog);
-    
+  var createDialogClose = function(d){
+    return function(event){
+      d.remove();
+    }
+  }
+  var dialogClose = createDialogClose(dialog);  
+  dialog.button_.addEventListener("click", dialogClose);
+
   dialog.setX(-300);
   dialog.setRotationX(-Math.PI/10);
-  var rollControls = new WIDGET3D.RollControls({component : dialog});
+  var rollControls = new WIDGET3D.RollControls({component : dialog, preventClick : true});
   
   mainWindow.addChild(dialog);
   

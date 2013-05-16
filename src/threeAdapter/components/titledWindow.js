@@ -66,6 +66,15 @@ WIDGET3D.TitledWindow = function(parameters){
   
   this.addChild(this.closeButton_);
   
+  var createCloseFunction = function(p){
+    return function(){
+      p.remove();
+    };
+  }
+  var closeFunction = createCloseFunction(this);
+  
+  this.closeButton_.addEventListener("click", closeFunction);
+  
   //---------------------------------------------------
   //CONTROLS
   //---------------------------------------------------

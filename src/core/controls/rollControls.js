@@ -24,6 +24,10 @@ WIDGET3D.RollControls = function(parameters){
   this.modelRotationX_ = initialRotation.x;
   
   this.rotate_ = false;
+  
+  this.clickHandler = function(event){
+    //preventing click while drag
+  };
 
   this.mouseupHandler = function(event){
     if(that.rotate_){
@@ -32,6 +36,7 @@ WIDGET3D.RollControls = function(parameters){
       var mainWindow = WIDGET3D.getMainWindow();
       mainWindow.removeEventListener("mousemove", that.mousemoveHandler);
       mainWindow.removeEventListener("mouseup", that.mouseupHandler);
+      mainWindow.removeEventListener("click", that.clickHandler);
     }
   };
   
@@ -47,8 +52,9 @@ WIDGET3D.RollControls = function(parameters){
         that.rotationOnMouseDownX_ = that.modelRotationX_;
         
         var mainWindow = WIDGET3D.getMainWindow();
-        mainWindow.addEventListener("mousemove", that.mousemoveHandler);
-        mainWindow.addEventListener("mouseup", that.mouseupHandler);
+        mainWindow.addEventListener("mousemove", that.mousemoveHandler, false, false);
+        mainWindow.addEventListener("mouseup", that.mouseupHandler, false, false);
+        mainWindow.addEventListener("click", that.clickHandler, false, false);
       }
     }
   };
@@ -60,10 +66,9 @@ WIDGET3D.RollControls = function(parameters){
       that.modelRotationY_ = that.rotationOnMouseDownY_ + ( mouse.x - that.clickLocation_.x );
       that.modelRotationX_ = that.rotationOnMouseDownX_ + ( mouse.y - that.clickLocation_.y );
     }
-
   };
   
-  this.component_.addEventListener("mousedown", this.mousedownHandler);
+  this.component_.addEventListener("mousedown", this.mousedownHandler, false, false);
   
   
   //Animate must be called before the component is rendered to apply

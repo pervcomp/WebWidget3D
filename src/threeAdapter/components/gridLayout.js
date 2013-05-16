@@ -23,7 +23,7 @@ WIDGET3D.GridWindow = function(parameters){
   this.width_ = parameters.width !== undefined ? parameters.width : 1000;
   this.height_ = parameters.height !== undefined ? parameters.height : 1000;
   this.density_ = parameters.density !== undefined ? parameters.density : 6;
-  this.depth_ = (this.width_/(this.density_*2.0));
+  this.depth_ = (this.width_/this.density_);
   
   this.maxChildren_ = this.density_ * this.density_;
   
@@ -39,8 +39,6 @@ WIDGET3D.GridWindow = function(parameters){
     wireframeLinewidth : this.lineWidth_
   });
   
-  //var geometry = new THREE.PlaneGeometry( this.width_, this.height_, this.density_, this.density_ );
-  //width, height, depth, widthSegments, heightSegments, depthSegments
   var geometry = new THREE.CubeGeometry( this.width_, this.height_, this.depth_, this.density_, this.density_, 1 );
   
   var mesh =  new THREE.Mesh(geometry, this.material_);
@@ -65,11 +63,8 @@ WIDGET3D.GridWindow.prototype = WIDGET3D.Group.prototype.inheritance();
 WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
   this.density_ = newDensity;
   this.maxChildren_ = newDensity * newDensity;
-  this.depth_ = (this.width_/(this.density_*2.0));
+  this.depth_ = (this.width_/this.density_);
   
-  //var grid = new THREE.PlaneGeometry( this.width_, this.height_, this.density_, this.density_ );
-  
-  //width, height, depth, widthSegments, heightSegments, depthSegments
   var grid = new THREE.CubeGeometry( this.width_, this.height_, this.depth_, this.density_, this.density_, 1 );
   
   var gridMesh =  new THREE.Mesh(grid, this.material_);

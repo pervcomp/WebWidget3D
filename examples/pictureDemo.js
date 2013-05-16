@@ -49,12 +49,16 @@ var init = function(){
   pictureDisplay.setMesh(display);
   mainWindow.addChild(pictureDisplay);
   
-  pictureDisplay.addEventListener("click", pictureclick, pictureDisplay);
+  var pictureclick = createPictureclickHandler(pictureDisplay);
+  
+  pictureDisplay.addEventListener("click", pictureclick, false);
   pictureDisplay.hide();
+  
+  var drop = createDrop({parent: subWindow, display: pictureDisplay});
   
   mainWindow.addEventListener("dragenter", drag);
   mainWindow.addEventListener("dragover", drag);
-  mainWindow.addEventListener("drop", drop, {parent: subWindow, display: pictureDisplay});
+  mainWindow.addEventListener("drop", drop);
   
   var onResize = function(){
     WIDTH = 0.90 * window.innerWidth;
@@ -71,79 +75,86 @@ var init = function(){
     WIDGET3D.render();
   };
   mainLoop();
-}
+};
 
-//event handlers
-
-var DISPLAY_DISTANCE = 400;
-var SCALEFACTOR = 525;
-
-//mouse click handler for small pictures
-var mouseclickHandler = function(event, parameters){
-  
-  var width = parameters.button.mesh_.material.map.image.naturalWidth;
-  var height = parameters.button.mesh_.material.map.image.naturalHeight;
-  var scale = SCALEFACTOR/height;
-  
-  var display = new THREE.Mesh(new THREE.PlaneGeometry(width*scale, height*scale),
-    parameters.button.mesh_.material);
-  
-  display.position.z = DISPLAY_DISTANCE;
-  
-  parameters.pictureDisplay.setMesh(display);
-  parameters.pictureDisplay.show();
-}
-
-//mouse click handler for picture display
-var pictureclick = function(event, pictureDisplay){
-  pictureDisplay.hide();
-}
-
-//Drag and drop events
+//Drag event handler
 var drag = function(event){
   event.stopPropagation();
   event.preventDefault();
-}
+};
 
-var drop = function(event, parameters){
-  
-  event.stopPropagation();
-  event.preventDefault();
 
-  var files = event.dataTransfer.files;
-
-  for(var i = 0; i < files.length; ++i){
-    var file = files[i];
-    var imageType = /image.*/;
+//drop handler factory
+var createDrop = function(parameters){
+  return function(event){
+    event.stopPropagation();
+    event.preventDefault();
     
-    if ( !file.type.match(imageType) ){
-      console.log("filetype missmatch");
-      continue;
-    }
+    var files = event.dataTransfer.files;
     
-    var img = new Image();
-    
-    var reader = new FileReader();
-    reader.onload = (function(aImg) { return function(e) {
+    for(var i = 0; i < files.length; ++i){
+      var file = files[i];
+      var imageType = /image.*/;
       
-      aImg.onload = function(){
-        displayPicture(parameters.parent, parameters.display, aImg);
+      if ( !file.type.match(imageType) ){
+        console.log("filetype missmatch");
+        continue;
       }
       
-      aImg.src = e.target.result;
+      var img = new Image();
       
-     
-      
-    }; })(img);
-    reader.readAsDataURL(file);   
+      var reader = new FileReader();
+      reader.onload = (function(aImg) { return function(e) {
+        
+        aImg.onload = function(){
+          displayPicture(parameters.parent, parameters.display, aImg);
+        }
+        
+        aImg.src = e.target.result;
+
+        
+      }; })(img);
+      reader.readAsDataURL(file);   
+    }
   }
-}
+};
+
+//mouse click handler factory for picture display
+var createPictureclickHandler = function(pd){
+  return function(){
+    pd.hide();
+  }
+};
+
+var createMouseclickHandler = function(parameters){
+  var DISPLAY_DISTANCE = 400;
+  var SCALEFACTOR = 525;
+  
+  return function(event){
+  
+    var width = parameters.button.mesh_.material.map.image.naturalWidth;
+    var height = parameters.button.mesh_.material.map.image.naturalHeight;
+    var scale = SCALEFACTOR/height;
+    
+    var display = new THREE.Mesh(new THREE.PlaneGeometry(width*scale, height*scale),
+      parameters.button.mesh_.material);
+    
+    display.position.z = DISPLAY_DISTANCE;
+    
+    parameters.pictureDisplay.setMesh(display);
+    parameters.pictureDisplay.show();
+    
+  }
+};
 
 var displayPicture = function(subWindow, pictureDisplay, img){
-
   var button = new WIDGET3D.GridIcon({parent: subWindow, img : img});
-  button.addEventListener("click", mouseclickHandler, {button: button, pictureDisplay : pictureDisplay});
-}
+  
+  var onclick = createMouseclickHandler({button: button, pictureDisplay : pictureDisplay});
+  button.addEventListener("click", onclick, false);
+};
+
+
 
 
 

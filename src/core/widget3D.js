@@ -39,14 +39,14 @@ WIDGET3D = {
   //
   //  collisionCallback: JSON object containing attributes callback and args (arguments for callback, optional).
   //    collisionCallback is used detecting mouse events on guiObjects. collisionCallback should return
-  //    the mesh which was hit by cursor or false if hit weren't occured.
+  //    list of visible meshes which were hit by cursor or false if hit weren't occured.
   //
   //  container: object containing constructor method of container (descriped above).
   //  
   //  canvas : the canvas element where the WebGL context is rendered
   //
   //RETURNS:
-  //  root window which is Window typed gui object.
+  //  root window which is MainWindow typed gui object.
   //
   init : function(parameters){
     //Some private variables inside a closure

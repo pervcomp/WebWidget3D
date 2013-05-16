@@ -29,7 +29,15 @@ WIDGET3D.SelectDialog = function(parameters){
   
   if(this.hasCancel_){
     this.cancelText_ = parameters.cancelText !== undefined ? parameters.cancelText : "Cancel";
-    this.choices_.push({string: this.cancelText_, onclick : {handler : function(event, that){that.remove()}, parameters : this}});
+    
+    var createCancelFunction = function(c){
+      return function(){
+        c.remove()
+      }
+    }
+    var handler = createCancelFunction(this);
+    
+    this.choices_.push({string: this.cancelText_, onclick : {handler : handler}});
   }
   
   if(this.text_){
@@ -104,7 +112,7 @@ WIDGET3D.SelectDialog.prototype.createChoises = function(){
     
     choice.setPosition(parentLoc.x, y ,parentLoc.z);
     
-    choice.addEventListener("click", this.choices_[i].onclick.handler, this.choices_[i].onclick.parameters);
+    choice.addEventListener("click", this.choices_[i].onclick.handler, false);
     choice.menuID_ = i;
     this.addChild(choice);
   }

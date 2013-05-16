@@ -52,7 +52,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
       _that_.mouseEvent(domEvent);
     }
     else if(proto.hasOwnProperty(String("initKeyboardEvent"))){
-      _that_.keyboardEvent(domEvent);
+      return _that_.keyboardEvent(domEvent);
     }
     else{
       _that_.triggerEvent(domEvent);
@@ -62,25 +62,49 @@ WIDGET3D.DomEvents = function(collisionCallback){
   
   _that_.mouseEvent = function(domEvent){
     
-    var hit = _that_.collisions_.callback(domEvent, _that_.collisions_.args);
+    var found = _that_.collisions_.callback(domEvent, _that_.collisions_.args);
     var name = domEvent.type;
     var mainWindow = WIDGET3D.getMainWindow();
     
-    //hit can't be mainWindow because mainWindow doesn't have mesh
-    if(hit && hit.events_.hasOwnProperty(name.toString())){
-      for(var k = 0; k < hit.events_[name.toString()].length; ++k){
-        hit.events_[name.toString()][k].callback(domEvent,
-          hit.events_[name.toString()][k].arguments);
+    var bubbles = true;
+    
+    //Widget event listeners
+    for(var i = 0; i < found.length; ++i){
+      
+      var hit = found[i];
+    
+      //hit can't be mainWindow because mainWindow doesn't have mesh
+      if(hit && hit.events_.hasOwnProperty(name.toString())){
+        for(var k = 0; k < hit.events_[name.toString()].length; ++k){
+          
+          //All the event handlers of the current object is to be called but
+          //bubbling to other widgets is prevented.
+          if(!hit.events_[name.toString()][k].bubbles){
+            bubbles = false;
+          }
+          
+          hit.events_[name.toString()][k].callback(domEvent);
+        }
       }
-    }
-    //if mainwindow has eventlistener it is executed also
-    if(mainWindow.events_.hasOwnProperty(name.toString())){
-      for(var j = 0; j < mainWindow.events_[name.toString()].length; ++j){
-        mainWindow.events_[name.toString()][j].callback(domEvent,
-          mainWindow.events_[name.toString()][j].arguments);
+      
+      if(!bubbles){
+        break;
       }
     }
     
+    //if mainwindow has eventlistener it is executed also if bubbling is not prevented
+    if(bubbles && mainWindow.events_.hasOwnProperty(name.toString())){
+      for(var j = 0; j < mainWindow.events_[name.toString()].length; ++j){
+      
+        if(!mainWindow.events_[name.toString()][j].bubbles){
+          bubbles = false;
+        }
+        
+        mainWindow.events_[name.toString()][j].callback(domEvent);
+      }
+    }
+    
+    return bubbles;
   };
   
   _that_.keyboardEvent = function(domEvent){
@@ -96,8 +120,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
         var object = mainWindow.childEvents_[name.toString()][k];
         
         for(var m = 0; m < object.events_[name.toString()].length; ++m){
-          object.events_[name.toString()][m].callback(domEvent,
-            object.events_[name.toString()][m].arguments);
+          object.events_[name.toString()][m].callback(domEvent);
           
         }
       }
@@ -108,8 +131,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
     if(!mainWindow.inFocus_){
       if(mainWindow.events_.hasOwnProperty(name.toString())){      
         for(var l = 0; l < mainWindow.events_[name.toString()].length; ++l){
-          mainWindow.events_[name.toString()][l].callback(domEvent,
-            mainWindow.events_[name.toString()][l].arguments);
+          mainWindow.events_[name.toString()][l].callback(domEvent);
         }
       }
     }
@@ -132,8 +154,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
         var object = mainWindow.childEvents_[name.toString()][k];
         
         for(var m = 0; m < object.events_[name.toString()].length; ++m){
-          object.events_[name.toString()][m].callback(event,
-            object.events_[name.toString()][m].arguments);
+          object.events_[name.toString()][m].callback(event);
         }
       }
     }
@@ -141,8 +162,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
       
       var to = WIDGET3D.getObjectById(id);
       for(var i = 0; i < to.events_[name.toString()].length; ++i){
-        to.events_[name.toString()][i].callback(event,
-          to.events_[name.toString()][i].arguments);
+        to.events_[name.toString()][i].callback(event);
       }
     }
   };

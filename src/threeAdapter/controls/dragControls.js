@@ -51,15 +51,12 @@ WIDGET3D.DragControls = function(parameters){
   
   that.setPlaneRotation();
   
- //WIDGET3D.scene.add( that.plane_ );
-  
   WIDGET3D.getScene().add( that.plane_ );
   
   that.mouseupHandler = function(event){
     if(that.drag_){
       that.drag_ = false;
       
-      //var pos = that.component_.getPosition();
       that.plane_.position.copy(that.component_.parent_.container_.localToWorld(that.component_.getPosition().clone()));
 
       WIDGET3D.getMainWindow().removeEventListener("mousemove", that.mousemoveHandler);
@@ -73,7 +70,6 @@ WIDGET3D.DragControls = function(parameters){
       if(!that.drag_){
         
         that.setPlaneRotation();
-        //var pos = that.component_.getPosition();
         that.plane_.position.copy(that.component_.parent_.container_.localToWorld(that.component_.getPosition().clone()));
         //FORCE TO UPDATE MATRIXES OTHERWISE WE MAY GET INCORRECT VALUES FROM INTERSECTION
         that.plane_.updateMatrixWorld(true);
@@ -121,7 +117,6 @@ WIDGET3D.DragControls = function(parameters){
   
   that.remove = function(){
   
-    //WIDGET3D.scene.remove( that.plane_ );
     WIDGET3D.getScene().remove( that.plane_ );
     
     that.plane_.geometry.dispose();

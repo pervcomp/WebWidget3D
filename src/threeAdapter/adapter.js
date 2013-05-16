@@ -211,13 +211,17 @@ var THREEJS_WIDGET3D = {
             //Info about object and world coordinates are atached to
             //the event object so that the data may be used in eventhandlers like
             //controls.
-            event.objectCoordinates = objPos;
-            event.worldCoordinates = intersects[m].point;
+            
+            //event.objectCoordinates = objPos;
+            //event.worldCoordinates = intersects[m].point;
+            //var data = {widget : hit, eventObject : event};
+            
+            found.push(hit);
             
           }
-          return hit;
         }
       }
+      return found;
     }
     return false;
   },

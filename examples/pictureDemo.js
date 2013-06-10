@@ -31,10 +31,12 @@ var init = function(){
   //--------------------------------------------
   
   //styled window
-  var subWindow = new WIDGET3D.GridWindow({width : 600,
+  var subWindow = new WIDGET3D.GridWindow({
+    width : 600,
     height : 500,
     color : 0x000000,
-    defaultControls: true});
+    defaultControls: true
+  });
   
   mainWindow.addChild(subWindow);
   
@@ -153,8 +155,3 @@ var displayPicture = function(subWindow, pictureDisplay, img){
   var onclick = createMouseclickHandler({button: button, pictureDisplay : pictureDisplay});
   button.addEventListener("click", onclick, false);
 };
-
-
-
-
-

@@ -7,7 +7,6 @@
 WIDGET3D.Group = function(){
   WIDGET3D.Basic.call( this );
   WIDGET3D.WindowBase.call( this );
-  
 };
 
 

@@ -10,7 +10,7 @@
 //              text : string, title text
 //              choices = array of choises 
 //                {string: choice name displayed, 
-//                 onclick : {handler : function, parameters : object}}
+//                 onclick : function}
 //
 //
 // TODO: ENABLE DIFFERENT LAYOUT
@@ -52,7 +52,6 @@ WIDGET3D.SelectDialog = function(parameters){
   //CREATING CHOICEBUTTONS
   this.choiceCanvases_ = [];
   this.createChoises();
-
 };
 
 WIDGET3D.SelectDialog.prototype = WIDGET3D.Group.prototype.inheritance();
@@ -65,12 +64,8 @@ WIDGET3D.SelectDialog.prototype.createText = function(){
   document.body.appendChild(this.textCanvas_);
   var context = this.textCanvas_.getContext('2d');
   
-  var material = this.createTitleMaterial(this.text_, context, this.textCanvas_);
-  
   this.choiceHeight_ = this.height_/((this.choices_.length+1)*1.2);
-  
-  var mesh = new THREE.Mesh(new THREE.CubeGeometry(this.width_, this.choiceHeight_, this.depth_), material);
-
+  var mesh = this.createTitle(this.text_, context, this.textCanvas_);
   mesh.position.y = this.height_*0.5 - this.choiceHeight_*0.5;
   
   this.setMesh(mesh);
@@ -97,11 +92,25 @@ WIDGET3D.SelectDialog.prototype.createChoises = function(){
     document.body.appendChild(choiceCanvas);
     var choiceContext = choiceCanvas.getContext('2d');
     
-    var material = this.createButtonMaterial(this.choices_[i].string, choiceContext, choiceCanvas);
     var width = this.width_/1.2;
     var height = this.choiceHeight_;
-    var mesh = new THREE.Mesh( new THREE.CubeGeometry(width, height, this.depth_), material);
     
+    var materials = this.createButtonMaterial(this.choices_[i].string, choiceContext, choiceCanvas);
+    var geometry = new THREE.CubeGeometry(width, height, this.depth_);
+    
+    for (var j = 0; j < geometry.faces.length; j ++ ){
+      var face = geometry.faces[ j ];
+      if(j === 4 || j == 5){
+        face.materialIndex = 1;
+      }
+      else{
+        face.materialIndex = 0;
+      }
+    }
+    geometry.materials = materials;
+    var material = new THREE.MeshFaceMaterial(materials);
+    var mesh = new THREE.Mesh(geometry, material);
+
     choice.setMesh(mesh);
     
     var parentLoc = this.getPosition();
@@ -129,7 +138,6 @@ WIDGET3D.SelectDialog.prototype.createChoises = function(){
 
 WIDGET3D.SelectDialog.prototype.createButtonMaterial = function(string, context, canvas){
 
-  
   context.fillStyle = "#FFFFFF";
   context.fillRect(0, 0, canvas.width, canvas.height);
   
@@ -141,16 +149,17 @@ WIDGET3D.SelectDialog.prototype.createButtonMaterial = function(string, context,
   context.fillText(string, canvas.width/2-(textWidth/2), canvas.height/2);
   
   var texture = new THREE.Texture(canvas);
-  
-  var material = new THREE.MeshBasicMaterial({ map: texture, color: this.color_, opacity : this.opacity_});
   texture.needsUpdate = true;
   
-  return material;
+  var materials = new Array();
+  materials.push(new THREE.MeshBasicMaterial({color: this.color_, opacity : this.opacity_}));//side faces
+  materials.push(new THREE.MeshBasicMaterial({map: texture, color: this.color_, opacity : this.opacity_}));//front & back face
+  
+  return materials;
 }
 
-WIDGET3D.SelectDialog.prototype.createTitleMaterial = function(string, context, canvas){
+WIDGET3D.SelectDialog.prototype.createTitle = function(string, context, canvas){
 
-  
   context.fillStyle = "#FFFFFF";
   context.fillRect(0, 0, canvas.width, canvas.height);
   
@@ -162,11 +171,29 @@ WIDGET3D.SelectDialog.prototype.createTitleMaterial = function(string, context, 
   context.fillText(string, canvas.width/2-(textWidth/2), canvas.height/2);
   
   var texture = new THREE.Texture(canvas);
-  
-  var material = new THREE.MeshBasicMaterial({ map: texture, color: this.color_, opacity : this.opacity_});
   texture.needsUpdate = true;
   
-  return material;
+  var materials = new Array();
+  materials.push(new THREE.MeshBasicMaterial({color: this.color_, opacity : this.opacity_}));//side faces
+  materials.push(new THREE.MeshBasicMaterial({map: texture, color: this.color_, opacity : this.opacity_}));//front & back face
+  
+  var geometry = new THREE.CubeGeometry(this.width_, this.choiceHeight_, this.depth_);
+  
+  for( var i = 0; i < geometry.faces.length; i ++ ){
+    var face = geometry.faces[ i ];
+    if(i === 4 || i === 5){
+      face.materialIndex = 1;
+    }
+    else{
+      face.materialIndex = 0;
+    }
+  }
+  
+  geometry.materials = materials;
+  var material = new THREE.MeshFaceMaterial(materials);
+  var mesh = new THREE.Mesh(geometry, material);
+  
+  return mesh;
 }
 
 WIDGET3D.SelectDialog.prototype.changeChoiceText = function(text, index){
@@ -180,8 +207,10 @@ WIDGET3D.SelectDialog.prototype.changeChoiceText = function(text, index){
   if(object){
     var canvas = object.mesh_.material.map.image;
     var context = object.mesh_.material.map.image.getContext('2d');
-    var material = this.createButtonMaterial(text, context, canvas);
-    object.mesh_.material = material;
+    var materials = this.createButtonMaterial(text, context, canvas);
+
+    object.mesh_.geometry.materials = materials;
+    object.mesh_.material = new THREE.MeshFaceMaterial(materials);
     object.mesh_.needsUpdate = true;
     return true;
   }
@@ -190,9 +219,6 @@ WIDGET3D.SelectDialog.prototype.changeChoiceText = function(text, index){
 
 
 WIDGET3D.SelectDialog.prototype.remove = function(){
-
-  //hiding the Group from scene
-  this.hide();
   
   //removing child canvases from DOM
   for(var i = 0; i < this.choiceCanvases_.length; ++i){
@@ -206,6 +232,5 @@ WIDGET3D.SelectDialog.prototype.remove = function(){
   document.body.removeChild(canvas);
   
   WIDGET3D.Group.prototype.remove.call( this );
-
-}
+};
 

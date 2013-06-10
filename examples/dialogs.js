@@ -29,15 +29,11 @@ var init = function(){
   //--------------------------------------------
   
   //styled window
-  var dialog = new WIDGET3D.Dialog({height : 500, width : 500, maxTextLength : 16});
+  //var dialog = new WIDGET3D.Dialog({height : 500, width : 500, maxTextLength : 16});
   
-  var createDialogClose = function(d){
-    return function(event){
-      d.remove();
-    }
-  }
-  var dialogClose = createDialogClose(dialog);  
-  dialog.button_.addEventListener("click", dialogClose);
+  var fields = [{description : "name"}, {description : "name"}, {description : "name"}, {description : "name"},
+    {description : "name"}, {description : "name"}, {description : "name"}];
+  var dialog = new WIDGET3D.Dialog({width: 600, height : 600, fields: fields, hasCancel : true});
 
   dialog.setX(-300);
   dialog.setRotationX(-Math.PI/10);

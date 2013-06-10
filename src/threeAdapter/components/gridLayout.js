@@ -55,7 +55,6 @@ WIDGET3D.GridWindow = function(parameters){
     
     this.controls_ = new WIDGET3D.RollControls({component : this, mouseButton : button, shiftKey : shift});
   }
-  
 };
 
 WIDGET3D.GridWindow.prototype = WIDGET3D.Group.prototype.inheritance();

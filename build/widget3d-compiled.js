@@ -27,43 +27,25 @@ WIDGET3D = {
 
   ElementType : {"MAIN_WINDOW":0, "GROUP":1, "BASIC":2, "TEXT":3, "UNDEFINED":666 },
   
-  isInitialized : function(){
-    return false;
-  },
-  
-  //Initializes the widget system core
-  //
-  //PARAMETERS:
-  //  scene: Scene where gui objects are drawn. Meshes and containers are added here. Should provide add and remove
-  //    methods.
-  //
-  //  collisionCallback: JSON object containing attributes callback and args (arguments for callback, optional).
-  //    collisionCallback is used detecting mouse events on guiObjects. collisionCallback should return
-  //    list of visible meshes which were hit by cursor or false if hit weren't occured.
-  //
-  //  container: object containing constructor method of container (descriped above).
-  //  
-  //  canvas : the canvas element where the WebGL context is rendered
-  //
-  //RETURNS:
-  //  root window which is MainWindow typed gui object.
-  //
-  init : function(parameters){
+  //Creating functions
+  createFunctions : function(){
     //Some private variables inside a closure
     
     var focused_ = [];
     var allObjects_ = {};
-    var mainWindow_;
+    var application_;
     var container_;
     var events_;
     var canvas_;
+    
+    var initialized_ = false;
     
     var makeId = function(){
       var i = 0;
       return function(){
         return ++i;
       }
-    }
+    };
     WIDGET3D.id = makeId();
       
     WIDGET3D.getEvents = function(){
@@ -72,10 +54,10 @@ WIDGET3D = {
     
     WIDGET3D.getCanvas = function(){
       return canvas_;
-    }
+    };
     
-    WIDGET3D.getMainWindow = function(){
-      return mainWindow_;
+    WIDGET3D.getApplication = function(){
+      return application_;
     };
     
     WIDGET3D.addObject = function(widget){
@@ -113,66 +95,87 @@ WIDGET3D = {
     };
     
     WIDGET3D.unfocusFocused = function(){
-    
       for(var i = 0; i < focused_.length; ++i){
         focused_[i].unfocus();
       }
-      
       focused_ = [];
     };
     
-    var parameters = parameters || {};
+    WIDGET3D.isInitialized = function(){
+      return initialized_;
+    };
     
-    //INITIALIZING CODE
-    
-    //Container is a object that contains constructor method of container (eg. in three.js Object3D)
-    // Container is used in group to manage it's childs. Container has to provide
-    // add and remove methods for meshes and other containers it allso needs to provide
-    // mutable position.x, position.y position.z and rotation.x, rotation.y, rotation.z values.
-    // position value changes has to be inherited to containers children.
-    // This interface is mandatory!!!
-    if(parameters.container != undefined){
-      WIDGET3D.Container = parameters.container;
-    }
-    else{
-      console.log("Container must be specified!");
-      console.log("Container has to be constructor method of container of used 3D-engine (eg. in three.js THREE.Object3D");
-      console.log("Initializing WIDGET3D failed!");
+    //Initializes the widget system core
+    //
+    //PARAMETERS:
+    //  scene: Scene where gui objects are drawn. Meshes and containers are added here. Should provide add and remove
+    //    methods.
+    //
+    //  collisionCallback: JSON object containing attributes callback and args (arguments for callback, optional).
+    //    collisionCallback is used detecting mouse events on guiObjects. collisionCallback should return
+    //    list of visible meshes which were hit by cursor or false if hit weren't occured.
+    //
+    //  container: object containing constructor method of container (descriped above).
+    //  
+    //  canvas : the canvas element where the WebGL context is rendered
+    //
+    //RETURNS:
+    //  root window which is Application typed gui object.
+    //
+    WIDGET3D.init = function(parameters){
       
-      return false;
-    }
-    
-    if(parameters.canvas != undefined){
-      canvas_ = parameters.canvas;
-    }
-    else{
-      console.log("Canvas must be specified!");
-      console.log("Initializing WIDGET3D failed!");
+      var parameters = parameters || {};
       
-      return false;
-    }
-    
-    mainWindow_ = new WIDGET3D.MainWindow();
-    
-    if(parameters.collisionCallback != undefined && 
+      //INITIALIZING CODE
+      
+      //Container is a object that contains constructor method of container (eg. in three.js Object3D)
+      // Container is used in group to manage it's childs. Container has to provide
+      // add and remove methods for meshes and other containers it allso needs to provide
+      // mutable position.x, position.y position.z and rotation.x, rotation.y, rotation.z values.
+      // position value changes has to be inherited to containers children.
+      // This interface is mandatory!!!
+      if(parameters.container != undefined){
+        WIDGET3D.Container = parameters.container;
+      }
+      else{
+        console.log("Container must be specified!");
+        console.log("Container has to be constructor method of container of used 3D-engine (eg. in three.js THREE.Object3D");
+        console.log("Initializing WIDGET3D failed!");
+        
+        return false;
+      }
+      
+      if(parameters.canvas != undefined){
+        canvas_ = parameters.canvas;
+      }
+      else{
+        console.log("Canvas must be specified!");
+        console.log("Initializing WIDGET3D failed!");
+        
+        return false;
+      }
+      
+      application_ = new WIDGET3D.Application();
+      
+      if(parameters.collisionCallback != undefined && 
       parameters.collisionCallback.callback != undefined){
       
-      events_ = new WIDGET3D.DomEvents(parameters.collisionCallback);
-    }
-    else{
-      console.log("CollisionCallback has to be JSON object containing attributes callback (and args, optional)");
-      console.log("Initializing WIDGET3D failed!");
+        events_ = new WIDGET3D.DomEvents(parameters.collisionCallback);
+      }
+      else{
+        console.log("CollisionCallback has to be JSON object containing attributes callback (and args, optional)");
+        console.log("Initializing WIDGET3D failed!");
+        
+        return false;
+      }
       
-      return false;
+      initialized_ = true;
+      
+      return application_;
     }
-    
-    WIDGET3D.isInitialized = function(){
-      return true;
-    }
-
-    return mainWindow_;
   }
 };
+WIDGET3D.createFunctions();
 
 
 
@@ -339,7 +342,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
     
     var found = _that_.collisions_.callback(domEvent, _that_.collisions_.args);
     var name = domEvent.type;
-    var mainWindow = WIDGET3D.getMainWindow();
+    var mainWindow = WIDGET3D.getApplication();
     
     var bubbles = true;
     
@@ -386,7 +389,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
   _that_.keyboardEvent = function(domEvent){
     
     var name = domEvent.type;
-    var mainWindow = WIDGET3D.getMainWindow();
+    var mainWindow = WIDGET3D.getApplication();
     
     //Focused widgets get the event
     for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
@@ -423,7 +426,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
     
     if(!id){
       
-      var mainWindow = WIDGET3D.getMainWindow();
+      var mainWindow = WIDGET3D.getApplication();
       
       for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
         
@@ -587,7 +590,7 @@ WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, bubbles
     WIDGET3D.getEvents().enableEvent(name);
   }
   if(!this.events_.checkEvent(name)){
-    var index = WIDGET3D.getMainWindow().childEvents_.addObject(name, this);
+    var index = WIDGET3D.getApplication().childEvents_.addObject(name, this);
   }
   else{
     var index = this.events_[name.toString()][0].index;
@@ -610,7 +613,7 @@ WIDGET3D.GuiObject.prototype.removeEventListener = function(name, callback){
     return false;
   }
   if(this.events_[name.toString()] === false){
-    var mainWindow = WIDGET3D.getMainWindow();
+    var mainWindow = WIDGET3D.getApplication();
     
     mainWindow.childEvents_[name.toString()].splice(index, 1);
     
@@ -633,7 +636,7 @@ WIDGET3D.GuiObject.prototype.removeEventListeners = function(name){
     return false;
   }
   else{
-    var mainWindow = WIDGET3D.getMainWindow();
+    var mainWindow = WIDGET3D.getApplication();
     
     mainWindow.childEvents_[name.toString()].splice(index, 1);
     
@@ -652,7 +655,7 @@ WIDGET3D.GuiObject.prototype.removeEventListeners = function(name){
 WIDGET3D.GuiObject.prototype.removeAllListeners = function(){
   var listeners = this.events_.remove();
   
-  var mainWindow = WIDGET3D.getMainWindow();
+  var mainWindow = WIDGET3D.getApplication();
   for(var i = 0; i < listeners.length; ++i){
     var name = listeners[i].name;
     var index = listeners[i].index;
@@ -674,7 +677,7 @@ WIDGET3D.GuiObject.prototype.setNewEventIndex = function(name, index){
   for(var i = 0; i < this.events_[name.toString()].length; ++i){
     this.events_[name.toString()][i].index = index;
   }
-  WIDGET3D.getMainWindow().childEvents_[name.toString()][index] = this;
+  WIDGET3D.getApplication().childEvents_[name.toString()][index] = this;
 }
 
 WIDGET3D.GuiObject.prototype.addUpdateCallback = function(callback, args){
@@ -746,7 +749,7 @@ WIDGET3D.Basic.prototype.setParent = function(widget){
 //meshes is array of meshes WIDGET3D are part of object
 WIDGET3D.Basic.prototype.setMesh = function(mesh){
 
-  var mainWindow = WIDGET3D.getMainWindow();
+  var mainWindow = WIDGET3D.getApplication();
   
   if(this.mesh_ && this.parent_){
     //removes the old mesh from the scene
@@ -804,56 +807,13 @@ WIDGET3D.Basic.prototype.remove = function(){
   //removing event listeners
   this.removeAllListeners();
   //removing mesh
-  WIDGET3D.getMainWindow().removeMesh(this.mesh_);
+  WIDGET3D.getApplication().removeMesh(this.mesh_);
   //removing object
   this.parent_.removeFromObjects(this);
   
   WIDGET3D.removeObject(this.id_);
 };
 
-//getters and setters for location and rotation
-//TODO: MOVE TO ADAPTER SIDE
-WIDGET3D.Basic.prototype.getPosition = function(){
-  return this.mesh_.position;
-};
-
-WIDGET3D.Basic.prototype.setPosition = function(x, y, z){
-  
-  this.mesh_.position.set(x,y,z);
-};
-
-WIDGET3D.Basic.prototype.setX = function(x){
-  this.mesh_.position.setX(x);
-};
-
-WIDGET3D.Basic.prototype.setY = function(y){
-  this.mesh_.position.setY(y);
-};
-
-WIDGET3D.Basic.prototype.setZ = function(z){
-  this.mesh_.position.setZ(z);
-};
-
-WIDGET3D.Basic.prototype.getRotation = function(){
-  return this.mesh_.rotation;
-};
-
-WIDGET3D.Basic.prototype.setRotation = function(rotX, rotY, rotZ){
-  
-  this.mesh_.rotation.set(rotX, rotY, rotZ);
-};
-
-WIDGET3D.Basic.prototype.setRotationX = function(rotX){
-  this.mesh_.rotation.setX(rotX);
-};
-
-WIDGET3D.Basic.prototype.setRotationY = function(rotY){
-  this.mesh_.rotation.setY(rotY);
-};
-
-WIDGET3D.Basic.prototype.setRotationZ = function(rotZ){
-  this.mesh_.rotation.setZ(rotZ);
-};
 
 //--------------------------------------------------
 // PROTOTYPAL INHERITANCE FUNCTION FOR BASIC OBJECT
@@ -871,20 +831,20 @@ WIDGET3D.Basic.prototype.inheritance = function(){
 // inherited to all kind of windows but not to any other objects.
 //
 
-WIDGET3D.WindowBase = function(){
+WIDGET3D.GroupBase = function(){
   this.children_ = [];
   this.container_ = new WIDGET3D.Container();
 };
 
 // adds new child to window
-WIDGET3D.WindowBase.prototype.addChild = function(widget){
+WIDGET3D.GroupBase.prototype.addChild = function(widget){
   
   widget.setParent(this);
   return widget;
 };
 
 // hides unfocused objects in window
-WIDGET3D.WindowBase.prototype.hideNotFocused = function(){
+WIDGET3D.GroupBase.prototype.hideNotFocused = function(){
   for(var i = 0; i < this.children_.length; ++i){
     if(!this.children_[i].inFocus_){
       this.children_[i].hide();
@@ -893,7 +853,7 @@ WIDGET3D.WindowBase.prototype.hideNotFocused = function(){
 };
 
 //removes object in place 'index' from object list
-WIDGET3D.WindowBase.prototype.removeFromObjects = function(widget){
+WIDGET3D.GroupBase.prototype.removeFromObjects = function(widget){
   
   for(var k = 0; k < this.children_.length; ++k){
     if(this.children_[k] === widget){
@@ -910,10 +870,10 @@ WIDGET3D.WindowBase.prototype.removeFromObjects = function(widget){
 // Extends WIDGET3D.GuiObject object.
 //---------------------------------------------------
 
-WIDGET3D.MainWindow = function(){
+WIDGET3D.Application = function(){
   
   WIDGET3D.GuiObject.call( this );
-  WIDGET3D.WindowBase.call( this );
+  WIDGET3D.GroupBase.call( this );
   
   this.meshes_ = [];
   
@@ -943,24 +903,24 @@ WIDGET3D.MainWindow = function(){
 
 
 //-----------------------------------------------------------------------------------------
-// inheriting MainWindow from GuiObject
-WIDGET3D.MainWindow.prototype = WIDGET3D.GuiObject.prototype.inheritance();
+// inheriting Application from GuiObject
+WIDGET3D.Application.prototype = WIDGET3D.GuiObject.prototype.inheritance();
 
 
 //inheriting some methods from WindowInterface
 // adds new child to window
-WIDGET3D.MainWindow.prototype.addChild= WIDGET3D.WindowBase.prototype.addChild;
+WIDGET3D.Application.prototype.addChild= WIDGET3D.GroupBase.prototype.addChild;
 // hides unfocused objects in window
-WIDGET3D.MainWindow.prototype.hideNotFocused = WIDGET3D.WindowBase.prototype.hideNotFocused;
+WIDGET3D.Application.prototype.hideNotFocused = WIDGET3D.GroupBase.prototype.hideNotFocused;
 // removes object from window
-WIDGET3D.MainWindow.prototype.removeFromObjects = WIDGET3D.WindowBase.prototype.removeFromObjects;
+WIDGET3D.Application.prototype.removeFromObjects = WIDGET3D.GroupBase.prototype.removeFromObjects;
 
 //-----------------------------------------------------------------------------------------
-WIDGET3D.MainWindow.prototype.type_ = WIDGET3D.ElementType.MAIN_WINDOW;
+WIDGET3D.Application.prototype.type_ = WIDGET3D.ElementType.MAIN_WINDOW;
 //-----------------------------------------------------------------------------------------
 
 //removes mesh from mesh list
-WIDGET3D.MainWindow.prototype.removeMesh = function(mesh){
+WIDGET3D.Application.prototype.removeMesh = function(mesh){
 
   for(var k = 0; k < this.meshes_.length; ++k){
     if(this.meshes_[k] === mesh){
@@ -980,7 +940,9 @@ WIDGET3D.MainWindow.prototype.removeMesh = function(mesh){
 //---------------------------------------------
 WIDGET3D.Group = function(){
   WIDGET3D.Basic.call( this );
-  WIDGET3D.WindowBase.call( this );
+  WIDGET3D.GroupBase.call( this );
+  
+  this.isVisible_;
 };
 
 
@@ -991,11 +953,11 @@ WIDGET3D.Group.prototype = WIDGET3D.Basic.prototype.inheritance();
 //inheriting some methods from WindowInterface
 
 // adds new child to Group
-WIDGET3D.Group.prototype.addChild= WIDGET3D.WindowBase.prototype.addChild;
+WIDGET3D.Group.prototype.addChild= WIDGET3D.GroupBase.prototype.addChild;
 // hides unfocused objects in Group
-WIDGET3D.Group.prototype.hideNotFocused = WIDGET3D.WindowBase.prototype.hideNotFocused;
+WIDGET3D.Group.prototype.hideNotFocused = WIDGET3D.GroupBase.prototype.hideNotFocused;
 // removes object from Group
-WIDGET3D.Group.prototype.removeFromObjects = WIDGET3D.WindowBase.prototype.removeFromObjects;
+WIDGET3D.Group.prototype.removeFromObjects = WIDGET3D.GroupBase.prototype.removeFromObjects;
 
 //-----------------------------------------------------------------------------------------
 WIDGET3D.Group.prototype.type_ = WIDGET3D.ElementType.GROUP;
@@ -1024,7 +986,7 @@ WIDGET3D.Group.prototype.setParent = function(widget){
 
 //sets mesh for Group
 WIDGET3D.Group.prototype.setMesh = function(mesh){
-  var mainWindow =  WIDGET3D.getMainWindow();
+  var mainWindow =  WIDGET3D.getApplication();
   
   if(this.mesh_){
     //removes the old mesh from the scene
@@ -1096,7 +1058,7 @@ WIDGET3D.Group.prototype.remove = function(){
   
   //If Group has a mesh, it has to be removed allso
   if(this.mesh_){
-    WIDGET3D.getMainWindow().removeMesh(this.mesh_);
+    WIDGET3D.getApplication().removeMesh(this.mesh_);
   }
   //container has to be removed from parent's container
   this.parent_.container_.remove(this.container_);
@@ -1105,52 +1067,6 @@ WIDGET3D.Group.prototype.remove = function(){
   
   WIDGET3D.removeObject(this.id_);
 };
-
-//setters and getters for location and rotation
-
-//TODO: MOVE TO THE ADAPTER SIDE
-WIDGET3D.Group.prototype.getPosition = function(){
-  return this.container_.position;
-};
-
-WIDGET3D.Group.prototype.setPosition = function(x, y, z){
-  
-  this.container_.position.set(x,y,z);
-};
-
-WIDGET3D.Group.prototype.setX = function(x){
-  this.container_.position.setX(x);
-};
-
-WIDGET3D.Group.prototype.setY = function(y){
-  this.container_.position.setY(y);
-};
-
-WIDGET3D.Group.prototype.setZ = function(z){
-  this.container_.position.setZ(z);
-};
-
-WIDGET3D.Group.prototype.getRotation = function(){
-  return this.container_.rotation;
-};
-
-WIDGET3D.Group.prototype.setRotation = function(rotX, rotY, rotZ){
-  
-  this.container_.rotation.set(rotX, rotY, rotZ);
-};
-
-WIDGET3D.Group.prototype.setRotationX = function(rotX){
-  this.container_.rotation.setX(rotX);
-};
-
-WIDGET3D.Group.prototype.setRotationY = function(rotY){
-  this.container_.rotation.setY(rotY);
-};
-
-WIDGET3D.Group.prototype.setRotationZ = function(rotZ){
-  this.container_.rotation.setZ(rotZ);
-};
-
  
 //--------------------------------------------------
 // PROTOTYPAL INHERITANCE FUNCTION FOR Group OBJECT
@@ -1322,7 +1238,31 @@ WIDGET3D.Text.prototype.inheritance = function(){
   return created;
 };
 
-// ROLL CONTROLS
+//---------------------------------------------------
+//
+// STYLED WIDGETS THAT CAN BE USED WITH THREEJS PLUGIN
+//
+//---------------------------------------------------
+
+//---------------------------------------------------
+// CAMERA GROUP
+//
+// components that needs to follow camera are added to this group
+//---------------------------------------------------
+//
+// PARAMETERS:  camera : 3D engine specific camera object
+//
+WIDGET3D.CameraGroup = function(parameters){
+  
+  WIDGET3D.Group.call( this );
+  
+  var parameters = parameters || {};
+  
+  this.camera_ = parameters.camera;
+  this.container_.add(this.camera_);
+};
+
+WIDGET3D.CameraGroup.prototype = WIDGET3D.Group.prototype.inheritance();// ROLL CONTROLS
 //
 //Parameters: component: WIDGET3D.Basic typed object to which the controlls are attached
 //                       COMPONENT MUST BE GIVEN!
@@ -1357,7 +1297,7 @@ WIDGET3D.RollControls = function(parameters){
       
       that.rotate_ = false;
       
-      var mainWindow = WIDGET3D.getMainWindow();
+      var mainWindow = WIDGET3D.getApplication();
       mainWindow.removeEventListener("mousemove", that.mousemoveHandler);
       mainWindow.removeEventListener("mouseup", that.mouseupHandler);
     }
@@ -1378,7 +1318,7 @@ WIDGET3D.RollControls = function(parameters){
         that.rotationOnMouseDownY_ = that.modelRotationY_;
         that.rotationOnMouseDownX_ = that.modelRotationX_;
         
-        var mainWindow = WIDGET3D.getMainWindow();
+        var mainWindow = WIDGET3D.getApplication();
         mainWindow.addEventListener("mousemove", that.mousemoveHandler, false);
         mainWindow.addEventListener("mouseup", that.mouseupHandler, false);
       }
@@ -1448,231 +1388,623 @@ SOFTWARE.
 //
 
 var THREEJS_WIDGET3D = {
-
-  initialized : false,
   
-  
-  //parameters:
-  //    rensrer: THREE renderer object
-  //      if renderer no specified width, height, antialias, domParent, clearColor and opacity can be given
-  //
-  //    camera: THREE camera object
-  //      if camera not specified aspect, fow, near and far can be given
-  //
-  //    scene: THREE scene object
-  //
-  init : function(parameters){
-  
+  createFunctions : function(){
+    
+    var plugin_initialized_ = false;
     var renderer_;
     var camera_;
     var cameraGroup_;
     var scene_;
     var projector_;
-
-    if(WIDGET3D != undefined && !THREEJS_WIDGET3D.initialized){
-      var parameters = parameters || {};
-      
-      //seting the three.js renderer
-      if(parameters.renderer){
-        renderer_ = parameters.renderer;
-      }
-      else{
-        //if there were no renderer given as a parameter, we create one
-        var width = parameters.width !== undefined ? parameters.width : window.innerWidth;
-        var height = parameters.height !== undefined ? parameters.height : window.innerHeight;
-        
-        var antialias = parameters.antialias !== undefined ? parameters.antialias : true;
-        var domParent = parameters.domParent !== undefined ? parameters.domParent : document.body;
-        
-        renderer_ = new THREE.WebGLRenderer({antialias: antialias});
-        renderer_.setSize( width, height );
-        
-        var clearColor = parameters.clearColor !== undefined ? parameters.clearColor : 0x333333;
-        var opacity = parameters.opacity !== undefined ? parameters.opacity : 1;
-
-        renderer_.setClearColor( clearColor, opacity );
-        
-        domParent.appendChild(renderer_.domElement);
-      }
-      
-      //setting three.js camera
-      if(parameters.camera){
-        camera_ = parameters.camera;
-      }
-      else{        
-        var aspect = parameters.aspect !== undefined ? parameters.aspect : (renderer_.domElement.width/renderer_.domElement.height);
-        
-        var fov = parameters.fov !== undefined ? parameters.fov : 50;
-        var near = parameters.near !== undefined ? parameters.near : 0.1;
-        var far = parameters.far !== undefined ? parameters.far : 2000;
-        
-        camera_ = new THREE.PerspectiveCamera(fov, aspect, near, far);
-      }
-      
-      scene_ = parameters.scene !== undefined ? parameters.scene : new THREE.Scene();
-      
-      var mainWindow = false;
-      
-      //initializing WIDGET3D
-      if(!WIDGET3D.isInitialized()){
-      
-        mainWindow = WIDGET3D.init({
-          collisionCallback: {callback: THREEJS_WIDGET3D.checkIfHits},
-          container: THREE.Object3D,
-          canvas: renderer_.domElement
-        });
-        
-        if(!mainWindow){
-          console.log("Widget3D init failed!");
-          return false;
+    
+    //---------------------------------------------
+    //CREATING RENDERING METHOD
+    WIDGET3D.render = function(){
+      //updating all objects
+      var objects = WIDGET3D.getAllObjects();
+      for(var i in objects){
+        if(objects.hasOwnProperty(i)){
+          objects[i].update();
         }
       }
-      else{
-        mainWindow = WIDGET3D.getMainWindow();
-      }
+      renderer_.render(scene_, camera_);
+    };
+    //---------------------------------------------
+    
+    //---------------------------------------------
+    //CREATING RESIZEMETHOD
+    //sets the renderer and camera parameters when window is resized
+    //HAS TO BE IMPLICITILY CALLED
+    WIDGET3D.setViewport = function(width, height, aspect){
+      renderer_.setSize( width, height );
+      camera_.aspect = aspect;
+      camera_.updateProjectionMatrix();
       
-      scene_.add(mainWindow.container_);
-      projector_ = new THREE.Projector();
+    };
+    //---------------------------------------------
+    
+    //---------------------------------------------
+    //returns the renderer object
+    WIDGET3D.getRenderer = function(){
+      return renderer_;
+    }
+    //---------------------------------------------
+    
+    //returns three.js camera object
+    WIDGET3D.getCamera = function(){
+      return camera_;
+    }
+    
+    //return WIDGET3D camera group object
+    WIDGET3D.getCameraGroup = function(){
+      return cameraGroup_;
+    }
+    
+    //returns three.js projector
+    WIDGET3D.getProjector = function(){
+      return projector_;
+    }
+    
+    //returns three.js scene
+    WIDGET3D.getScene = function(){
+      return scene_;
+    };
+    
+    WIDGET3D.isPluginInitialized = function(){
+      return plugin_initialized_;
+    };
+    
+    WIDGET3D.checkIfHits = function(event){
+    
+      var mouse = WIDGET3D.mouseCoordinates(event);
       
-      //Constructing camera group
-      cameraGroup_ = new WIDGET3D.CameraGroup({camera : camera_});
-      mainWindow.addChild(cameraGroup_);
+      var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
+      var ray = WIDGET3D.getProjector().pickingRay(vector, WIDGET3D.getCamera());
       
-      //---------------------------------------------
-      //CREATING RENDERING METHOD
-      WIDGET3D.render = function(){
-        //updating all objects
-        var objects = WIDGET3D.getAllObjects();
-        for(var i in objects){
-          if(objects.hasOwnProperty(i)){
-            objects[i].update();
+      //intersects checks now all the meshes in scene. It might be good to construct
+      // a datastructure that contains meshes of mainWindow.childEvents_.event array content
+      var intersects = ray.intersectObjects(WIDGET3D.getApplication().meshes_);
+      
+      var closest = false;
+      
+      var found = [];
+      
+      if(intersects.length > 0){
+        //finding closest
+        //closest object is the first visible object in intersects
+        for(var m = 0; m < intersects.length; ++m){
+          
+          if(intersects[m].object.visible){
+            closest = intersects[m].object;
+            var inv = new THREE.Matrix4();
+            inv.getInverse(intersects[m].object.matrixWorld);
+            
+            //position where the click happened in object coordinates
+            var objPos = intersects[m].point.clone().applyProjection(inv);
+            var hit = WIDGET3D.findObject(closest, event.type);
+            
+            if(hit){
+              //Info about object and world coordinates are atached to
+              //the event object so that the data may be used in eventhandlers like
+              //controls.
+              
+              //event.objectCoordinates = objPos;
+              //event.worldCoordinates = intersects[m].point;
+              //var data = {widget : hit, eventObject : event};
+              
+              found.push(hit);
+              
+            }
           }
         }
-        renderer_.render(scene_, camera_);
-      };
-      //---------------------------------------------
+        return found;
+      }
+      return false;
+    };
+    
+    WIDGET3D.findObject = function(mesh, name){
+    
+      var mainWindow = WIDGET3D.getApplication();
       
-      //---------------------------------------------
-      //CREATING RESIZEMETHOD
-      //sets the renderer and camera parameters when window is resized
-      //HAS TO BE IMPLICITILY CALLED
-      WIDGET3D.setViewport = function(width, height, aspect){
-        renderer_.setSize( width, height );
-        camera_.aspect = aspect;
-        camera_.updateProjectionMatrix();
+      for(var i = 0; i < mainWindow.childEvents_[name.toString()].length; ++i){
         
-      };
-      //---------------------------------------------
-      
-      //---------------------------------------------
-      //returns the renderer object
-      WIDGET3D.getRenderer = function(){
-        return renderer_;
-      }
-      //---------------------------------------------
-      
-      //returns three.js camera object
-      WIDGET3D.getCamera = function(){
-        return camera_;
-      }
-      
-      //return WIDGET3D camera group object
-      WIDGET3D.getCameraGroup = function(){
-        return cameraGroup_;
-      }
-      
-      //returns three.js projector
-      WIDGET3D.getProjector = function(){
-        return projector_;
-      }
-      
-      //returns three.js scene
-      WIDGET3D.getScene = function(){
-        return scene_;
-      }
-      
-      THREEJS_WIDGET3D.initialized = true;
-      
-      return mainWindow;
-    }
-    else{
-      console.log("nothing to init");
-      return WIDGET3D.getMainWindow();
-    }
-  },
+        // if the object is not visible it can be the object hit
+        // because it's not in the scene.
+        if(mainWindow.childEvents_[name.toString()][i].isVisible_){
+          
+          // If the object is the one we hit, we return the object
+          if(mesh === mainWindow.childEvents_[name.toString()][i].mesh_){
+            
+            return mainWindow.childEvents_[name.toString()][i];
+            
+          }//if right object
+          
+        }//if visible
+      }//for child events loop
+      return false;
+    };
   
-  checkIfHits : function(event){
   
-    var mouse = WIDGET3D.mouseCoordinates(event);
+    //parameters:
+    //    rensrer: THREE renderer object
+    //      if renderer no specified width, height, antialias, domParent, clearColor and opacity can be given
+    //
+    //    camera: THREE camera object
+    //      if camera not specified aspect, fow, near and far can be given
+    //
+    //    scene: THREE scene object
+    //
+    WIDGET3D.THREE_Application = function(parameters){
     
-    var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
-    var ray = WIDGET3D.getProjector().pickingRay(vector, WIDGET3D.getCamera());
-    
-    //intersects checks now all the meshes in scene. It might be good to construct
-    // a datastructure that contains meshes of mainWindow.childEvents_.event array content
-    var intersects = ray.intersectObjects(WIDGET3D.getMainWindow().meshes_);
-    
-    var closest = false;
-    
-    var found = [];
-    
-    if(intersects.length > 0){
-      //finding closest
-      //closest object is the first visible object in intersects
-      for(var m = 0; m < intersects.length; ++m){
+      if(!plugin_initialized_){
+        var parameters = parameters || {};
         
-        if(intersects[m].object.visible){
-          closest = intersects[m].object;
-          var inv = new THREE.Matrix4();
-          inv.getInverse(intersects[m].object.matrixWorld);
+        //seting the three.js renderer
+        if(parameters.renderer){
+          renderer_ = parameters.renderer;
+        }
+        else{
+          //if there were no renderer given as a parameter, we create one
+          var width = parameters.width !== undefined ? parameters.width : window.innerWidth;
+          var height = parameters.height !== undefined ? parameters.height : window.innerHeight;
           
-          //position where the click happened in object coordinates
-          var objPos = intersects[m].point.clone().applyProjection(inv);
-          var hit = THREEJS_WIDGET3D.findObject(closest, event.type);
+          var antialias = parameters.antialias !== undefined ? parameters.antialias : true;
+          var domParent = parameters.domParent !== undefined ? parameters.domParent : document.body;
           
-          if(hit){
-            //Info about object and world coordinates are atached to
-            //the event object so that the data may be used in eventhandlers like
-            //controls.
-            
-            //event.objectCoordinates = objPos;
-            //event.worldCoordinates = intersects[m].point;
-            //var data = {widget : hit, eventObject : event};
-            
-            found.push(hit);
-            
+          renderer_ = new THREE.WebGLRenderer({antialias: antialias});
+          renderer_.setSize( width, height );
+          
+          var clearColor = parameters.clearColor !== undefined ? parameters.clearColor : 0x333333;
+          var opacity = parameters.opacity !== undefined ? parameters.opacity : 1;
+
+          renderer_.setClearColor( clearColor, opacity );
+          
+          domParent.appendChild(renderer_.domElement);
+        }
+        
+        //setting three.js camera
+        if(parameters.camera){
+          camera_ = parameters.camera;
+        }
+        else{        
+          var aspect = parameters.aspect !== undefined ? parameters.aspect : (renderer_.domElement.width/renderer_.domElement.height);
+          
+          var fov = parameters.fov !== undefined ? parameters.fov : 50;
+          var near = parameters.near !== undefined ? parameters.near : 0.1;
+          var far = parameters.far !== undefined ? parameters.far : 2000;
+          
+          camera_ = new THREE.PerspectiveCamera(fov, aspect, near, far);
+        }
+        
+        scene_ = parameters.scene !== undefined ? parameters.scene : new THREE.Scene();
+        
+        var mainWindow = false;
+        
+        //initializing WIDGET3D
+        if(!WIDGET3D.isInitialized()){
+        
+          mainWindow = WIDGET3D.init({
+            collisionCallback: {callback: WIDGET3D.checkIfHits},
+            container: THREE.Object3D,
+            canvas: renderer_.domElement
+          });
+          
+          if(!mainWindow){
+            console.log("Widget3D init failed!");
+            return false;
           }
         }
+        else{
+          mainWindow = WIDGET3D.getApplication();
+        }
+        
+        scene_.add(mainWindow.container_);
+        projector_ = new THREE.Projector();
+        
+        //Constructing camera group
+        cameraGroup_ = new WIDGET3D.CameraGroup({camera : camera_});
+        mainWindow.addChild(cameraGroup_);
+        
+        
+        
+        plugin_initialized_ = true;
+        
+        return mainWindow;
       }
-      return found;
-    }
-    return false;
-  },
-  
-  findObject : function(mesh, name){
-  
-    var mainWindow = WIDGET3D.getMainWindow();
-    
-    for(var i = 0; i < mainWindow.childEvents_[name.toString()].length; ++i){
-      
-      // if the object is not visible it can be the object hit
-      // because it's not in the scene.
-      if(mainWindow.childEvents_[name.toString()][i].isVisible_){
-        
-        // If the object is the one we hit, we return the object
-        if(mesh === mainWindow.childEvents_[name.toString()][i].mesh_){
-          
-          return mainWindow.childEvents_[name.toString()][i];
-          
-        }//if right object
-        
-      }//if visible
-    }//for child events loop
-    return false;
+      else{
+        console.log("nothing to init");
+        return WIDGET3D.getApplication();
+      }
+    };
   }
 };
+THREEJS_WIDGET3D.createFunctions();
+//---------------------------------------------
+// GUI OBJECT: BASIC EXTENSION FOR THREE.JS
+//---------------------------------------------
+//
+//
 
-WIDGET3D.createMainWindow_THREE = THREEJS_WIDGET3D.init;
+//Vector3 basic operations
+WIDGET3D.Basic.prototype.getPosition = function(){
+  return this.mesh_.position;
+};
+
+WIDGET3D.Basic.prototype.getPositionX = function(){
+  return this.mesh_.position.x;
+};
+
+WIDGET3D.Basic.prototype.getPositionY = function(){
+  return this.mesh_.position.y;
+};
+
+WIDGET3D.Basic.prototype.getPositionZ = function(){
+  return this.mesh_.position.z;
+};
+
+WIDGET3D.Basic.prototype.setPosition = function(x, y, z){
+  
+  this.mesh_.position.set(x,y,z);
+};
+
+WIDGET3D.Basic.prototype.setPositionX = function(x){
+  this.mesh_.position.setX(x);
+};
+
+WIDGET3D.Basic.prototype.setPositionY = function(y){
+  this.mesh_.position.setY(y);
+};
+
+WIDGET3D.Basic.prototype.setPositionZ = function(z){
+  this.mesh_.position.setZ(z);
+};
+
+WIDGET3D.Basic.prototype.getRotation = function(){
+  
+  if(this.mehs_.useQuaternion){
+    this.mesh_.rotation.setEulerFromQuaternion(this.mesh_.quaternion);
+  }
+  
+  return this.mesh_.rotation;
+};
+
+WIDGET3D.Basic.prototype.getRotationX = function(){
+  if(this.mehs_.useQuaternion){
+    this.mesh_.rotation.setEulerFromQuaternion(this.mesh_.quaternion);
+  }
+  
+  return this.mesh_.rotation.x;
+};
+
+WIDGET3D.Basic.prototype.getRotationY = function(){
+  if(this.mehs_.useQuaternion){
+    this.mesh_.rotation.setEulerFromQuaternion(this.mesh_.quaternion);
+  }
+  return this.mesh_.rotation.y;
+};
+
+WIDGET3D.Basic.prototype.getRotationZ = function(){
+  if(this.mehs_.useQuaternion){
+    this.mesh_.rotation.setEulerFromQuaternion(this.mesh_.quaternion);
+  }
+  return this.mesh_.rotation.z;
+};
+
+WIDGET3D.Basic.prototype.setRotation = function(rotX, rotY, rotZ){
+  if(this.mesh_.useQuaternion){
+    this.mesh_.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.mesh_.eulerOrder);
+  }
+  this.mesh_.rotation.set(rotX, rotY, rotZ);
+};
+
+WIDGET3D.Basic.prototype.setRotationX = function(rotX){
+  if(this.mesh_.useQuaternion){
+    var rotY = this.getRotationY();
+    var rotZ = this.getRotationZ();
+    this.mesh_.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.mesh_.eulerOrder);
+  }
+  this.mesh_.rotation.setX(rotX);
+};
+
+WIDGET3D.Basic.prototype.setRotationY = function(rotY){
+  if(this.mesh_.useQuaternion){
+    var rotX = this.getRotationX();
+    var rotZ = this.getRotationZ();
+    this.mesh_.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.mesh_.eulerOrder);
+  }
+  this.mesh_.rotation.setY(rotY);
+};
+
+WIDGET3D.Basic.prototype.setRotationZ = function(rotZ){
+  if(this.mesh_.useQuaternion){
+    var rotX = this.getRotationX();
+    var rotY = this.getRotationY();
+    this.mesh_.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.mesh_.eulerOrder);
+  }
+  this.mesh_.rotation.setZ(rotZ);
+};
+
+
+//Object 3D actions
+WIDGET3D.Basic.prototype.useQuaternion = function(){
+  this.mesh_.useQuaternion = true;
+};
+
+WIDGET3D.Basic.prototype.setEulerOrder = function(order){
+  this.mesh_.eulerOrder = order;
+};
+
+WIDGET3D.Basic.prototype.applyMatrix = function(matrix){
+  this.mesh_.applyMatrix(matrix);
+}
+
+WIDGET3D.Basic.prototype.rotateOnAxis = function(axis, angle){
+  this.mesh_.rotateOnAxis(axis, angle);
+};
+
+WIDGET3D.Basic.prototype.translateOnAxis = function(axis, distance){
+  this.mesh_.translateOnAxis(axis, distance);
+};
+
+WIDGET3D.Basic.prototype.translateX = function(distance){
+  this.mesh_.translateX(distance);
+};
+
+WIDGET3D.Basic.prototype.translateY = function(distance){
+  this.mesh_.translateY(distance);
+};
+
+WIDGET3D.Basic.prototype.translateZ = function(distance){
+  this.mesh_.translateZ(distance);
+};
+
+WIDGET3D.Basic.prototype.localToWorld = function(){
+  return (this.mesh_.localToWorld());
+};
+
+WIDGET3D.Basic.prototype.worldToLocal = function(){
+  return (this.mesh_.worldToLocal());
+};
+
+WIDGET3D.Basic.prototype.lookAt = function(vector){
+  this.mesh_.lookAt(vector);
+};
+
+WIDGET3D.Basic.prototype.updateMatrix = function(){
+  this.mesh_.updateMatrix();
+};
+
+WIDGET3D.Basic.prototype.updateMatrixWorld = function(){
+  this.mesh_.updateMatrixWorld();
+};
+
+//Geometry properties
+
+WIDGET3D.Basic.prototype.computeBoundingBox = function(){
+  this.mesh_.geometry.computeBoundingBox();
+  return this.getBoundingBox();
+};
+
+WIDGET3D.Basic.prototype.getBoundingBox = function(){
+  return this.mesh_.geometry.boundingBox;
+};
+
+WIDGET3D.Basic.prototype.computeBoundingSphere = function(){
+  this.mesh_.geometry.computeBoundingSphere();
+  return this.getBoundingSphere();
+};
+
+WIDGET3D.Basic.prototype.getBoundingSphere = function(){
+  return this.mesh_.geometry.boundingSphere;
+};
+
+//---------------------------------------------
+// GUI OBJECT: GROUP EXTENSION FOR THREE.JS
+//---------------------------------------------
+//
+//
+
+//Vector3 basic operations
+WIDGET3D.Group.prototype.getPosition = function(){
+  return this.container_.position;
+};
+
+WIDGET3D.Group.prototype.getPositionX = function(){
+  return this.container_.position.x;
+};
+
+WIDGET3D.Group.prototype.getPositionY = function(){
+  return this.container_.position.y;
+};
+
+WIDGET3D.Group.prototype.getPositionZ = function(){
+  return this.container_.position.z;
+};
+
+WIDGET3D.Group.prototype.setPosition = function(x, y, z){
+  
+  this.container_.position.set(x,y,z);
+};
+
+WIDGET3D.Group.prototype.setPositionX = function(x){
+  this.container_.position.setX(x);
+};
+
+WIDGET3D.Group.prototype.setPositionY = function(y){
+  this.container_.position.setY(y);
+};
+
+WIDGET3D.Group.prototype.setPositionZ = function(z){
+  this.container_.position.setZ(z);
+};
+
+WIDGET3D.Group.prototype.getRotation = function(){
+  if(this.container_.useQuaternion){
+    this.container_.rotation.setEulerFromQuaternion(this.container_.quaternion);
+  }
+  return this.container_.rotation;
+};
+
+WIDGET3D.Group.prototype.getRotationX = function(){
+  if(this.container_.useQuaternion){
+    this.container_.rotation.setEulerFromQuaternion(this.container_.quaternion);
+  }
+  return this.container_.rotation.x;
+};
+
+WIDGET3D.Group.prototype.getRotationY = function(){
+  if(this.container_.useQuaternion){
+    this.container_.rotation.setEulerFromQuaternion(this.container_.quaternion);
+  }
+  return this.container_.rotation.y;
+};
+
+WIDGET3D.Group.prototype.getRotation.z = function(){
+  if(this.container_.useQuaternion){
+    this.container_.rotation.setEulerFromQuaternion(this.container_.quaternion);
+  }
+  return this.container_.rotation.z;
+};
+
+WIDGET3D.Group.prototype.setRotation = function(rotX, rotY, rotZ){
+
+  if(this.container_.useQuaternion){
+    this.container_.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.container_.eulerOrder);
+  }
+  
+  this.container_.rotation.set(rotX, rotY, rotZ);
+};
+
+WIDGET3D.Group.prototype.setRotationX = function(rotX){
+  if(this.container_.useQuaternion){
+    var rotY = this.getRotationY();
+    var rotZ = this.getRotationZ();
+    this.container_.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.container_.eulerOrder);
+  }
+  this.container_.rotation.setX(rotX);
+};
+
+WIDGET3D.Group.prototype.setRotationY = function(rotY){
+  if(this.container_.useQuaternion){
+    var rotX = this.getRotationX();
+    var rotZ = this.getRotationZ();
+    this.container_.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.container_.eulerOrder);
+  }
+  this.container_.rotation.setY(rotY);
+};
+
+WIDGET3D.Group.prototype.setRotationZ = function(rotZ){
+  if(this.container_.useQuaternion){
+    var rotX = this.getRotationX();
+    var rotY = this.getRotationY();
+    this.container_.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.container_.eulerOrder);
+  }
+  this.container_.rotation.setZ(rotZ);
+};
+
+
+//Object 3D actions
+
+WIDGET3D.Group.prototype.useQuaternion = function(){
+  this.container_.useQuaternion = true;
+};
+
+WIDGET3D.Group.prototype.setEulerOrder = function(order){
+  this.container_.eulerOrder = order;
+};
+
+WIDGET3D.Group.prototype.applyMatrix = function(matrix){
+  this.container_.applyMatrix(matrix);
+}
+
+WIDGET3D.Group.prototype.rotateOnAxis = function(axis, angle){
+  this.container_.rotateOnAxis(axis, angle);
+};
+
+WIDGET3D.Group.prototype.translateOnAxis = function(axis, distance){
+  this.container_.translateOnAxis(axis, distance);
+};
+
+WIDGET3D.Group.prototype.translateX = function(distance){
+  this.container_.translateX(distance);
+};
+
+WIDGET3D.Group.prototype.translateY = function(distance){
+  this.container_.translateY(distance);
+};
+
+WIDGET3D.Group.prototype.translateZ = function(distance){
+  this.container_.translateZ(distance);
+};
+
+WIDGET3D.Group.prototype.localToWorld = function(){
+  return (this.container_.localToWorld());
+};
+
+WIDGET3D.Group.prototype.worldToLocal = function(){
+  return (this.container_.worldToLocal());
+};
+
+WIDGET3D.Group.prototype.lookAt = function(vector){
+  this.container_.lookAt(vector);
+};
+
+WIDGET3D.Group.prototype.updateMatrix = function(){
+  this.container_.updateMatrix();
+};
+
+WIDGET3D.Group.prototype.updateMatrixWorld = function(){
+  this.container_.updateMatrixWorld();
+};
+
+
+//Bounding boxes and spheres
+WIDGET3D.Group.prototype.computeBoundingBox = function(){
+
+  var sphere = this.getBoundingSphere();
+  if(sphere == undefined){
+    sphere = this.computeBoundingSphere();
+  }
+  this.boundingBox = sphere.getBoundingBox();
+  
+  return this.boundingBox;
+};
+
+WIDGET3D.Group.prototype.getBoundingBox = function(){
+  return this.boundingBox;
+};
+
+WIDGET3D.Group.prototype.computeBoundingSphere = function(){
+  var center = this.getPosition();
+  
+  var radius = 0;
+  
+  for(var i = 0; i < this.children_.length; ++i){
+  
+    var sphere = this.children_[i].computeBoundingSphere();
+    
+    var distance = center.distanceTo(sphere.center) + sphere.radius;
+    
+    if(i == 0){
+      radius = distance;
+    }
+    
+    if(distance > radius){
+      radius = distance;
+    }
+  }
+  
+  this.boundingSphere = new THREE.Sphere(center, radius);
+  
+  return this.boundingSphere;
+};
+
+WIDGET3D.Group.prototype.getBoundingSphere = function(){
+  return this.boundingSphere;
+};
+
+
 
 //---------------------------------------------------
 //
@@ -2613,33 +2945,7 @@ WIDGET3D.SelectDialog.prototype.remove = function(){
   WIDGET3D.Group.prototype.remove.call( this );
 };
 
-//---------------------------------------------------
-//
-// STYLED WIDGETS THAT CAN BE USED WITH THREEJS PLUGIN
-//
-//---------------------------------------------------
-
-//---------------------------------------------------
-// CAMERA GROUP
-//
-// components that needs to follow camera are added to
-// this group and the coordinates given to added component
-// are offset from the camera
-//---------------------------------------------------
-//
-// PARAMETERS:  camera : three.js camera object
-//
-WIDGET3D.CameraGroup = function(parameters){
-  
-  WIDGET3D.Group.call( this );
-  
-  var parameters = parameters || {};
-  
-  this.camera_ = parameters.camera;
-  this.container_.add(this.camera_);
-};
-
-WIDGET3D.CameraGroup.prototype = WIDGET3D.Group.prototype.inheritance();// DRAG CONTROLS for WIDGET3D three.js version
+// DRAG CONTROLS for WIDGET3D three.js version
 //
 //Parameters: component: WIDGET3D.Basic typed object to which the controlls are attached
 //                       COMPONENT MUST BE GIVEN!
@@ -2700,8 +3006,8 @@ WIDGET3D.DragControls = function(parameters){
       
       that.plane_.position.copy(that.component_.parent_.container_.localToWorld(that.component_.getPosition().clone()));
 
-      WIDGET3D.getMainWindow().removeEventListener("mousemove", that.mousemoveHandler);
-      WIDGET3D.getMainWindow().removeEventListener("mouseup", that.mouseupHandler);
+      WIDGET3D.getApplication().removeEventListener("mousemove", that.mousemoveHandler);
+      WIDGET3D.getApplication().removeEventListener("mouseup", that.mouseupHandler);
     }
   };
   
@@ -2725,8 +3031,8 @@ WIDGET3D.DragControls = function(parameters){
         }
         
         
-        WIDGET3D.getMainWindow().addEventListener("mousemove", that.mousemoveHandler, false);
-        WIDGET3D.getMainWindow().addEventListener("mouseup", that.mouseupHandler, false);
+        WIDGET3D.getApplication().addEventListener("mousemove", that.mousemoveHandler, false);
+        WIDGET3D.getApplication().addEventListener("mouseup", that.mouseupHandler, false);
         
         that.component_.focus();
         that.drag_ = true;

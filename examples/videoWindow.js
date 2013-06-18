@@ -19,17 +19,17 @@ var init = function(){
   // THREEJS_WIDGET3D is a adapter that provides nesesary plugin for widget3D
   // widget3D doesn't use any 3D-engine in default
   // THREEJS_WIDGET3D defines the necessary callbacks for widget3D using three.js
-  // When usin three.js and widget3D, initializing widget3D can be done by WIDGET3D.createMainWindow_THREE.
+  // When usin three.js and widget3D, initializing widget3D can be done by WIDGET3D.THREE_Application.
   
-  var mainWindow = WIDGET3D.createMainWindow_THREE({
+  var mainWindow = WIDGET3D.THREE_Application({
     antialias : true,
     width : WIDTH,
     height : HEIGHT,
     clearColor : 0xf9f9f9
   });
   
-  var camera = WIDGET3D.getCameraGroup();
-  camera.setZ(that.DISTANCE);
+  var camera = WIDGET3D.getCamera();
+  camera.position.setZ(that.DISTANCE);
   
   //--------------------------------------------
   // TITLED WINDOW WHERE WE SHOW THE VIDEO
@@ -49,7 +49,8 @@ var init = function(){
     height : 204,
     title : "video",
     texture : texture,
-    defaultControls : true
+    defaultControls : true,
+    debug : true
   });
   
   var rollControls = new WIDGET3D.RollControls({component : videoWindow, mouseButton : 0, shiftKey : true});
@@ -65,7 +66,9 @@ var init = function(){
   var pauseFunction = createPauseFunction(video);
   videoWindow.closeButton_.addEventListener("click", pauseFunction);
   
-  mainWindow.addChild(videoWindow);
+  WIDGET3D.getCameraGroup().addChild(videoWindow);
+  
+  //mainWindow.addChild(videoWindow);
   
   var onResize = function(){
     WIDTH = window.innerWidth;

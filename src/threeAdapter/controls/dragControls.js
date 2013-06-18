@@ -59,8 +59,8 @@ WIDGET3D.DragControls = function(parameters){
       
       that.plane_.position.copy(that.component_.parent_.container_.localToWorld(that.component_.getPosition().clone()));
 
-      WIDGET3D.getMainWindow().removeEventListener("mousemove", that.mousemoveHandler);
-      WIDGET3D.getMainWindow().removeEventListener("mouseup", that.mouseupHandler);
+      WIDGET3D.getApplication().removeEventListener("mousemove", that.mousemoveHandler);
+      WIDGET3D.getApplication().removeEventListener("mouseup", that.mouseupHandler);
     }
   };
   
@@ -84,8 +84,8 @@ WIDGET3D.DragControls = function(parameters){
         }
         
         
-        WIDGET3D.getMainWindow().addEventListener("mousemove", that.mousemoveHandler, false);
-        WIDGET3D.getMainWindow().addEventListener("mouseup", that.mouseupHandler, false);
+        WIDGET3D.getApplication().addEventListener("mousemove", that.mousemoveHandler, false);
+        WIDGET3D.getApplication().addEventListener("mouseup", that.mouseupHandler, false);
         
         that.component_.focus();
         that.drag_ = true;

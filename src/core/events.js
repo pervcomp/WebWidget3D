@@ -65,7 +65,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
     
     var found = _that_.collisions_.callback(domEvent, _that_.collisions_.args);
     var name = domEvent.type;
-    var mainWindow = WIDGET3D.getMainWindow();
+    var mainWindow = WIDGET3D.getApplication();
     
     var bubbles = true;
     
@@ -112,7 +112,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
   _that_.keyboardEvent = function(domEvent){
     
     var name = domEvent.type;
-    var mainWindow = WIDGET3D.getMainWindow();
+    var mainWindow = WIDGET3D.getApplication();
     
     //Focused widgets get the event
     for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
@@ -149,7 +149,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
     
     if(!id){
       
-      var mainWindow = WIDGET3D.getMainWindow();
+      var mainWindow = WIDGET3D.getApplication();
       
       for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
         

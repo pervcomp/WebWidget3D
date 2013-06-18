@@ -7,12 +7,10 @@
 //---------------------------------------------------
 // CAMERA GROUP
 //
-// components that needs to follow camera are added to
-// this group and the coordinates given to added component
-// are offset from the camera
+// components that needs to follow camera are added to this group
 //---------------------------------------------------
 //
-// PARAMETERS:  camera : three.js camera object
+// PARAMETERS:  camera : 3D engine specific camera object
 //
 WIDGET3D.CameraGroup = function(parameters){
   

@@ -46,7 +46,7 @@ WIDGET3D.Basic.prototype.setParent = function(widget){
 //meshes is array of meshes WIDGET3D are part of object
 WIDGET3D.Basic.prototype.setMesh = function(mesh){
 
-  var mainWindow = WIDGET3D.getMainWindow();
+  var mainWindow = WIDGET3D.getApplication();
   
   if(this.mesh_ && this.parent_){
     //removes the old mesh from the scene
@@ -104,56 +104,13 @@ WIDGET3D.Basic.prototype.remove = function(){
   //removing event listeners
   this.removeAllListeners();
   //removing mesh
-  WIDGET3D.getMainWindow().removeMesh(this.mesh_);
+  WIDGET3D.getApplication().removeMesh(this.mesh_);
   //removing object
   this.parent_.removeFromObjects(this);
   
   WIDGET3D.removeObject(this.id_);
 };
 
-//getters and setters for location and rotation
-//TODO: MOVE TO ADAPTER SIDE
-WIDGET3D.Basic.prototype.getPosition = function(){
-  return this.mesh_.position;
-};
-
-WIDGET3D.Basic.prototype.setPosition = function(x, y, z){
-  
-  this.mesh_.position.set(x,y,z);
-};
-
-WIDGET3D.Basic.prototype.setX = function(x){
-  this.mesh_.position.setX(x);
-};
-
-WIDGET3D.Basic.prototype.setY = function(y){
-  this.mesh_.position.setY(y);
-};
-
-WIDGET3D.Basic.prototype.setZ = function(z){
-  this.mesh_.position.setZ(z);
-};
-
-WIDGET3D.Basic.prototype.getRotation = function(){
-  return this.mesh_.rotation;
-};
-
-WIDGET3D.Basic.prototype.setRotation = function(rotX, rotY, rotZ){
-  
-  this.mesh_.rotation.set(rotX, rotY, rotZ);
-};
-
-WIDGET3D.Basic.prototype.setRotationX = function(rotX){
-  this.mesh_.rotation.setX(rotX);
-};
-
-WIDGET3D.Basic.prototype.setRotationY = function(rotY){
-  this.mesh_.rotation.setY(rotY);
-};
-
-WIDGET3D.Basic.prototype.setRotationZ = function(rotZ){
-  this.mesh_.rotation.setZ(rotZ);
-};
 
 //--------------------------------------------------
 // PROTOTYPAL INHERITANCE FUNCTION FOR BASIC OBJECT

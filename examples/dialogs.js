@@ -13,16 +13,16 @@ var init = function(){
   // THREEJS_WIDGET3D is a adapter that provides nesesary plugin for widget3D
   // widget3D doesn't use any 3D-engine in default
   // THREEJS_WIDGET3D defines the necessary callbacks for widget3D using three.js
-  // When usin three.js and widget3D, initializing widget3D can be done by WIDGET3D.createMainWindow_THREE.
+  // When usin three.js and widget3D, initializing widget3D can be done by WIDGET3D.THREE_Application.
   
-  var mainWindow = WIDGET3D.createMainWindow_THREE({
+  var mainWindow = WIDGET3D.THREE_Application({
     antialias : true,
     width : WIDTH,
     height : HEIGHT,
     clearColor : 0xf9f9f9
   });
   
-  WIDGET3D.getCameraGroup().setZ(1000);
+  WIDGET3D.getCameraGroup().setPositionZ(1000);
   
   //--------------------------------------------
   // Example dialog
@@ -35,7 +35,7 @@ var init = function(){
     {description : "name"}, {description : "name"}, {description : "name"}];
   var dialog = new WIDGET3D.Dialog({width: 600, height : 600, fields: fields, hasCancel : true});
 
-  dialog.setX(-300);
+  dialog.setPositionX(-300);
   dialog.setRotationX(-Math.PI/10);
   var rollControls = new WIDGET3D.RollControls({component : dialog, preventClick : true});
   
@@ -55,10 +55,13 @@ var init = function(){
     height : 600,
     depth : 30});
   
-  select.setX(300);
+  select.setPositionX(300);
   select.setRotationY(Math.PI/10);
   
   var rollControls2 = new WIDGET3D.RollControls({component : select});
+  
+  console.log(select.computeBoundingSphere());
+  console.log(select.computeBoundingBox());
   
   mainWindow.addChild(select);
   

@@ -33,7 +33,7 @@ WIDGET3D.RollControls = function(parameters){
       
       that.rotate_ = false;
       
-      var mainWindow = WIDGET3D.getMainWindow();
+      var mainWindow = WIDGET3D.getApplication();
       mainWindow.removeEventListener("mousemove", that.mousemoveHandler);
       mainWindow.removeEventListener("mouseup", that.mouseupHandler);
     }
@@ -54,7 +54,7 @@ WIDGET3D.RollControls = function(parameters){
         that.rotationOnMouseDownY_ = that.modelRotationY_;
         that.rotationOnMouseDownX_ = that.modelRotationX_;
         
-        var mainWindow = WIDGET3D.getMainWindow();
+        var mainWindow = WIDGET3D.getApplication();
         mainWindow.addEventListener("mousemove", that.mousemoveHandler, false);
         mainWindow.addEventListener("mouseup", that.mouseupHandler, false);
       }

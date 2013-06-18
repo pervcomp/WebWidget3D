@@ -6,7 +6,9 @@
 //---------------------------------------------
 WIDGET3D.Group = function(){
   WIDGET3D.Basic.call( this );
-  WIDGET3D.WindowBase.call( this );
+  WIDGET3D.GroupBase.call( this );
+  
+  this.isVisible_;
 };
 
 
@@ -17,11 +19,11 @@ WIDGET3D.Group.prototype = WIDGET3D.Basic.prototype.inheritance();
 //inheriting some methods from WindowInterface
 
 // adds new child to Group
-WIDGET3D.Group.prototype.addChild= WIDGET3D.WindowBase.prototype.addChild;
+WIDGET3D.Group.prototype.addChild= WIDGET3D.GroupBase.prototype.addChild;
 // hides unfocused objects in Group
-WIDGET3D.Group.prototype.hideNotFocused = WIDGET3D.WindowBase.prototype.hideNotFocused;
+WIDGET3D.Group.prototype.hideNotFocused = WIDGET3D.GroupBase.prototype.hideNotFocused;
 // removes object from Group
-WIDGET3D.Group.prototype.removeFromObjects = WIDGET3D.WindowBase.prototype.removeFromObjects;
+WIDGET3D.Group.prototype.removeFromObjects = WIDGET3D.GroupBase.prototype.removeFromObjects;
 
 //-----------------------------------------------------------------------------------------
 WIDGET3D.Group.prototype.type_ = WIDGET3D.ElementType.GROUP;
@@ -50,7 +52,7 @@ WIDGET3D.Group.prototype.setParent = function(widget){
 
 //sets mesh for Group
 WIDGET3D.Group.prototype.setMesh = function(mesh){
-  var mainWindow =  WIDGET3D.getMainWindow();
+  var mainWindow =  WIDGET3D.getApplication();
   
   if(this.mesh_){
     //removes the old mesh from the scene
@@ -122,7 +124,7 @@ WIDGET3D.Group.prototype.remove = function(){
   
   //If Group has a mesh, it has to be removed allso
   if(this.mesh_){
-    WIDGET3D.getMainWindow().removeMesh(this.mesh_);
+    WIDGET3D.getApplication().removeMesh(this.mesh_);
   }
   //container has to be removed from parent's container
   this.parent_.container_.remove(this.container_);
@@ -131,52 +133,6 @@ WIDGET3D.Group.prototype.remove = function(){
   
   WIDGET3D.removeObject(this.id_);
 };
-
-//setters and getters for location and rotation
-
-//TODO: MOVE TO THE ADAPTER SIDE
-WIDGET3D.Group.prototype.getPosition = function(){
-  return this.container_.position;
-};
-
-WIDGET3D.Group.prototype.setPosition = function(x, y, z){
-  
-  this.container_.position.set(x,y,z);
-};
-
-WIDGET3D.Group.prototype.setX = function(x){
-  this.container_.position.setX(x);
-};
-
-WIDGET3D.Group.prototype.setY = function(y){
-  this.container_.position.setY(y);
-};
-
-WIDGET3D.Group.prototype.setZ = function(z){
-  this.container_.position.setZ(z);
-};
-
-WIDGET3D.Group.prototype.getRotation = function(){
-  return this.container_.rotation;
-};
-
-WIDGET3D.Group.prototype.setRotation = function(rotX, rotY, rotZ){
-  
-  this.container_.rotation.set(rotX, rotY, rotZ);
-};
-
-WIDGET3D.Group.prototype.setRotationX = function(rotX){
-  this.container_.rotation.setX(rotX);
-};
-
-WIDGET3D.Group.prototype.setRotationY = function(rotY){
-  this.container_.rotation.setY(rotY);
-};
-
-WIDGET3D.Group.prototype.setRotationZ = function(rotZ){
-  this.container_.rotation.setZ(rotZ);
-};
-
  
 //--------------------------------------------------
 // PROTOTYPAL INHERITANCE FUNCTION FOR Group OBJECT

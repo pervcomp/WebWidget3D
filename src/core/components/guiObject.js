@@ -115,7 +115,7 @@ WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, bubbles
     WIDGET3D.getEvents().enableEvent(name);
   }
   if(!this.events_.checkEvent(name)){
-    var index = WIDGET3D.getMainWindow().childEvents_.addObject(name, this);
+    var index = WIDGET3D.getApplication().childEvents_.addObject(name, this);
   }
   else{
     var index = this.events_[name.toString()][0].index;
@@ -138,7 +138,7 @@ WIDGET3D.GuiObject.prototype.removeEventListener = function(name, callback){
     return false;
   }
   if(this.events_[name.toString()] === false){
-    var mainWindow = WIDGET3D.getMainWindow();
+    var mainWindow = WIDGET3D.getApplication();
     
     mainWindow.childEvents_[name.toString()].splice(index, 1);
     
@@ -161,7 +161,7 @@ WIDGET3D.GuiObject.prototype.removeEventListeners = function(name){
     return false;
   }
   else{
-    var mainWindow = WIDGET3D.getMainWindow();
+    var mainWindow = WIDGET3D.getApplication();
     
     mainWindow.childEvents_[name.toString()].splice(index, 1);
     
@@ -180,7 +180,7 @@ WIDGET3D.GuiObject.prototype.removeEventListeners = function(name){
 WIDGET3D.GuiObject.prototype.removeAllListeners = function(){
   var listeners = this.events_.remove();
   
-  var mainWindow = WIDGET3D.getMainWindow();
+  var mainWindow = WIDGET3D.getApplication();
   for(var i = 0; i < listeners.length; ++i){
     var name = listeners[i].name;
     var index = listeners[i].index;
@@ -202,7 +202,7 @@ WIDGET3D.GuiObject.prototype.setNewEventIndex = function(name, index){
   for(var i = 0; i < this.events_[name.toString()].length; ++i){
     this.events_[name.toString()][i].index = index;
   }
-  WIDGET3D.getMainWindow().childEvents_[name.toString()][index] = this;
+  WIDGET3D.getApplication().childEvents_[name.toString()][index] = this;
 }
 
 WIDGET3D.GuiObject.prototype.addUpdateCallback = function(callback, args){

@@ -2259,6 +2259,175 @@ WIDGET3D.GridIcon.prototype.setToPlace = function(){
 
 //---------------------------------------------------
 //
+// STYLED WIDGETS THAT CAN BE USED WITH THREEJS PLUGIN
+//
+//---------------------------------------------------
+
+//---------------------------------------------------
+// TITLED Group
+//---------------------------------------------------
+//
+// PARAMETERS:  title :           title string
+//              width :           widht in world coordinate space
+//              height:           height in world coordinate space
+//              defaultControls : boolean that tells if the default mouse controls are used
+//              *color:           hexadecimal color for Group
+//              *texture :        three.js texture object
+//              *material :       three.js material object
+//              * if material is given texture and color doens't apply
+//
+//              All parameters are optional
+//
+WIDGET3D.TitledWindow = function(parameters){
+  
+  WIDGET3D.Group.call( this );
+  
+  var that = this;
+  
+  var parameters = parameters || {};
+  
+  this.width_ = parameters.width !== undefined ? parameters.width : 2000;
+  this.height_ = parameters.height !== undefined ? parameters.height : 2000;
+  
+  var title = parameters.title !== undefined ? parameters.title : "title";
+  
+  var color = parameters.color !== undefined ? parameters.color : 0x808080;
+  var texture = parameters.texture;
+  var material = parameters.material !== undefined ? parameters.material :  new THREE.MeshBasicMaterial({color : color, map : texture, side : THREE.DoubleSide});
+  
+  
+  //---------------------------------------------------
+  //TITLEBAR, ACTS AS THE BODY FOR THE WINDOW
+  //---------------------------------------------------
+  this.title_ = new WIDGET3D.Basic();
+  var mainMesh = this.createTitle(title, material.side);
+  this.title_.setMesh(mainMesh);
+  this.add(this.title_);
+  
+  //---------------------------------------------------
+  //CONTENT
+  //---------------------------------------------------
+  this.content_ =  new WIDGET3D.Basic();
+  var mesh =  new THREE.Mesh( new THREE.PlaneGeometry( this.width_, this.height_ ), material);
+  this.content_.setMesh(mesh);
+  this.add(this.content_);
+  
+  
+  //---------------------------------------------------
+  //CLOSE BUTTON
+  //---------------------------------------------------
+  this.closeButton_ = new WIDGET3D.Basic();
+  
+  var buttonMesh = new THREE.Mesh( new THREE.PlaneGeometry( this.width_/10.0, this.height_/10.0 ),
+    new THREE.MeshBasicMaterial( { color: 0xAA0000, side : material.side} ) );
+  
+  this.closeButton_.setMesh(buttonMesh);
+  this.closeButton_.setPosition(((this.width_/2.0)-(this.width_/20.0)), ((this.height_/2.0)+(this.height_/20.0)), 0);
+  
+  this.add(this.closeButton_);
+  
+  var createCloseFunction = function(p){
+    return function(){
+      p.remove();
+    };
+  }
+  this.closeButton_.addEventListener("click", createCloseFunction(this));
+  
+  //---------------------------------------------------
+  //CONTROLS
+  //---------------------------------------------------
+  this.defaultControls_ = parameters.defaultControls !== undefined ? parameters.defaultControls : false;
+  
+  if(this.defaultControls_){
+    var button = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
+    var shift = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
+    var attached = parameters.attached !== undefined ? parameters.attached : false;
+    var debug = parameters.debug !== undefined ? parameters.debug : false;
+    
+    this.controls_ = new WIDGET3D.DragControls({
+      debug: debug,
+      component : this,
+      mouseButton : button,
+      shiftKey : shift,
+      width : (this.width_*2),
+      height : ((this.height_+this.title_.height_)*2)
+    });
+  }
+};
+
+WIDGET3D.TitledWindow.prototype = WIDGET3D.Group.prototype.inheritance();
+
+//sets titlebar text
+WIDGET3D.TitledWindow.prototype.createTitle = function(title, side){
+
+  this.textureCanvas_ = document.createElement('canvas');
+  this.textureCanvas_.width = 512;
+  this.textureCanvas_.height = 128;
+  this.textureCanvas_.style.display = "none";
+  
+  document.body.appendChild(this.textureCanvas_);
+  
+  this.setTitle(title);
+  
+  var texture = new THREE.Texture(this.textureCanvas_);
+  texture.needsUpdate = true;
+  
+  var material = new THREE.MeshBasicMaterial({ map: texture, side : side });
+  
+  this.title_.width_ = this.width_ - this.width_/10.0;
+  this.title_.height_ = this.height_/10.0;
+  
+  var titleMesh = new THREE.Mesh( new THREE.PlaneGeometry(this.title_.width_, this.title_.height_), material);
+  titleMesh.position.y = ((this.height_/2.0)+(this.height_/20.0));
+  titleMesh.position.x =(((this.width_ - this.width_/10.0)/2.0) - (this.width_/2.0));
+  
+  return titleMesh;
+};
+
+WIDGET3D.TitledWindow.prototype.setTitle = function(title){
+
+  var titleContext = this.textureCanvas_.getContext('2d');
+
+  titleContext.fillStyle = "#B3B3B3";
+  titleContext.fillRect(0, 0, this.textureCanvas_.width, this.textureCanvas_.height);
+  
+  titleContext.fillStyle = "#000000";
+  titleContext.font = "bold 60px Courier New";
+  titleContext.align = "center";
+  titleContext.textBaseline = "middle";
+  titleContext.fillText(title, 10, this.textureCanvas_.height/2);
+};
+
+WIDGET3D.TitledWindow.prototype.updateTitle = function(title){
+
+  this.setTitle(title);
+  this.title_.container_.material.map.needsUpdate = true;
+}
+
+
+WIDGET3D.TitledWindow.prototype.remove = function(){
+  
+  //hiding the window from scene
+  this.hide();
+  
+  //removing texturecanvases from DOM
+  var canvas = this.textureCanvas_;
+  document.body.removeChild(canvas);
+  
+  if(this.defaultControls_){
+    this.controls_.remove();
+  }
+  
+  WIDGET3D.Group.prototype.remove.call( this );
+};
+
+WIDGET3D.TitledWindow.prototype.getContent = function(){
+  return this.content_;
+};
+
+
+//---------------------------------------------------
+//
 // 3D DIALOG
 //
 //---------------------------------------------------
@@ -2601,6 +2770,245 @@ WIDGET3D.Dialog.prototype.remove = function(){
   }
   //deleting the background canvas
   document.body.removeChild(this.canvas_);
+  
+  WIDGET3D.Group.prototype.remove.call( this );
+};
+
+//---------------------------------------------------
+//
+// 3D SELECT DIALOG
+//
+//---------------------------------------------------
+//
+// PARAMETERS:  width : width in world coordinates
+//              height : height in world coordinates
+//              color : hexadecimal string
+//              text : string, title text
+//              choices = array of choises 
+//                {string: choice name displayed, 
+//                 onclick : function}
+//
+//
+// TODO: ENABLE DIFFERENT LAYOUT
+WIDGET3D.SelectDialog = function(parameters){
+  
+  WIDGET3D.Group.call( this );
+  
+  var parameters = parameters || {};
+
+  this.width_ = parameters.width !== undefined ? parameters.width : 1000;
+  this.height_ = parameters.height !== undefined ? parameters.height : 1000;
+  this.depth_ = parameters.depth !== undefined ? parameters.depth : 10;
+  this.color_ = parameters.color !== undefined ? parameters.color : 0xC0D0D0;
+  this.opacity_ = parameters.opacity !== undefined ? parameters.opacity : 0.9;
+  this.choices_ = parameters.choices !== undefined ? parameters.choices : [];
+  this.hasCancel_ = parameters.hasCancel !== undefined ? parameters.hasCancel : false;
+  this.text_ = parameters.text !== undefined ? parameters.text : false;
+  
+  if(this.hasCancel_){
+    this.cancelText_ = parameters.cancelText !== undefined ? parameters.cancelText : "Cancel";
+    
+    var createCancelFunction = function(c){
+      return function(){
+        c.remove()
+      }
+    }
+    var handler = createCancelFunction(this);
+    
+    this.choices_.push({string: this.cancelText_, onclick : {handler : handler}});
+  }
+  
+  if(this.text_){
+    this.createText();
+  }
+  else{
+    this.choiceHeight_ = this.height_/((this.choices_.length)*1.2);
+  }
+  
+  //CREATING CHOICEBUTTONS
+  this.choiceCanvases_ = [];
+  this.createChoises();
+};
+
+WIDGET3D.SelectDialog.prototype = WIDGET3D.Group.prototype.inheritance();
+
+WIDGET3D.SelectDialog.prototype.createText = function(){
+  this.textCanvas_ = document.createElement('canvas');
+  this.textCanvas_.width = 512;
+  this.textCanvas_.height = 128;
+  this.textCanvas_.style.display = "none";
+  document.body.appendChild(this.textCanvas_);
+  var context = this.textCanvas_.getContext('2d');
+  
+  this.choiceHeight_ = this.height_/((this.choices_.length+1)*1.2);
+  var mesh = this.createTitle(this.text_, context, this.textCanvas_);
+  mesh.position.y = this.height_*0.5 - this.choiceHeight_*0.5;
+  
+  var title = new WIDGET3D.Basic();
+  title.setMesh(mesh);
+  
+  this.add(title);
+  
+  this.addEventListener("click",
+    function(event){
+      event.stopPropagation();
+      event.preventDefault();
+    }, 
+  false);
+}
+
+WIDGET3D.SelectDialog.prototype.createChoises = function(){
+
+  var lastY = 0;
+  
+  for(var i = 0; i < this.choices_.length; ++i){
+    var choice = new WIDGET3D.Basic();
+    var choiceCanvas = document.createElement('canvas');
+    this.choiceCanvases_.push(choiceCanvas);
+    choiceCanvas.width = 512;
+    choiceCanvas.height = 128;
+    choiceCanvas.style.display = "none";
+    document.body.appendChild(choiceCanvas);
+    var choiceContext = choiceCanvas.getContext('2d');
+    
+    var width = this.width_/1.2;
+    var height = this.choiceHeight_;
+    
+    var materials = this.createButtonMaterial(this.choices_[i].string, choiceContext, choiceCanvas);
+    var geometry = new THREE.CubeGeometry(width, height, this.depth_);
+    
+    for (var j = 0; j < geometry.faces.length; j ++ ){
+      var face = geometry.faces[ j ];
+      if(j === 4 || j == 5){
+        face.materialIndex = 1;
+      }
+      else{
+        face.materialIndex = 0;
+      }
+    }
+    geometry.materials = materials;
+    var material = new THREE.MeshFaceMaterial(materials);
+    var mesh = new THREE.Mesh(geometry, material);
+
+    choice.setMesh(mesh);
+    
+    var parentLoc = this.getPosition();
+    var y = 0;
+    if(i == 0){
+      if(this.text_){
+        y = this.height_*0.5 - height*1.7;
+      }
+      else{
+        y = this.height_*0.5 - height*0.5;
+      }
+    }
+    else{
+      y = lastY - 1.2*height;
+    }
+    lastY = y;
+    
+    choice.setPosition(parentLoc.x, y ,parentLoc.z);
+    
+    choice.addEventListener("click", this.choices_[i].onclick.handler, false);
+    choice.menuID_ = i;
+    this.add(choice);
+  }
+};
+
+WIDGET3D.SelectDialog.prototype.createButtonMaterial = function(string, context, canvas){
+
+  context.fillStyle = "#FFFFFF";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  
+  context.fillStyle = "#000000";
+  context.font = "bold 40px Courier New";
+  context.align = "center";
+  context.textBaseline = "middle";
+  var textWidth = context.measureText(string).width;
+  context.fillText(string, canvas.width/2-(textWidth/2), canvas.height/2);
+  
+  var texture = new THREE.Texture(canvas);
+  texture.needsUpdate = true;
+  
+  var materials = new Array();
+  materials.push(new THREE.MeshBasicMaterial({color: this.color_, opacity : this.opacity_}));//side faces
+  materials.push(new THREE.MeshBasicMaterial({map: texture, color: this.color_, opacity : this.opacity_}));//front & back face
+  
+  return materials;
+}
+
+WIDGET3D.SelectDialog.prototype.createTitle = function(string, context, canvas){
+
+  context.fillStyle = "#FFFFFF";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  
+  context.fillStyle = "#000000";
+  context.font = "bold 45px Courier New";
+  context.align = "center";
+  context.textBaseline = "middle";
+  var textWidth = context.measureText(string).width;
+  context.fillText(string, canvas.width/2-(textWidth/2), canvas.height/2);
+  
+  var texture = new THREE.Texture(canvas);
+  texture.needsUpdate = true;
+  
+  var materials = new Array();
+  materials.push(new THREE.MeshBasicMaterial({color: this.color_, opacity : this.opacity_}));//side faces
+  materials.push(new THREE.MeshBasicMaterial({map: texture, color: this.color_, opacity : this.opacity_}));//front & back face
+  
+  var geometry = new THREE.CubeGeometry(this.width_, this.choiceHeight_, this.depth_);
+  
+  for( var i = 0; i < geometry.faces.length; i ++ ){
+    var face = geometry.faces[ i ];
+    if(i === 4 || i === 5){
+      face.materialIndex = 1;
+    }
+    else{
+      face.materialIndex = 0;
+    }
+  }
+  
+  geometry.materials = materials;
+  var material = new THREE.MeshFaceMaterial(materials);
+  var mesh = new THREE.Mesh(geometry, material);
+  
+  return mesh;
+}
+
+WIDGET3D.SelectDialog.prototype.changeChoiceText = function(text, index){
+  var object = false;
+  for(var i = 0; i < this.children_.length; ++i){
+    if(this.children_[i].menuID_ == index){
+      object = this.children_[i];
+      break;
+    }
+  }
+  if(object){
+    var canvas = object.container_.material.map.image;
+    var context = object.container_.material.map.image.getContext('2d');
+    var materials = this.createButtonMaterial(text, context, canvas);
+
+    object.container_.geometry.materials = materials;
+    object.container_.material = new THREE.MeshFaceMaterial(materials);
+    object.container_.needsUpdate = true;
+    return true;
+  }
+  return false;
+}
+
+
+WIDGET3D.SelectDialog.prototype.remove = function(){
+  
+  //removing child canvases from DOM
+  for(var i = 0; i < this.choiceCanvases_.length; ++i){
+    canvas = this.choiceCanvases_[i];
+    document.body.removeChild(canvas);
+  }
+  this.choiceCanvases_ = null;
+  
+  //deleting the background canvas
+  var canvas = this.textCanvas_;
+  document.body.removeChild(canvas);
   
   WIDGET3D.Group.prototype.remove.call( this );
 };

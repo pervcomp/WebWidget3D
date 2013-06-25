@@ -39,7 +39,7 @@ var init = function(){
   dialog.setRotationX(-Math.PI/10);
   var rollControls = new WIDGET3D.RollControls({component : dialog, preventClick : true});
   
-  mainWindow.addChild(dialog);
+  mainWindow.add(dialog);
   
   var choices = [
     {string : "choice1", onclick : {handler : function(){alert("clicked choice1");}}},
@@ -60,10 +60,7 @@ var init = function(){
   
   var rollControls2 = new WIDGET3D.RollControls({component : select});
   
-  console.log(select.computeBoundingSphere());
-  console.log(select.computeBoundingBox());
-  
-  mainWindow.addChild(select);
+  mainWindow.add(select);
   
   var onResize = function(){
     WIDTH = window.innerWidth;

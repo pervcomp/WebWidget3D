@@ -40,9 +40,10 @@ WIDGET3D.TitledWindow = function(parameters){
   //---------------------------------------------------
   //TITLEBAR, ACTS AS THE BODY FOR THE WINDOW
   //---------------------------------------------------
-  this.title_ = {};
+  this.title_ = new WIDGET3D.Basic();
   var mainMesh = this.createTitle(title, material.side);
-  this.setMesh(mainMesh);
+  this.title_.setMesh(mainMesh);
+  this.add(this.title_);
   
   //---------------------------------------------------
   //CONTENT
@@ -50,7 +51,7 @@ WIDGET3D.TitledWindow = function(parameters){
   this.content_ =  new WIDGET3D.Basic();
   var mesh =  new THREE.Mesh( new THREE.PlaneGeometry( this.width_, this.height_ ), material);
   this.content_.setMesh(mesh);
-  this.addChild(this.content_);
+  this.add(this.content_);
   
   
   //---------------------------------------------------
@@ -59,12 +60,12 @@ WIDGET3D.TitledWindow = function(parameters){
   this.closeButton_ = new WIDGET3D.Basic();
   
   var buttonMesh = new THREE.Mesh( new THREE.PlaneGeometry( this.width_/10.0, this.height_/10.0 ),
-    new THREE.MeshBasicMaterial( { color: 0xAA0000, side : this.mesh_.material.side} ) );
+    new THREE.MeshBasicMaterial( { color: 0xAA0000, side : material.side} ) );
   
   this.closeButton_.setMesh(buttonMesh);
   this.closeButton_.setPosition(((this.width_/2.0)-(this.width_/20.0)), ((this.height_/2.0)+(this.height_/20.0)), 0);
   
-  this.addChild(this.closeButton_);
+  this.add(this.closeButton_);
   
   var createCloseFunction = function(p){
     return function(){
@@ -141,7 +142,7 @@ WIDGET3D.TitledWindow.prototype.setTitle = function(title){
 WIDGET3D.TitledWindow.prototype.updateTitle = function(title){
 
   this.setTitle(title);
-  this.mesh_.material.map.needsUpdate = true;
+  this.title_.container_.material.map.needsUpdate = true;
 }
 
 

@@ -50,7 +50,7 @@ var init = function(){
     title : "video",
     texture : texture,
     defaultControls : true,
-    debug : true
+    //debug : true
   });
   
   var rollControls = new WIDGET3D.RollControls({component : videoWindow, mouseButton : 0, shiftKey : true});
@@ -66,9 +66,9 @@ var init = function(){
   var pauseFunction = createPauseFunction(video);
   videoWindow.closeButton_.addEventListener("click", pauseFunction);
   
-  WIDGET3D.getCameraGroup().addChild(videoWindow);
+  WIDGET3D.getCameraGroup().add(videoWindow);
   
-  //mainWindow.addChild(videoWindow);
+  //mainWindow.add(videoWindow);
   
   var onResize = function(){
     WIDTH = window.innerWidth;

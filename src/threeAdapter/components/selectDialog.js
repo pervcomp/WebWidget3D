@@ -68,7 +68,10 @@ WIDGET3D.SelectDialog.prototype.createText = function(){
   var mesh = this.createTitle(this.text_, context, this.textCanvas_);
   mesh.position.y = this.height_*0.5 - this.choiceHeight_*0.5;
   
-  this.setMesh(mesh);
+  var title = new WIDGET3D.Basic();
+  title.setMesh(mesh);
+  
+  this.add(title);
   
   this.addEventListener("click",
     function(event){
@@ -132,7 +135,7 @@ WIDGET3D.SelectDialog.prototype.createChoises = function(){
     
     choice.addEventListener("click", this.choices_[i].onclick.handler, false);
     choice.menuID_ = i;
-    this.addChild(choice);
+    this.add(choice);
   }
 };
 

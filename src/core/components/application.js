@@ -28,7 +28,7 @@ WIDGET3D.Application = function(){
 
     removeEvent : function(name){
       if(this.hasOwnProperty(name.toString()) && this[name.toString()].length == 0){
-        this[name.toString()] = false;  
+        this[name.toString()] = false;
         WIDGET3D.getEvents().disableEvent(name);
         return true;
       }
@@ -45,14 +45,14 @@ WIDGET3D.Application.prototype = WIDGET3D.GuiObject.prototype.inheritance();
 
 //inheriting some methods from WindowInterface
 // adds new child to window
-WIDGET3D.Application.prototype.addChild= WIDGET3D.GroupBase.prototype.addChild;
+WIDGET3D.Application.prototype.add = WIDGET3D.GroupBase.prototype.add;
 // hides unfocused objects in window
 WIDGET3D.Application.prototype.hideNotFocused = WIDGET3D.GroupBase.prototype.hideNotFocused;
 // removes object from window
 WIDGET3D.Application.prototype.removeFromObjects = WIDGET3D.GroupBase.prototype.removeFromObjects;
 
 //-----------------------------------------------------------------------------------------
-WIDGET3D.Application.prototype.type_ = WIDGET3D.ElementType.MAIN_WINDOW;
+WIDGET3D.Application.prototype.type_ = WIDGET3D.ElementType.APPLICATION;
 //-----------------------------------------------------------------------------------------
 
 //removes mesh from mesh list

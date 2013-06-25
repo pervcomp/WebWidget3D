@@ -66,6 +66,13 @@ WIDGET3D.Group.prototype.getRotation.z = function(){
   return this.container_.rotation.z;
 };
 
+WIDGET3D.Group.prototype.getRotationMatrix = function(){
+  var m1 = new THREE.Matrix4();
+  m1.extractRotation( this.container_.matrix );
+  
+  return m1;
+}
+
 WIDGET3D.Group.prototype.setRotation = function(rotX, rotY, rotZ){
 
   if(this.container_.useQuaternion){

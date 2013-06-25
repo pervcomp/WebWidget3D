@@ -118,7 +118,9 @@ var THREEJS_WIDGET3D = {
             inv.getInverse(intersects[m].object.matrixWorld);
             
             //position where the click happened in object coordinates
+            //what should be done to this?
             var objPos = intersects[m].point.clone().applyProjection(inv);
+            
             var hit = WIDGET3D.findObject(closest, event.type);
             
             if(hit){
@@ -151,7 +153,7 @@ var THREEJS_WIDGET3D = {
         if(mainWindow.childEvents_[name.toString()][i].isVisible_){
           
           // If the object is the one we hit, we return the object
-          if(mesh === mainWindow.childEvents_[name.toString()][i].mesh_){
+          if(mesh === mainWindow.childEvents_[name.toString()][i].container_){
             
             return mainWindow.childEvents_[name.toString()][i];
             
@@ -241,7 +243,7 @@ var THREEJS_WIDGET3D = {
         
         //Constructing camera group
         cameraGroup_ = new WIDGET3D.CameraGroup({camera : camera_});
-        mainWindow.addChild(cameraGroup_);
+        mainWindow.add(cameraGroup_);
         
         
         

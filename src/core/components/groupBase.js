@@ -12,10 +12,27 @@ WIDGET3D.GroupBase = function(){
 };
 
 // adds new child to window
-WIDGET3D.GroupBase.prototype.addChild = function(widget){
+/*WIDGET3D.GroupBase.prototype.addChild = function(widget){
   
   widget.setParent(this);
   return widget;
+};*/
+
+WIDGET3D.GroupBase.prototype.add = function(child){
+
+  if(child.parent != undefined){
+  
+    //removing event listeners from former parent
+    if(child.parent_ != WIDGET3D.getApplication()){
+      child.parent_.removeRelatedEventListeners(child);
+    }
+  
+    child.parent_.container_.remove(child.container_);
+    child.parent_.removeFromObjects(child);
+  }
+  child.parent_ = this;
+  this.children_.push(child);
+  this.container_.add(child.container_);
 };
 
 // hides unfocused objects in window

@@ -35,10 +35,11 @@ var init = function(){
     width : 600,
     height : 500,
     color : 0x000000,
-    defaultControls: true
+    defaultControls: true//,
+    //hideGrid : true
   });
   
-  mainWindow.addChild(subWindow);
+  mainWindow.add(subWindow);
   
   //--------------------------------------------
   // PICUTRE DISPLAY FOR LARGE PICTURE
@@ -49,7 +50,7 @@ var init = function(){
   
   var pictureDisplay = new WIDGET3D.Basic();
   pictureDisplay.setMesh(display);
-  mainWindow.addChild(pictureDisplay);
+  mainWindow.add(pictureDisplay);
   
   var pictureclick = createPictureclickHandler(pictureDisplay);
   
@@ -134,12 +135,12 @@ var createMouseclickHandler = function(parameters){
   
   return function(event){
   
-    var width = parameters.button.mesh_.material.map.image.naturalWidth;
-    var height = parameters.button.mesh_.material.map.image.naturalHeight;
+    var width = parameters.button.container_.material.map.image.naturalWidth;
+    var height = parameters.button.container_.material.map.image.naturalHeight;
     var scale = SCALEFACTOR/height;
     
     var display = new THREE.Mesh(new THREE.PlaneGeometry(width*scale, height*scale),
-      parameters.button.mesh_.material);
+      parameters.button.container_.material);
     
     display.position.z = DISPLAY_DISTANCE;
     

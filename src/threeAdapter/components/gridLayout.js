@@ -40,10 +40,17 @@ WIDGET3D.GridWindow = function(parameters){
   });
   
   var geometry = new THREE.CubeGeometry( this.width_, this.height_, this.depth_, this.density_, this.density_, 1 );
-  
   var mesh =  new THREE.Mesh(geometry, this.material_);
+  this.grid_ = new WIDGET3D.Basic();
+  this.grid_.setMesh(mesh);
   
-  this.setMesh(mesh);
+  var hideGrid = parameters.hideGrid !== undefined ? parameters.hideGrid : false;
+  if(hideGrid){
+    this.grid_.hide();
+  }
+  this.add(this.grid_);
+  
+  this.icons_ = new Array();;
   
   //default mouse controls in use
   this.defaultControls_ = parameters.defaultControls !== undefined ? parameters.defaultControls : false;
@@ -65,26 +72,24 @@ WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
   this.depth_ = (this.width_/this.density_);
   
   var grid = new THREE.CubeGeometry( this.width_, this.height_, this.depth_, this.density_, this.density_, 1 );
-  
   var gridMesh =  new THREE.Mesh(grid, this.material_);
+  this.grid_.setMesh(gridMesh);
   
-  this.setMesh(gridMesh);
-  
-  var tmpChilds = this.children_;
-  this.children_ = [];
+  var tmpChilds = this.icons_;
+  this.icons_ = new Array();
   
   for(var i = 0; i < tmpChilds.length; ++i){
   
     var icon = tmpChilds[i];
-    this.children_.push(icon);
+    this.icons_.push(icon);
     
     icon.width_ = this.width_/(this.density_ + 3.3);
     icon.height_ = this.height_/(this.density_ + 3.3);
     
     var geometry = new THREE.CubeGeometry(icon.width_, icon.height_, icon.depth_);
-    
     var mesh = new THREE.Mesh( geometry, icon.material_);
     icon.setMesh(mesh);
+    
     icon.setToPlace();
   } 
 }
@@ -105,7 +110,7 @@ WIDGET3D.GridIcon = function(parameters){
     return false;
   }
   
-  if(parent.children_.length >= parent.maxChildren_){
+  if(parent.icons_.length >= parent.maxChildren_){
     console.log("Grid is full! Creating bigger one");
     parent.addSlots(Math.ceil(parent.density_ * 1.5));
   }
@@ -139,7 +144,8 @@ WIDGET3D.GridIcon = function(parameters){
   var mesh = new THREE.Mesh( geometry, this.material_);
   
   this.setMesh(mesh);
-  parent.addChild(this);
+  parent.add(this);
+  parent.icons_.push(this);
   
   this.setToPlace();
   
@@ -160,12 +166,12 @@ WIDGET3D.GridIcon.prototype.setToPlace = function(){
   var slotCenterX = stepX/2;
   var slotCenterY = stepY/2;
   
-  if(this.parent_.children_.length-1 > 0){
+  if(this.parent_.icons_.length-1 > 0){
   
-    var lastIcon = this.parent_.children_[this.parent_.children_.length-2];
+    var lastIcon = this.parent_.icons_[this.parent_.icons_.length-2];
     var lastIconLoc = lastIcon.getPosition();
     
-    if(((this.parent_.children_.length-1) % this.parent_.density_) == 0)
+    if(((this.parent_.icons_.length-1) % this.parent_.density_) == 0)
     {  
       var x = parentLeft + slotCenterX;
       var y = lastIconLoc.y - stepY;
@@ -179,9 +185,8 @@ WIDGET3D.GridIcon.prototype.setToPlace = function(){
   else{
     
     var x = parentLeft + slotCenterX;
-    var y = parentTop - slotCenterY;
-    
+    var y = parentTop - slotCenterY; 
   }
-  this.setPosition(x, y, parentLoc.z/this.parent_.height_);
+  this.setPosition(x, y, parentLoc.z/this.parent_.depth_);
 };
 

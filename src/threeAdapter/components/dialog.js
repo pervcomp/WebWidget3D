@@ -96,9 +96,11 @@ WIDGET3D.Dialog.prototype.createDialogTitle = function(){
   geometry.materials = materials;
   var material = new THREE.MeshFaceMaterial(materials);
   var mesh = new THREE.Mesh(geometry, material);
+  var title = new WIDGET3D.Basic();
+  title.setMesh(mesh);
+  this.add(title);
   
-  this.setMesh(mesh);
-  
+  //MITÄKÖHÄN TÄLLE PITÄISI TEHDÄ?
   this.addEventListener("click",
     function(event){
       event.stopPropagation();
@@ -152,7 +154,7 @@ WIDGET3D.Dialog.prototype.createButtons = function(){
     var button = new WIDGET3D.Basic();
     button.setMesh(mesh);
     button.addEventListener("click", this.buttons_[i].onclick, false);
-    this.addChild(button);
+    this.add(button);
     
     if(i == 0){
       var x = left + slotCenterX;
@@ -254,7 +256,7 @@ WIDGET3D.Dialog.prototype.createTextfields = function(){
     textfield.addEventListener("keydown", textBoxKeyFactory(textfield));
     textfield.addUpdateCallback(textBoxUpdateFactory(canvas1, textfield, texture));
     
-    this.addChild(textfield);
+    this.add(textfield);
     
     //Creating description for field
     var canvas2 = document.createElement('canvas');
@@ -288,7 +290,7 @@ WIDGET3D.Dialog.prototype.createTextfields = function(){
     
     var description = new WIDGET3D.Basic();
     description.setMesh(mesh2);
-    this.addChild(description);
+    this.add(description);
     
     //positioning
     if(i == 0){

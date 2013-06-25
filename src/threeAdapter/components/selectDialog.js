@@ -205,13 +205,13 @@ WIDGET3D.SelectDialog.prototype.changeChoiceText = function(text, index){
     }
   }
   if(object){
-    var canvas = object.mesh_.material.map.image;
-    var context = object.mesh_.material.map.image.getContext('2d');
+    var canvas = object.container_.material.map.image;
+    var context = object.container_.material.map.image.getContext('2d');
     var materials = this.createButtonMaterial(text, context, canvas);
 
-    object.mesh_.geometry.materials = materials;
-    object.mesh_.material = new THREE.MeshFaceMaterial(materials);
-    object.mesh_.needsUpdate = true;
+    object.container_.geometry.materials = materials;
+    object.container_.material = new THREE.MeshFaceMaterial(materials);
+    object.container_.needsUpdate = true;
     return true;
   }
   return false;

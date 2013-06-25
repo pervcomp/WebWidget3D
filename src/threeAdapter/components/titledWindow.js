@@ -71,9 +71,7 @@ WIDGET3D.TitledWindow = function(parameters){
       p.remove();
     };
   }
-  var closeFunction = createCloseFunction(this);
-  
-  this.closeButton_.addEventListener("click", closeFunction);
+  this.closeButton_.addEventListener("click", createCloseFunction(this));
   
   //---------------------------------------------------
   //CONTROLS
@@ -94,8 +92,6 @@ WIDGET3D.TitledWindow = function(parameters){
       width : (this.width_*2),
       height : ((this.height_+this.title_.height_)*2)
     });
-    
-    this.start_ = false;
   }
 };
 
@@ -168,3 +164,5 @@ WIDGET3D.TitledWindow.prototype.remove = function(){
 WIDGET3D.TitledWindow.prototype.getContent = function(){
   return this.content_;
 };
+
+

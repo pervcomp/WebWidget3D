@@ -220,9 +220,9 @@ WIDGET3D.GuiObject.prototype.update = function(){
 // PROTOTYPAL INHERITANCE FUNCTION FOR ABSTRACT GUI OBJECT
 //---------------------------------------------------------
 WIDGET3D.GuiObject.prototype.inheritance = function(){
-  function guiObjectPrototype(){}
-  guiObjectPrototype.prototype = this;
-  var created = new guiObjectPrototype();
+  function WIDGET3DObjectPrototype(){};
+  WIDGET3DObjectPrototype.prototype = this;
+  var created = new WIDGET3DObjectPrototype();
   return created;
 };
 

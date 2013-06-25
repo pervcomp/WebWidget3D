@@ -56,8 +56,8 @@ var srcFiles = {
     
     "../src/threeAdapter/components/basicExtension.js", "../src/threeAdapter/components/groupExtension.js",
     
-    "../src/threeAdapter/components/gridLayout.js", "../src/threeAdapter/components/titledWindow.js",
-    "../src/threeAdapter/components/dialog.js", "../src/threeAdapter/components/selectDialog.js",
+    "../src/threeAdapter/components/gridLayout.js", //"../src/threeAdapter/components/titledWindow.js",
+    "../src/threeAdapter/components/dialog.js", //"../src/threeAdapter/components/selectDialog.js",
     
     
     "../src/threeAdapter/controls/dragControls.js"
@@ -73,7 +73,7 @@ var deps = {
   "../src/core/components/basic.js" : ["../src/core/components/guiObject.js"],
   "../src/core/components/groupBase.js" : ["../src/core/components/guiObject.js"],
   "../src/core/components/application.js" : ["../src/core/components/guiObject.js", "../src/core/components/groupBase.js"],
-  "../src/core/components/group.js" : ["../src/core/components/basic.js", "../src/core/components/groupBase.js"],
+  "../src/core/components/group.js" : ["../src/core/components/guiObject.js", "../src/core/components/groupBase.js"],
   "../src/core/components/text.js" : ["../src/core/components/basic.js"],
   "../src/core/components/cameraGroup.js": ["../src/core/components/group.js"],
 
@@ -85,9 +85,9 @@ var deps = {
   "../src/threeAdapter/components/groupExtension.js": ["../src/threeAdapter/adapter.js", "../src/core/components/group.js"],
   
 	"../src/threeAdapter/components/gridLayout.js": ["../src/core/components/group.js", "../src/threeAdapter/adapter.js"],
-	"../src/threeAdapter/components/titledWindow.js": ["../src/core/components/group.js", "../src/threeAdapter/adapter.js"],
+	//"../src/threeAdapter/components/titledWindow.js": ["../src/core/components/group.js", "../src/threeAdapter/adapter.js"],
   "../src/threeAdapter/components/dialog.js" : ["../src/core/components/group.js", "../src/threeAdapter/adapter.js"],
-  "../src/threeAdapter/components/selectDialog.js" : ["../src/core/components/group.js", "../src/threeAdapter/adapter.js"],
+  //"../src/threeAdapter/components/selectDialog.js" : ["../src/core/components/group.js", "../src/threeAdapter/adapter.js"],
   
   "../src/threeAdapter/controls/dragControls.js": ["../src/core/events.js", "../src/threeAdapter/adapter.js"]
 };

@@ -5,10 +5,11 @@
 // Extends WIDGET3D.Basic object.
 //---------------------------------------------
 WIDGET3D.Group = function(){
-  WIDGET3D.Basic.call( this );
+  //WIDGET3D.Basic.call( this );
+  WIDGET3D.GuiObject.call( this );
   WIDGET3D.GroupBase.call( this );
-  
-  this.isVisible_;
+   
+  this.parent_;
 };
 
 
@@ -19,7 +20,7 @@ WIDGET3D.Group.prototype = WIDGET3D.Basic.prototype.inheritance();
 //inheriting some methods from WindowInterface
 
 // adds new child to Group
-WIDGET3D.Group.prototype.addChild= WIDGET3D.GroupBase.prototype.addChild;
+//WIDGET3D.Group.prototype.addChild= WIDGET3D.GroupBase.prototype.addChild;
 // hides unfocused objects in Group
 WIDGET3D.Group.prototype.hideNotFocused = WIDGET3D.GroupBase.prototype.hideNotFocused;
 // removes object from Group
@@ -50,30 +51,13 @@ WIDGET3D.Group.prototype.setParent = function(widget){
   }
 };
 
-//sets mesh for Group
-WIDGET3D.Group.prototype.setMesh = function(mesh){
-  var mainWindow =  WIDGET3D.getApplication();
+WIDGET3D.Group.prototype.add = function(child){
+
+  WIDGET3D.GroupBase.prototype.add.call(this, child);
   
-  if(this.mesh_){
-    //removes the old mesh from the scene
-    if(this.isVisible_){
-      this.container_.remove(this.mesh_);
-    }
-    
-    mainWindow.removeMesh(this.mesh_);
-    this.mesh_ = mesh;
-    
-    if(this.isVisible_){
-      this.container_.add(this.mesh_);
-    }
-    mainWindow.meshes_.push(this.mesh_);
-  }
-  else {
-    this.mesh_ = mesh;
-    mainWindow.meshes_.push(this.mesh_);
-    this.container_.add(this.mesh_);
-  }
-};
+  //Adding event listeners from this object
+  this.addRelatedEventListeners(child);
+}
 
 // shows Group
 WIDGET3D.Group.prototype.show = function(){
@@ -83,11 +67,6 @@ WIDGET3D.Group.prototype.show = function(){
       this.children_[i].show();
     }
     this.isVisible_ = true;
-    this.parent_.container_.add(this.container_);
-    if(this.mesh_){
-      this.mesh_.visible = true;
-      this.container_.add(this.mesh_);
-    }
   }
 };
 
@@ -103,11 +82,6 @@ WIDGET3D.Group.prototype.hide = function(){
     if(this.inFocus_){
       this.unfocus();
     }
-    this.parent_.container_.remove(this.container_);
-    if(this.mesh_){
-      this.mesh_.visible = false;
-      this.container_.remove(this.mesh_);
-    }
   }
 };
 
@@ -122,10 +96,6 @@ WIDGET3D.Group.prototype.remove = function(){
   //removing event listeners
   this.removeAllListeners();
   
-  //If Group has a mesh, it has to be removed allso
-  if(this.mesh_){
-    WIDGET3D.getApplication().removeMesh(this.mesh_);
-  }
   //container has to be removed from parent's container
   this.parent_.container_.remove(this.container_);
   //removing this from parents objects
@@ -133,14 +103,103 @@ WIDGET3D.Group.prototype.remove = function(){
   
   WIDGET3D.removeObject(this.id_);
 };
- 
+
+WIDGET3D.Group.prototype.addEventListener = function(name, callback, bubbles){
+  
+  WIDGET3D.GuiObject.prototype.addEventListener.call(this, name, callback, bubbles);
+
+  for(var i = 0; i < this.children_.length; ++i){
+    this.children_[i].addEventListener(name, callback, bubbles);
+  }
+};
+
+WIDGET3D.Group.prototype.removeEventListener = function(name, callback){
+
+  WIDGET3D.GuiObject.prototype.removeEventListener.call(this, name, callback);
+
+  for(var i = 0; i < this.children_.length; ++i){
+    this.children_[i].removeEventListener(name, callback);
+  }
+};
+
+WIDGET3D.Group.prototype.removeEventListeners = function(name){
+
+  for(var i = 0; i < this.events_[name].length; ++i){
+    var callback = this.events_[name][i].callback;
+        
+    for(var k = 0; k < this.children_.length; ++k){
+      this.children_[i].removeEventListener(name, callback);
+    }
+  }
+  
+  WIDGET3D.GuiObject.prototype.removeEventListeners.call(this, name);
+};
+
+WIDGET3D.Group.prototype.removeAllListeners = function(){
+  
+  for(listener in this.events_){
+    if(this.events_.hasOwnProperty(listener) &&
+    Object.prototype.toString.apply(this.events_[listener]) === '[object Array]')
+    {
+      var name = listener;
+      
+      for(var i = 0; i < this.events_[listener].length; ++i){
+      
+        var callback = this.events_[listener][i].callback;
+        
+        for(var k = 0; k < this.children_.length; ++k){
+          this.children_[i].removeEventListener(name, callback);
+        }
+      }
+    }
+  }
+  
+  WIDGET3D.GuiObject.prototype.removeAllListeners.call(this);
+};
+
+WIDGET3D.Group.prototype.removeRelatedEventListeners = function(child){
+  for(listener in this.events_){
+    if(this.events_.hasOwnProperty(listener) &&
+    Object.prototype.toString.apply(this.events_[listener]) === '[object Array]')
+    {
+      var name = listener;
+      
+      for(var i = 0; i < this.events_[listener].length; ++i){
+      
+        var callback = this.events_[listener][i].callback;
+        
+        child.removeEventListener(name, callback);
+      }
+    }
+  }
+};
+
+WIDGET3D.Group.prototype.addRelatedEventListeners = function(child){
+  for(listener in this.events_){
+    if(this.events_.hasOwnProperty(listener) &&
+    Object.prototype.toString.apply(this.events_[listener]) === '[object Array]')
+    {
+      var name = listener;
+      
+      for(var i = 0; i < this.events_[listener].length; ++i){
+      
+        var callback = this.events_[listener][i].callback;
+        var bubbles = this.events_[listener][i].bubbles;
+        
+        child.addEventListener(name, callback);
+      }
+    }
+  }
+};
+
+
 //--------------------------------------------------
 // PROTOTYPAL INHERITANCE FUNCTION FOR Group OBJECT
 //--------------------------------------------------
 WIDGET3D.Group.prototype.inheritance = function(){
-  function guiWindowPrototype(){}
-  guiWindowPrototype.prototype = this;
-  var created = new guiWindowPrototype();
+  function WIDGET3DGroupPrototype(){};
+  WIDGET3DGroupPrototype.prototype = this;
+  var created = new WIDGET3DGroupPrototype();
   return created;
 };
 

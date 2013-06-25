@@ -25,7 +25,7 @@ SOFTWARE.
 
 WIDGET3D = {
 
-  ElementType : {"MAIN_WINDOW":0, "GROUP":1, "BASIC":2, "TEXT":3, "UNDEFINED":666 },
+  ElementType : {"APPLICATION":0, "GROUP":1, "BASIC":2, "TEXT":3, "UNDEFINED":666 },
   
   //Creating functions
   createFunctions : function(){

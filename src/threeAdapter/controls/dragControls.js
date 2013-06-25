@@ -31,12 +31,12 @@ WIDGET3D.DragControls = function(parameters){
   that.component_ = parameters.component;
   that.mouseButton_ = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
   that.shiftKey_ = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
-
+  
+  that.start_ = false;
   that.camera_ = WIDGET3D.getCamera();
   
   var width = parameters.width !== undefined ? parameters.width : 2000;
   var height = parameters.height !== undefined ? parameters.height : 2000;
-  
   var debug = parameters.debug !== undefined ? parameters.debug : false;
   
   that.drag_ = false;
@@ -46,11 +46,9 @@ WIDGET3D.DragControls = function(parameters){
   //the planes orientation is the same as the cameras orientation.
   that.plane_ = new THREE.Mesh( new THREE.PlaneGeometry( width, height, 8, 8 ), 
     new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true, side : THREE.DoubleSide } ) );
-  
   that.plane_.visible = debug;
   
   that.setPlaneRotation();
-  
   WIDGET3D.getScene().add( that.plane_ );
   
   that.mouseupHandler = function(event){

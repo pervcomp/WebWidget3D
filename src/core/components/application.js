@@ -11,9 +11,7 @@ WIDGET3D.Application = function(){
   WIDGET3D.GuiObject.call( this );
   WIDGET3D.GroupBase.call( this );
   
-  this.meshes_ = [];
-  
-  this.childEvents_ = {
+  this.childEvents = {
     
     addObject : function(name, child){
       if(!this.hasOwnProperty(name.toString()) ||
@@ -52,19 +50,7 @@ WIDGET3D.Application.prototype.hideNotFocused = WIDGET3D.GroupBase.prototype.hid
 WIDGET3D.Application.prototype.removeFromObjects = WIDGET3D.GroupBase.prototype.removeFromObjects;
 
 //-----------------------------------------------------------------------------------------
-WIDGET3D.Application.prototype.type_ = WIDGET3D.ElementType.APPLICATION;
+WIDGET3D.Application.prototype.type = WIDGET3D.ElementType.APPLICATION;
 //-----------------------------------------------------------------------------------------
-
-//removes mesh from mesh list
-WIDGET3D.Application.prototype.removeMesh = function(mesh){
-
-  for(var k = 0; k < this.meshes_.length; ++k){
-    if(this.meshes_[k] === mesh){
-      var removedMesh = this.meshes_.splice(k, 1);
-      return removedMesh[0];
-    }
-  }
-  return false;
-};
 
 

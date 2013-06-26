@@ -1,10 +1,4 @@
 //---------------------------------------------------
-//
-// STYLED WIDGETS THAT CAN BE USED WITH THREEJS PLUGIN
-//
-//---------------------------------------------------
-
-//---------------------------------------------------
 // CAMERA GROUP
 //
 // components that needs to follow camera are added to this group
@@ -18,8 +12,8 @@ WIDGET3D.CameraGroup = function(parameters){
   
   var parameters = parameters || {};
   
-  this.camera_ = parameters.camera;
-  this.container_.add(this.camera_);
+  this.camera = parameters.camera;
+  this.container.add(this.camera);
 };
 
 WIDGET3D.CameraGroup.prototype = WIDGET3D.Group.prototype.inheritance();

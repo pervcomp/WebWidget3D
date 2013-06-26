@@ -100,8 +100,8 @@ var THREEJS_WIDGET3D = {
       var ray = WIDGET3D.getProjector().pickingRay(vector, WIDGET3D.getCamera());
       
       //intersects checks now all the meshes in scene. It might be good to construct
-      // a datastructure that contains meshes of mainWindow.childEvents_.event array content
-      var intersects = ray.intersectObjects(WIDGET3D.getApplication().meshes_);
+      // a datastructure that contains meshes of app.childEvents.event array content
+      var intersects = ray.intersectObjects(scene_.children);
       
       var closest = false;
       
@@ -144,18 +144,18 @@ var THREEJS_WIDGET3D = {
     
     WIDGET3D.findObject = function(mesh, name){
     
-      var mainWindow = WIDGET3D.getApplication();
+      var app = WIDGET3D.getApplication();
       
-      for(var i = 0; i < mainWindow.childEvents_[name.toString()].length; ++i){
+      for(var i = 0; i < app.childEvents[name.toString()].length; ++i){
         
         // if the object is not visible it can be the object hit
         // because it's not in the scene.
-        if(mainWindow.childEvents_[name.toString()][i].isVisible_){
+        if(app.childEvents[name.toString()][i].isVisible){
           
           // If the object is the one we hit, we return the object
-          if(mesh === mainWindow.childEvents_[name.toString()][i].container_){
+          if(mesh === app.childEvents[name.toString()][i].container){
             
-            return mainWindow.childEvents_[name.toString()][i];
+            return app.childEvents[name.toString()][i];
             
           }//if right object
           
@@ -218,38 +218,38 @@ var THREEJS_WIDGET3D = {
         
         scene_ = parameters.scene !== undefined ? parameters.scene : new THREE.Scene();
         
-        var mainWindow = false;
+        var app = false;
         
         //initializing WIDGET3D
         if(!WIDGET3D.isInitialized()){
         
-          mainWindow = WIDGET3D.init({
+          app = WIDGET3D.init({
             collisionCallback: {callback: WIDGET3D.checkIfHits},
             container: THREE.Object3D,
             canvas: renderer_.domElement
           });
           
-          if(!mainWindow){
+          if(!app){
             console.log("Widget3D init failed!");
             return false;
           }
         }
         else{
-          mainWindow = WIDGET3D.getApplication();
+          app = WIDGET3D.getApplication();
         }
         
-        scene_.add(mainWindow.container_);
+        scene_.add(app.container);
         projector_ = new THREE.Projector();
         
         //Constructing camera group
         cameraGroup_ = new WIDGET3D.CameraGroup({camera : camera_});
-        mainWindow.add(cameraGroup_);
+        app.add(cameraGroup_);
         
         
         
         plugin_initialized_ = true;
         
-        return mainWindow;
+        return app;
       }
       else{
         console.log("nothing to init");

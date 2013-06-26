@@ -9,57 +9,51 @@ WIDGET3D.Basic = function(){
 
   WIDGET3D.GuiObject.call( this );
   
-  this.container_;
-  this.parent_;
+  this.container;
+  this.parent;
+  this.isVisible = true;
 };
 
 
 // inheriting basic from GuiObject
 WIDGET3D.Basic.prototype = WIDGET3D.GuiObject.prototype.inheritance();
 
-WIDGET3D.Basic.prototype.type_ = WIDGET3D.ElementType.BASIC;
+WIDGET3D.Basic.prototype.type = WIDGET3D.ElementType.BASIC;
 
-//meshes is array of meshes WIDGET3D are part of object
 WIDGET3D.Basic.prototype.setMesh = function(mesh){
 
-  mesh.visible = this.isVisible_;
-  var mainWindow = WIDGET3D.getApplication();
+  mesh.visible = this.isVisible;
   
-  if(this.container_ && this.parent_){
+  if(this.container && this.parent){
     //removes the old mesh from the scene    
-    this.parent_.container_.remove(this.container_);
-    mainWindow.removeMesh(this.container_);
-    this.container_ = mesh;
-    this.parent_.container_.add(this.container_);
+    this.parent.container.remove(this.container);
+    this.container = mesh;
+    this.parent.container.add(this.container);
   }
-  else if(this.parent_){
+  else if(this.parent){
   
-    this.container_ = mesh;
-    this.parent_.container_.add(this.container_);
+    this.container = mesh;
+    this.parent.container.add(this.container);
   }
   else{
-    this.container_ = mesh;
+    this.container = mesh;
   }
-  
-  
-  
-  mainWindow.meshes_.push(this.container_);
 };
 
-// shows object
+//shows object
 WIDGET3D.Basic.prototype.show = function(){
-  if(!this.isVisible_){
-    this.isVisible_ = true;
-    this.container_.visible = true;
+  if(!this.isVisible){
+    this.isVisible = true;
+    this.container.visible = true;
   }
 };
 
-// hides object
+//hides object
 WIDGET3D.Basic.prototype.hide = function(){
-  if(this.isVisible_){
-    this.isVisible_ = false;
-    this.container_.visible = false;
-    if(this.inFocus_){
+  if(this.isVisible){
+    this.isVisible = false;
+    this.container.visible = false;
+    if(this.inFocus){
       this.unfocus();
     }
   }
@@ -70,12 +64,9 @@ WIDGET3D.Basic.prototype.remove = function(){
   this.hide();
   //removing event listeners
   this.removeAllListeners();
-  //removing mesh
-  WIDGET3D.getApplication().removeMesh(this.container_);
   //removing object
-  this.parent_.removeFromObjects(this);
-  
-  WIDGET3D.removeObject(this.id_);
+  this.parent.removeFromObjects(this);
+  WIDGET3D.removeObject(this.id);
 };
 
 

@@ -14,48 +14,48 @@ WIDGET3D.DragControls = function(parameters){
   //To get the right orientation we need to have orientation of a cameras parent and camera and add these together
   that.setPlaneRotation = function(){
     
-    var camRot = that.camera_.rotation.clone();
-    var parent = that.camera_.parent;
+    var camRot = that.camera.rotation.clone();
+    var parent = that.camera.parent;
     
     
-    while(parent != undefined && parent != that.component_.parent){
+    while(parent != undefined && parent != that.component.parent){
     
       camRot.add(parent.rotation.clone());
       parent = parent.parent;
     }
     
-    that.plane_.rotation.copy(camRot);
+    that.plane.rotation.copy(camRot);
     
   }; 
   
-  that.component_ = parameters.component;
-  that.mouseButton_ = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
-  that.shiftKey_ = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
+  that.component = parameters.component;
+  that.mouseButton = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
+  that.shiftKey = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
   
-  that.start_ = false;
-  that.camera_ = WIDGET3D.getCamera();
+  that.start = false;
+  that.camera = WIDGET3D.getCamera();
   
   var width = parameters.width !== undefined ? parameters.width : 2000;
   var height = parameters.height !== undefined ? parameters.height : 2000;
   var debug = parameters.debug !== undefined ? parameters.debug : false;
   
-  that.drag_ = false;
-  that.offset_ = new THREE.Vector3();
+  that.drag = false;
+  that.offset = new THREE.Vector3();
   
   //invisible plane that is used as a "draging area".
   //the planes orientation is the same as the cameras orientation.
-  that.plane_ = new THREE.Mesh( new THREE.PlaneGeometry( width, height, 8, 8 ), 
+  that.plane = new THREE.Mesh( new THREE.PlaneGeometry( width, height, 8, 8 ), 
     new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true, side : THREE.DoubleSide } ) );
-  that.plane_.visible = debug;
+  that.plane.visible = debug;
   
   that.setPlaneRotation();
-  WIDGET3D.getScene().add( that.plane_ );
+  WIDGET3D.getScene().add( that.plane );
   
   that.mouseupHandler = function(event){
-    if(that.drag_){
-      that.drag_ = false;
+    if(that.drag){
+      that.drag = false;
       
-      that.plane_.position.copy(that.component_.parent_.container_.localToWorld(that.component_.getPosition().clone()));
+      that.plane.position.copy(that.component.parent.container.localToWorld(that.component.getPosition().clone()));
 
       WIDGET3D.getApplication().removeEventListener("mousemove", that.mousemoveHandler);
       WIDGET3D.getApplication().removeEventListener("mouseup", that.mouseupHandler);
@@ -63,63 +63,63 @@ WIDGET3D.DragControls = function(parameters){
   };
   
   that.mousedownHandler = function(event){
-    if(event.button === that.mouseButton_ && event.shiftKey === that.shiftKey_){
-      that.start_ = true;
-      if(!that.drag_){
+    if(event.button === that.mouseButton && event.shiftKey === that.shiftKey){
+      that.start = true;
+      if(!that.drag){
         
         that.setPlaneRotation();
-        that.plane_.position.copy(that.component_.parent_.container_.localToWorld(that.component_.getPosition().clone()));
+        that.plane.position.copy(that.component.parent.container.localToWorld(that.component.getPosition().clone()));
         //FORCE TO UPDATE MATRIXES OTHERWISE WE MAY GET INCORRECT VALUES FROM INTERSECTION
-        that.plane_.updateMatrixWorld(true);
+        that.plane.updateMatrixWorld(true);
         
         var mouse = WIDGET3D.mouseCoordinates(event);
         var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
-        var ray = WIDGET3D.getProjector().pickingRay(vector, that.camera_);
+        var ray = WIDGET3D.getProjector().pickingRay(vector, that.camera);
         
-        var intersects = ray.intersectObject( that.plane_ );
+        var intersects = ray.intersectObject( that.plane );
         if(intersects.length > 0){
-          that.offset_.copy( intersects[ 0 ].point ).sub( that.plane_.position );
+          that.offset.copy( intersects[ 0 ].point ).sub( that.plane.position );
         }
         
         
         WIDGET3D.getApplication().addEventListener("mousemove", that.mousemoveHandler, false);
         WIDGET3D.getApplication().addEventListener("mouseup", that.mouseupHandler, false);
         
-        that.component_.focus();
-        that.drag_ = true;
+        that.component.focus();
+        that.drag = true;
       }
     }
   };
 
   that.mousemoveHandler = function(event){
-    if(that.drag_){
+    if(that.drag){
 
       var mouse = WIDGET3D.mouseCoordinates(event);
       var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
-      var ray = WIDGET3D.getProjector().pickingRay(vector, that.camera_);
+      var ray = WIDGET3D.getProjector().pickingRay(vector, that.camera);
       
-      var intersects = ray.intersectObject( that.plane_ );
+      var intersects = ray.intersectObject( that.plane );
       if(intersects.length > 0){
       
-        var pos = intersects[ 0 ].point.sub( that.offset_);
-        that.plane_.position.copy(pos);
-        var vec = that.component_.parent_.container_.worldToLocal(pos);
-        that.component_.setPosition(vec.x, vec.y, vec.z);
+        var pos = intersects[ 0 ].point.sub( that.offset);
+        that.plane.position.copy(pos);
+        var vec = that.component.parent.container.worldToLocal(pos);
+        that.component.setPosition(vec.x, vec.y, vec.z);
         
       }
     }
   };
   
-  that.component_.addEventListener("mousedown", that.mousedownHandler, false);
+  that.component.addEventListener("mousedown", that.mousedownHandler, false);
   
   
   that.remove = function(){
   
-    WIDGET3D.getScene().remove( that.plane_ );
+    WIDGET3D.getScene().remove( that.plane);
     
-    that.plane_.geometry.dispose();
-    that.plane_.material.dispose();
-    that.plane_ = undefined;
+    that.plane.geometry.dispose();
+    that.plane.material.dispose();
+    that.plane = undefined;
   };
   
 };

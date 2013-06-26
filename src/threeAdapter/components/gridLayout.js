@@ -20,74 +20,74 @@ WIDGET3D.GridWindow = function(parameters){
   
   var parameters = parameters || {};
   
-  this.width_ = parameters.width !== undefined ? parameters.width : 1000;
-  this.height_ = parameters.height !== undefined ? parameters.height : 1000;
-  this.density_ = parameters.density !== undefined ? parameters.density : 6;
-  this.depth_ = (this.width_/this.density_);
+  this.width = parameters.width !== undefined ? parameters.width : 1000;
+  this.height = parameters.height !== undefined ? parameters.height : 1000;
+  this.density = parameters.density !== undefined ? parameters.density : 6;
+  this.depth = (this.width/this.density);
   
-  this.maxChildren_ = this.density_ * this.density_;
+  this.maxChildren = this.density * this.density;
   
-  this.color_ = parameters.color !== undefined ? parameters.color : 0x6B6B6B;
-  this.lineWidth_ = parameters.lineWidth !== undefined ? parameters.lineWidth : 2;
-  this.opacity_ = parameters.opacity !== undefined ? parameters.opacity : 0.5;
+  this.color = parameters.color !== undefined ? parameters.color : 0x6B6B6B;
+  this.lineWidth = parameters.lineWidth !== undefined ? parameters.lineWidth : 2;
+  this.opacity = parameters.opacity !== undefined ? parameters.opacity : 0.5;
   
-  this.material_ = new THREE.MeshBasicMaterial({
-    color: this.color_,
-    opacity: this.opacity_,
+  this.material = new THREE.MeshBasicMaterial({
+    color: this.color,
+    opacity: this.opacity,
     wireframe: true,
     side : THREE.DoubleSide,
-    wireframeLinewidth : this.lineWidth_
+    wireframeLinewidth : this.lineWidth
   });
   
-  var geometry = new THREE.CubeGeometry( this.width_, this.height_, this.depth_, this.density_, this.density_, 1 );
-  var mesh =  new THREE.Mesh(geometry, this.material_);
-  this.grid_ = new WIDGET3D.Basic();
-  this.grid_.setMesh(mesh);
+  var geometry = new THREE.CubeGeometry( this.width, this.height, this.depth, this.density, this.density, 1 );
+  var mesh =  new THREE.Mesh(geometry, this.material);
+  this.grid = new WIDGET3D.Basic();
+  this.grid.setMesh(mesh);
   
   var hideGrid = parameters.hideGrid !== undefined ? parameters.hideGrid : false;
   if(hideGrid){
-    this.grid_.hide();
+    this.grid.hide();
   }
-  this.add(this.grid_);
+  this.add(this.grid);
   
-  this.icons_ = new Array();;
+  this.icons = new Array();;
   
   //default mouse controls in use
-  this.defaultControls_ = parameters.defaultControls !== undefined ? parameters.defaultControls : false;
+  this.defaultControls = parameters.defaultControls !== undefined ? parameters.defaultControls : false;
   
-  if(this.defaultControls_){
+  if(this.defaultControls){
     
     var button = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
     var shift = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
     
-    this.controls_ = new WIDGET3D.RollControls({component : this, mouseButton : button, shiftKey : shift});
+    this.controls = new WIDGET3D.RollControls({component : this, mouseButton : button, shiftKey : shift});
   }
 };
 
 WIDGET3D.GridWindow.prototype = WIDGET3D.Group.prototype.inheritance();
 
 WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
-  this.density_ = newDensity;
-  this.maxChildren_ = newDensity * newDensity;
-  this.depth_ = (this.width_/this.density_);
+  this.density = newDensity;
+  this.maxChildren = newDensity * newDensity;
+  this.depth = (this.width/this.density);
   
-  var grid = new THREE.CubeGeometry( this.width_, this.height_, this.depth_, this.density_, this.density_, 1 );
-  var gridMesh =  new THREE.Mesh(grid, this.material_);
-  this.grid_.setMesh(gridMesh);
+  var grid = new THREE.CubeGeometry( this.width, this.height, this.depth, this.density, this.density, 1 );
+  var gridMesh =  new THREE.Mesh(grid, this.material);
+  this.grid.setMesh(gridMesh);
   
-  var tmpChilds = this.icons_;
-  this.icons_ = new Array();
+  var tmpChilds = this.icons;
+  this.icons = new Array();
   
   for(var i = 0; i < tmpChilds.length; ++i){
   
     var icon = tmpChilds[i];
-    this.icons_.push(icon);
+    this.icons.push(icon);
     
-    icon.width_ = this.width_/(this.density_ + 3.3);
-    icon.height_ = this.height_/(this.density_ + 3.3);
+    icon.width = this.width/(this.density + 3.3);
+    icon.height = this.height/(this.density + 3.3);
     
-    var geometry = new THREE.CubeGeometry(icon.width_, icon.height_, icon.depth_);
-    var mesh = new THREE.Mesh( geometry, icon.material_);
+    var geometry = new THREE.CubeGeometry(icon.width, icon.height, icon.depth);
+    var mesh = new THREE.Mesh( geometry, icon.material);
     icon.setMesh(mesh);
     
     icon.setToPlace();
@@ -110,42 +110,41 @@ WIDGET3D.GridIcon = function(parameters){
     return false;
   }
   
-  if(parent.icons_.length >= parent.maxChildren_){
+  if(parent.icons.length >= parent.maxChildren){
     console.log("Grid is full! Creating bigger one");
-    parent.addSlots(Math.ceil(parent.density_ * 1.5));
+    parent.addSlots(Math.ceil(parent.density * 1.5));
   }
   
-  this.color_ = parameters.color !== undefined ? parameters.color : 0xFFFFFF;
-  this.url_ = parameters.url !== undefined ? parameters.url : false;
-  this.img_ = parameters.img !== undefined ? parameters.img : false;
-  
+  this.color = parameters.color !== undefined ? parameters.color : 0xFFFFFF;
+  this.url = parameters.url !== undefined ? parameters.url : false;
+  this.img = parameters.img !== undefined ? parameters.img : false;
   //object can store metadata in a format that user like
-  this.metadata_ = parameters.metadata !== undefined ? parameters.metadata : false;
+  this.metadata = parameters.metadata !== undefined ? parameters.metadata : false;
   
-  this.width_ = parent.width_/(parent.density_ + 3.3);
-  this.height_ = parent.height_/(parent.density_ + 3.3);
+  this.width = parent.width/(parent.density + 3.3);
+  this.height = parent.height/(parent.density + 3.3);
   
-  this.depth_ = parameters.depth !== undefined ? parameters.depth : this.height_;
+  this.depth = parameters.depth !== undefined ? parameters.depth : this.height;
   
-  var geometry = new THREE.CubeGeometry(this.width_, this.height_, this.depth_);
+  var geometry = new THREE.CubeGeometry(this.width, this.height, this.depth);
   
-  this.texture_ = false;
+  this.texture = false;
   
-  if(this.img_){
-    this.texture_ = new THREE.Texture(this.img_);
-    this.texture_.needsUpdate = true;
+  if(this.img){
+    this.texture = new THREE.Texture(this.img);
+    this.texture.needsUpdate = true;
   }
-  else if(this.url_){
-    this.texture_ = THREE.ImageUtils.loadTexture(this.url_);
+  else if(this.url){
+    this.texture = THREE.ImageUtils.loadTexture(this.url);
   }
 
-  this.material_ = new THREE.MeshBasicMaterial({map : this.texture_, color: this.color_});
+  this.material = new THREE.MeshBasicMaterial({map : this.texture, color: this.color});
   
-  var mesh = new THREE.Mesh( geometry, this.material_);
+  var mesh = new THREE.Mesh( geometry, this.material);
   
   this.setMesh(mesh);
   parent.add(this);
-  parent.icons_.push(this);
+  parent.icons.push(this);
   
   this.setToPlace();
   
@@ -155,23 +154,23 @@ WIDGET3D.GridIcon.prototype = WIDGET3D.Basic.prototype.inheritance();
 
 WIDGET3D.GridIcon.prototype.setToPlace = function(){
 
-  var parentLoc = this.parent_.getPosition();
+  var parentLoc = this.parent.getPosition();
   
-  var parentLeft = -this.parent_.width_/2.0 + parentLoc.x/this.parent_.width_;
-  var parentTop =  this.parent_.height_/2.0 + parentLoc.y/this.parent_.height_;
+  var parentLeft = -this.parent.width/2.0 + parentLoc.x/this.parent.width;
+  var parentTop =  this.parent.height/2.0 + parentLoc.y/this.parent.height;
   
-  var stepX = this.parent_.width_/this.parent_.density_;
-  var stepY = this.parent_.height_/this.parent_.density_;
+  var stepX = this.parent.width/this.parent.density;
+  var stepY = this.parent.height/this.parent.density;
   
   var slotCenterX = stepX/2;
   var slotCenterY = stepY/2;
   
-  if(this.parent_.icons_.length-1 > 0){
+  if(this.parent.icons.length-1 > 0){
   
-    var lastIcon = this.parent_.icons_[this.parent_.icons_.length-2];
+    var lastIcon = this.parent.icons[this.parent.icons.length-2];
     var lastIconLoc = lastIcon.getPosition();
     
-    if(((this.parent_.icons_.length-1) % this.parent_.density_) == 0)
+    if(((this.parent.icons.length-1) % this.parent.density) == 0)
     {  
       var x = parentLeft + slotCenterX;
       var y = lastIconLoc.y - stepY;
@@ -187,6 +186,6 @@ WIDGET3D.GridIcon.prototype.setToPlace = function(){
     var x = parentLeft + slotCenterX;
     var y = parentTop - slotCenterY; 
   }
-  this.setPosition(x, y, parentLoc.z/this.parent_.depth_);
+  this.setPosition(x, y, parentLoc.z/this.parent.depth);
 };
 

@@ -61,7 +61,7 @@ WIDGET3D = {
     };
     
     WIDGET3D.addObject = function(widget){
-      allObjects_[(widget.id_)] = widget;
+      allObjects_[(widget.id)] = widget;
     };
     
     WIDGET3D.removeObject = function(id){

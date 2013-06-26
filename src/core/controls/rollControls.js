@@ -11,27 +11,27 @@ WIDGET3D.RollControls = function(parameters){
   
   var that = this;
   
-  this.component_ = parameters.component;
-  this.mouseButton_ = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
-  this.shiftKey_ = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
+  this.component = parameters.component;
+  this.mouseButton = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
+  this.shiftKey = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
   
-  this.clickLocation_;
-  this.rotationOnMouseDownY_;
-  this.rotationOnMousedownX_;
+  this.clickLocation;
+  this.rotationOnMouseDownY;
+  this.rotationOnMousedownX;
   
-  var initialRotation = this.component_.getRotation();
-  this.modelRotationY_ = initialRotation.y;
-  this.modelRotationX_ = initialRotation.x;
+  var initialRotation = this.component.getRotation();
+  this.modelRotationY = initialRotation.y;
+  this.modelRotationX = initialRotation.x;
   
-  this.rotate_ = false;
+  this.rotate = false;
 
   this.mouseupHandler = function(event){
-    if(that.rotate_){
+    if(that.rotate){
       
       event.stopPropagation();
       event.preventDefault();
       
-      that.rotate_ = false;
+      that.rotate = false;
       
       var mainWindow = WIDGET3D.getApplication();
       mainWindow.removeEventListener("mousemove", that.mousemoveHandler);
@@ -41,18 +41,18 @@ WIDGET3D.RollControls = function(parameters){
   
   this.mousedownHandler = function(event){
     
-    if(event.button === that.mouseButton_ && event.shiftKey === that.shiftKey_){
+    if(event.button === that.mouseButton && event.shiftKey === that.shiftKey){
       
       event.stopPropagation();
       event.preventDefault();
       
-      that.component_.focus();
-      if(!that.rotate_){
-        that.rotate_ = true;
+      that.component.focus();
+      if(!that.rotate){
+        that.rotate = true;
         
-        that.clickLocation_ = WIDGET3D.mouseCoordinates(event);
-        that.rotationOnMouseDownY_ = that.modelRotationY_;
-        that.rotationOnMouseDownX_ = that.modelRotationX_;
+        that.clickLocation = WIDGET3D.mouseCoordinates(event);
+        that.rotationOnMouseDownY = that.modelRotationY;
+        that.rotationOnMouseDownX = that.modelRotationX;
         
         var mainWindow = WIDGET3D.getApplication();
         mainWindow.addEventListener("mousemove", that.mousemoveHandler, false);
@@ -63,37 +63,38 @@ WIDGET3D.RollControls = function(parameters){
 
   this.mousemoveHandler = function(event){
 
-    if (that.rotate_){
+    if (that.rotate){
     
       event.stopPropagation();
       event.preventDefault();
       
       var mouse = WIDGET3D.mouseCoordinates(event);
-      that.modelRotationY_ = that.rotationOnMouseDownY_ + ( mouse.x - that.clickLocation_.x );
-      that.modelRotationX_ = that.rotationOnMouseDownX_ + ( mouse.y - that.clickLocation_.y );
+      that.modelRotationY = that.rotationOnMouseDownY + ( mouse.x - that.clickLocation.x );
+      that.modelRotationX = that.rotationOnMouseDownX + ( mouse.y - that.clickLocation.y );
     }
   };
   
-  this.component_.addEventListener("mousedown", this.mousedownHandler, false);
+  this.component.addEventListener("mousedown", this.mousedownHandler, false);
   
   
   //Animate must be called before the component is rendered to apply
   //the change in components rotation
   this.animate = function(){
 
-    var rot = that.component_.getRotation();
+    var rot = that.component.getRotation();
     
-    var newRotY = rot.y + ((that.modelRotationY_ - rot.y)*0.04);
-    var newRotX = rot.x + ((that.modelRotationX_ - rot.x)*0.04);
+    var newRotY = rot.y + ((that.modelRotationY - rot.y)*0.04);
+    var newRotX = rot.x + ((that.modelRotationX - rot.x)*0.04);
     
-    that.component_.setRotationY(newRotY);
-    that.component_.setRotationX(newRotX);
+    that.component.setRotationY(newRotY);
+    that.component.setRotationX(newRotX);
   };
   
-  this.component_.addUpdateCallback(this.animate);
+  this.component.addUpdateCallback(this.animate);
   
 };
 
 
-
+WIDGET3D.RollControls.prototype.remove = function(){
+};
 

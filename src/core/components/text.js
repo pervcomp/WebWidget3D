@@ -17,26 +17,26 @@ WIDGET3D.Text = function(parameters){
   
   var parameters = parameters || {};
   
-  this.mutable_ = parameters.mutable !== undefined ? parameters.mutable : true;
+  this.mutable = parameters.mutable !== undefined ? parameters.mutable : true;
   
-  this.cursor_ = parameters.cursor !== undefined ? parameters.cursor : "|";
+  this.cursor = parameters.cursor !== undefined ? parameters.cursor : "|";
   
-  this.maxLength_ = parameters.maxLength !== undefined ? parameters.maxLength : false;
-  this.maxLineLength_ = parameters.maxLineLength !==  undefined ? parameters.maxLineLength : this.maxLength_;
+  this.maxLength = parameters.maxLength !== undefined ? parameters.maxLength : false;
+  this.maxLineLength = parameters.maxLineLength !==  undefined ? parameters.maxLineLength : this.maxLength;
   
-  this.endl_ = '\n';
+  this.endl = '\n';
   
-  //row buffer that is not yet added to the rows_ table
-  this.currentRow_ = "";
+  //row buffer that is not yet added to the rows table
+  this.currentRow = "";
   
   //the whole text that is processed in add and erase functions
-  this.text_ = "";
+  this.text = "";
   
   //table of rows
-  this.rows_ = [];
+  this.rows = [];
   
   //the whole text + cursor
-  this.textHandle_ = this.text_;
+  this.textHandle = this.text;
   
   if(parameters.text){
     this.setText(parameters.text);
@@ -47,10 +47,10 @@ WIDGET3D.Text = function(parameters){
 // inheriting Text from Basic
 WIDGET3D.Text.prototype = WIDGET3D.Basic.prototype.inheritance();
 
-WIDGET3D.Text.prototype.type_ = WIDGET3D.ElementType.TEXT;
+WIDGET3D.Text.prototype.type = WIDGET3D.ElementType.TEXT;
 
 WIDGET3D.Text.prototype.setText = function(text){
-  if(this.mutable_){
+  if(this.mutable){
     for(var i = 0; i < text.length; ++i){
       this.addLetter(text[i]);
     }
@@ -60,34 +60,34 @@ WIDGET3D.Text.prototype.setText = function(text){
 };
 
 WIDGET3D.Text.prototype.addLetter = function(letter){
-  if(this.mutable_){
+  if(this.mutable){
     
     //Checking it the current row and the whole text length are below limits
-    if(!this.maxLength_ || this.text_.length < this.maxLength_)
+    if(!this.maxLength || this.text.length < this.maxLength)
     {
     
-      if(!this.maxLineLength_ || this.currentRow_.length < this.maxLineLength_){
-        this.currentRow_ += letter;
-        this.text_ += letter;
+      if(!this.maxLineLength || this.currentRow.length < this.maxLineLength){
+        this.currentRow += letter;
+        this.text += letter;
         
-        if(this.currentRow_.length == this.maxLineLength_ || this.text_.length == this.maxLength_)
+        if(this.currentRow.length == this.maxLineLength || this.text.length == this.maxLength)
         {
-          this.rows_.push(this.currentRow_+this.endl_);
-          this.currentRow_ = "";
+          this.rows.push(this.currentRow+this.endl);
+          this.currentRow = "";
         }
       }
-      else if(this.currentRow_.length == this.maxLineLength_ || this.text_.length == this.maxLength_)
+      else if(this.currentRow.length == this.maxLineLength || this.text.length == this.maxLength)
       {
-        this.rows_.push(this.currentRow_+this.endl_);
-        this.currentRow_ = letter;
-        this.text_ += letter;
+        this.rows.push(this.currentRow+this.endl);
+        this.currentRow = letter;
+        this.text += letter;
       }
       
     }
     
-    this.textHandle_ = this.text_;
-    if(this.inFocus_){
-      this.textHandle_ += this.cursor_;
+    this.textHandle = this.text;
+    if(this.inFocus){
+      this.textHandle += this.cursor;
     }
     
     this.update();
@@ -95,33 +95,33 @@ WIDGET3D.Text.prototype.addLetter = function(letter){
 };
 
 WIDGET3D.Text.prototype.erase = function(amount){
-  if(this.mutable_){
+  if(this.mutable){
     
     for(i = 0; i < amount; ++i){
-      if(this.currentRow_.length != 0){
-        this.currentRow_ = this.currentRow_.substring(0, (this.currentRow_.length-1));
+      if(this.currentRow.length != 0){
+        this.currentRow = this.currentRow.substring(0, (this.currentRow.length-1));
         
-        if(this.currentRow_.length == 0 && this.rows_.length != 0){
-          this.currentRow_ = this.rows_[this.rows_.length-1];
-          this.rows_.splice(-1, 1);
+        if(this.currentRow.length == 0 && this.rows.length != 0){
+          this.currentRow = this.rows[this.rows.length-1];
+          this.rows.splice(-1, 1);
           //taking the endl character out.
-          this.currentRow_ = this.currentRow_.substring(0, (this.currentRow_.length-1));
+          this.currentRow = this.currentRow.substring(0, (this.currentRow.length-1));
           
         }
       }
-      else if(this.rows_.length != 0){
-        this.currentRow_ = this.rows_[this.rows_.length-1];
-        this.rows_.splice(-1, 1);
+      else if(this.rows.length != 0){
+        this.currentRow = this.rows[this.rows.length-1];
+        this.rows.splice(-1, 1);
         
         //taking the endl character and the character to be erased out.
-        this.currentRow_ = this.currentRow_.substring(0, (this.currentRow_.length-2));
+        this.currentRow = this.currentRow.substring(0, (this.currentRow.length-2));
       }
     }
-    this.text_ = this.text_.substring(0, (this.text_.length-amount));
+    this.text = this.text.substring(0, (this.text.length-amount));
     
-    this.textHandle_ = this.text_;
-    if(this.inFocus_){
-      this.textHandle_ += this.cursor_;
+    this.textHandle = this.text;
+    if(this.inFocus){
+      this.textHandle += this.cursor;
     }
     
     this.update();
@@ -130,8 +130,8 @@ WIDGET3D.Text.prototype.erase = function(amount){
 
 //set focus on textobject
 WIDGET3D.Text.prototype.focus = function(){
-  if(this.mutable_ && !this.inFocus_){
-    this.textHandle_ = this.text_ + this.cursor_;
+  if(this.mutable && !this.inFocus){
+    this.textHandle = this.text + this.cursor;
   }
   WIDGET3D.Basic.prototype.focus.call(this);
   this.update();
@@ -139,8 +139,8 @@ WIDGET3D.Text.prototype.focus = function(){
 
 //unfocus textobject
 WIDGET3D.Text.prototype.unfocus = function(){
-  if(this.inFocus_ && this.mutable_){
-    this.textHandle_ = this.text_;
+  if(this.inFocus && this.mutable){
+    this.textHandle = this.text;
   }
   WIDGET3D.Basic.prototype.unfocus.call(this);
   this.update();
@@ -151,9 +151,9 @@ WIDGET3D.Text.prototype.unfocus = function(){
 // PROTOTYPAL INHERITANCE FUNCTION FOR TEXT OBJECT
 //--------------------------------------------------
 WIDGET3D.Text.prototype.inheritance = function(){
-  function guiTextPrototype(){}
-  guiTextPrototype.prototype = this;
-  var created = new guiTextPrototype();
+  function WIDGET3DTextPrototype(){}
+  WIDGET3DTextPrototype.prototype = this;
+  var created = new WIDGET3DTextPrototype();
   return created;
 };
 

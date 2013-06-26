@@ -10,13 +10,12 @@
 //GUI OBJECT CONSTRUCTORS
 WIDGET3D.GuiObject = function(){
 
-  this.isVisible_ = true;
-  this.inFocus_ = false;
-  this.id_ = WIDGET3D.id();
+  this.inFocus = false;
+  this.id = WIDGET3D.id();
   
-  this.updateCallbacks_ = [];
+  this.updateCallbacks = [];
   
-  this.events_ = {
+  this.events = {
   
     checkEvent : function(name){
       if(this.hasOwnProperty(name.toString()) && this[name.toString()] != false){
@@ -89,9 +88,9 @@ WIDGET3D.GuiObject = function(){
 
 //set focus on object
 WIDGET3D.GuiObject.prototype.focus = function(){
-  if(!this.inFocus_){
+  if(!this.inFocus){
   
-    this.inFocus_ = true;
+    this.inFocus = true;
     WIDGET3D.addFocus(this);
     
   }
@@ -99,8 +98,8 @@ WIDGET3D.GuiObject.prototype.focus = function(){
 
 //unfocus object
 WIDGET3D.GuiObject.prototype.unfocus = function(){
-  if(this.inFocus_){
-    this.inFocus_ = false; 
+  if(this.inFocus){
+    this.inFocus = false; 
     WIDGET3D.removeFocus(this);
   }
 };
@@ -111,20 +110,20 @@ WIDGET3D.GuiObject.prototype.unfocus = function(){
 //
 WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, bubbles){
 
-  if(!WIDGET3D.getEvents().enabled_[name.toString()]){
+  if(!WIDGET3D.getEvents().enabled[name.toString()]){
     WIDGET3D.getEvents().enableEvent(name);
   }
-  if(!this.events_.checkEvent(name)){
-    var index = WIDGET3D.getApplication().childEvents_.addObject(name, this);
+  if(!this.events.checkEvent(name)){
+    var index = WIDGET3D.getApplication().childEvents.addObject(name, this);
   }
   else{
-    var index = this.events_[name.toString()][0].index;
+    var index = this.events[name.toString()][0].index;
   }
   
   if(bubbles == undefined){
     bubbles = true;
   }
-  this.events_.addCallback(name, callback, bubbles, index);
+  this.events.addCallback(name, callback, bubbles, index);
 };
 
 // Removes eventlistener from object
@@ -132,22 +131,22 @@ WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, bubbles
 //             callback = binded callbackfunction
 WIDGET3D.GuiObject.prototype.removeEventListener = function(name, callback){
 
-  var index = this.events_.removeCallback(name, callback);
+  var index = this.events.removeCallback(name, callback);
   
   if(index === false){
     return false;
   }
-  if(this.events_[name.toString()] === false){
+  if(this.events[name.toString()] === false){
     var mainWindow = WIDGET3D.getApplication();
     
-    mainWindow.childEvents_[name.toString()].splice(index, 1);
+    mainWindow.childEvents[name.toString()].splice(index, 1);
     
     //if there were no events left lets disable event
-    if(mainWindow.childEvents_[name.toString()].length == 0){
-      mainWindow.childEvents_.removeEvent(name);
+    if(mainWindow.childEvents[name.toString()].length == 0){
+      mainWindow.childEvents.removeEvent(name);
     }
-    for(var i = 0; i < mainWindow.childEvents_[name.toString()].length; ++i){
-      mainWindow.childEvents_[name.toString()][i].setNewEventIndex(name, i);
+    for(var i = 0; i < mainWindow.childEvents[name.toString()].length; ++i){
+      mainWindow.childEvents[name.toString()][i].setNewEventIndex(name, i);
     }
     
     return true;
@@ -156,21 +155,21 @@ WIDGET3D.GuiObject.prototype.removeEventListener = function(name, callback){
 
 // Removes eventlisteners from object
 WIDGET3D.GuiObject.prototype.removeEventListeners = function(name){
-  var index = this.events_.removeAll(name);
+  var index = this.events.removeAll(name);
   if(index === false){
     return false;
   }
   else{
     var mainWindow = WIDGET3D.getApplication();
     
-    mainWindow.childEvents_[name.toString()].splice(index, 1);
+    mainWindow.childEvents[name.toString()].splice(index, 1);
     
-    if(mainWindow.childEvents_[name.toString()].length == 0){   
-      mainWindow.childEvents_.removeEvent(name);
+    if(mainWindow.childEvents[name.toString()].length == 0){   
+      mainWindow.childEvents.removeEvent(name);
     }
     
-    for(var i = 0; i < mainWindow.childEvents_[name.toString()].length; ++i){
-      mainWindow.childEvents_[name.toString()][i].setNewEventIndex(name, i);
+    for(var i = 0; i < mainWindow.childEvents[name.toString()].length; ++i){
+      mainWindow.childEvents[name.toString()][i].setNewEventIndex(name, i);
     }
     
     return true;
@@ -178,40 +177,40 @@ WIDGET3D.GuiObject.prototype.removeEventListeners = function(name){
 };
 
 WIDGET3D.GuiObject.prototype.removeAllListeners = function(){
-  var listeners = this.events_.remove();
+  var listeners = this.events.remove();
   
   var mainWindow = WIDGET3D.getApplication();
   for(var i = 0; i < listeners.length; ++i){
     var name = listeners[i].name;
     var index = listeners[i].index;
     
-    mainWindow.childEvents_[name].splice(index, 1);
+    mainWindow.childEvents[name].splice(index, 1);
     
-    if(mainWindow.childEvents_[name].length == 0){
-      mainWindow.childEvents_.removeEvent(name);
+    if(mainWindow.childEvents[name].length == 0){
+      mainWindow.childEvents.removeEvent(name);
     }
     
-    for(var k = 0; k < mainWindow.childEvents_[name].length; ++k){
-      mainWindow.childEvents_[name][k].setNewEventIndex(name, k);
+    for(var k = 0; k < mainWindow.childEvents[name].length; ++k){
+      mainWindow.childEvents[name][k].setNewEventIndex(name, k);
     }
   }
 }
 
 WIDGET3D.GuiObject.prototype.setNewEventIndex = function(name, index){
   
-  for(var i = 0; i < this.events_[name.toString()].length; ++i){
-    this.events_[name.toString()][i].index = index;
+  for(var i = 0; i < this.events[name.toString()].length; ++i){
+    this.events[name.toString()][i].index = index;
   }
-  WIDGET3D.getApplication().childEvents_[name.toString()][index] = this;
+  WIDGET3D.getApplication().childEvents[name.toString()][index] = this;
 }
 
 WIDGET3D.GuiObject.prototype.addUpdateCallback = function(callback, args){
-  this.updateCallbacks_.push({callback: callback, arguments: args});
+  this.updateCallbacks.push({callback: callback, arguments: args});
 };
 
 WIDGET3D.GuiObject.prototype.update = function(){
-  for(var i = 0; i < this.updateCallbacks_.length; ++i){
-    this.updateCallbacks_[i].callback(this.updateCallbacks_[i].arguments);
+  for(var i = 0; i < this.updateCallbacks.length; ++i){
+    this.updateCallbacks[i].callback(this.updateCallbacks[i].arguments);
   }
 };
 

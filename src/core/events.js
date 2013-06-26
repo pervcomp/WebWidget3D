@@ -31,39 +31,39 @@ SOFTWARE.
 // needs the gui's main window (root window)
 WIDGET3D.DomEvents = function(collisionCallback){
 
-  var _that_ = this;
+  var that = this;
   
-  _that_.collisions_ = {
+  var collisions_ = {
     callback: collisionCallback.callback,
     args: collisionCallback.args
   };
   
-  _that_.enabled_ = {};
+  that.enabled = {};
   
   //Function for checking the event prototype
   // if event is mouse event mouseEvent function is called
   // if it is a keyboard event keyboarEvent is called and
   // if the event is neither of these triggerEvent is called.
-  _that_.mainEventHandler = function(domEvent){
+  that.mainEventHandler = function(domEvent){
     
     var proto = Object.getPrototypeOf(domEvent);
     
     if(proto.hasOwnProperty(String("initMouseEvent"))){
-      _that_.mouseEvent(domEvent);
+      that.mouseEvent(domEvent);
       return false;
     }
     else if(proto.hasOwnProperty(String("initKeyboardEvent"))){
-      return _that_.keyboardEvent(domEvent);
+      return that.keyboardEvent(domEvent);
     }
     else{
-      _that_.triggerEvent(domEvent);
+      that.triggerEvent(domEvent);
     }
     
   };
   
-  _that_.mouseEvent = function(domEvent){
+  that.mouseEvent = function(domEvent){
     
-    var found = _that_.collisions_.callback(domEvent, _that_.collisions_.args);
+    var found = collisions_.callback(domEvent, collisions_.args);
     var name = domEvent.type;
     var mainWindow = WIDGET3D.getApplication();
     
@@ -75,16 +75,16 @@ WIDGET3D.DomEvents = function(collisionCallback){
       var hit = found[i];
     
       //hit can't be mainWindow because mainWindow doesn't have mesh
-      if(hit && hit.events_.hasOwnProperty(name.toString())){
-        for(var k = 0; k < hit.events_[name.toString()].length; ++k){
+      if(hit && hit.events.hasOwnProperty(name.toString())){
+        for(var k = 0; k < hit.events[name.toString()].length; ++k){
           
           //All the event handlers of the current object is to be called but
           //bubbling to other widgets is prevented.
-          if(!hit.events_[name.toString()][k].bubbles){
+          if(!hit.events[name.toString()][k].bubbles){
             bubbles = false;
           }
           
-          hit.events_[name.toString()][k].callback(domEvent);
+          hit.events[name.toString()][k].callback(domEvent);
         }
       }
       
@@ -94,14 +94,14 @@ WIDGET3D.DomEvents = function(collisionCallback){
     }
     
     //if mainwindow has eventlistener it is executed also if bubbling is not prevented
-    if(bubbles && mainWindow.events_.hasOwnProperty(name.toString())){
-      for(var j = 0; j < mainWindow.events_[name.toString()].length; ++j){
+    if(bubbles && mainWindow.events.hasOwnProperty(name.toString())){
+      for(var j = 0; j < mainWindow.events[name.toString()].length; ++j){
       
-        if(!mainWindow.events_[name.toString()][j].bubbles){
+        if(!mainWindow.events[name.toString()][j].bubbles){
           bubbles = false;
         }
         
-        mainWindow.events_[name.toString()][j].callback(domEvent);
+        mainWindow.events[name.toString()][j].callback(domEvent);
       }
     }
     
@@ -109,20 +109,20 @@ WIDGET3D.DomEvents = function(collisionCallback){
   };
   
   //NOTICE KEYBOARD EVENTS DOESN'T CARE ON BUBBLES PARAMETER!
-  _that_.keyboardEvent = function(domEvent){
+  that.keyboardEvent = function(domEvent){
     
     var name = domEvent.type;
     var mainWindow = WIDGET3D.getApplication();
     
     //Focused widgets get the event
-    for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
-      if(mainWindow.childEvents_[name.toString()][k] != mainWindow &&
-        mainWindow.childEvents_[name.toString()][k].inFocus_)
+    for(var k = 0; k < mainWindow.childEvents[name.toString()].length; ++k){
+      if(mainWindow.childEvents[name.toString()][k] != mainWindow &&
+        mainWindow.childEvents[name.toString()][k].inFocus)
       {
-        var object = mainWindow.childEvents_[name.toString()][k];
+        var object = mainWindow.childEvents[name.toString()][k];
         
-        for(var m = 0; m < object.events_[name.toString()].length; ++m){
-          object.events_[name.toString()][m].callback(domEvent);
+        for(var m = 0; m < object.events[name.toString()].length; ++m){
+          object.events[name.toString()][m].callback(domEvent);
           
         }
       }
@@ -130,10 +130,10 @@ WIDGET3D.DomEvents = function(collisionCallback){
     
     //TODO REFACTOR
     //If mainwindow handler wasn't called yet it will be called now.
-    if(!mainWindow.inFocus_){
-      if(mainWindow.events_.hasOwnProperty(name.toString())){      
-        for(var l = 0; l < mainWindow.events_[name.toString()].length; ++l){
-          mainWindow.events_[name.toString()][l].callback(domEvent);
+    if(!mainWindow.inFocus){
+      if(mainWindow.events.hasOwnProperty(name.toString())){      
+        for(var l = 0; l < mainWindow.events[name.toString()].length; ++l){
+          mainWindow.events[name.toString()][l].callback(domEvent);
         }
       }
     }
@@ -144,27 +144,27 @@ WIDGET3D.DomEvents = function(collisionCallback){
   // if the id isn't specified the event is passed to all objects
   // that has the listener for the event.
   //
-  _that_.triggerEvent = function(event, id){
+  that.triggerEvent = function(event, id){
     var name = event.type;
     
     if(!id){
       
       var mainWindow = WIDGET3D.getApplication();
       
-      for(var k = 0; k < mainWindow.childEvents_[name.toString()].length; ++k){
+      for(var k = 0; k < mainWindow.childEvents[name.toString()].length; ++k){
         
-        var object = mainWindow.childEvents_[name.toString()][k];
+        var object = mainWindow.childEvents[name.toString()][k];
         
-        for(var m = 0; m < object.events_[name.toString()].length; ++m){
-          object.events_[name.toString()][m].callback(event);
+        for(var m = 0; m < object.events[name.toString()].length; ++m){
+          object.events[name.toString()][m].callback(event);
         }
       }
     }
     else{
       
       var to = WIDGET3D.getObjectById(id);
-      for(var i = 0; i < to.events_[name.toString()].length; ++i){
-        to.events_[name.toString()][i].callback(event);
+      for(var i = 0; i < to.events[name.toString()].length; ++i){
+        to.events[name.toString()][i].callback(event);
       }
     }
   };
@@ -175,22 +175,22 @@ WIDGET3D.DomEvents = function(collisionCallback){
 //Adds event listener to dom element
 WIDGET3D.DomEvents.prototype.enableEvent = function(name){
   //if there is no property or if the property is false
-  if(!this.enabled_.hasOwnProperty(name.toString()) || 
-    (this.enabled_.hasOwnProperty(name.toString()) && this.enabled_[name.toString()] === false))
+  if(!this.enabled.hasOwnProperty(name.toString()) || 
+    (this.enabled.hasOwnProperty(name.toString()) && this.enabled[name.toString()] === false))
   {
     window.addEventListener(name, this.mainEventHandler, false); 
-    this.enabled_[name.toString()] = true;
+    this.enabled[name.toString()] = true;
   }
 };
 
 //Removes event listener from dom element
 WIDGET3D.DomEvents.prototype.disableEvent = function(name){
 
-  if(this.enabled_.hasOwnProperty(name.toString()) && this.enabled_[name.toString()] === true){
+  if(this.enabled.hasOwnProperty(name.toString()) && this.enabled[name.toString()] === true){
     
     window.removeEventListener(name, this.mainEventHandler, false);
     
-    this.enabled_[name.toString()] = false;
+    this.enabled[name.toString()] = false;
     return true;
   }
   return false;

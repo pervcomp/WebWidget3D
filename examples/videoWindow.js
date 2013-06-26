@@ -30,6 +30,16 @@ var init = function(){
   
   var camera = WIDGET3D.getCamera();
   camera.position.setZ(that.DISTANCE);
+  camera.rotation.setX(Math.PI/5);
+  
+  var cameraGroup = WIDGET3D.getCameraGroup();
+  cameraGroup.setRotationX(-Math.PI/5);
+  
+  
+  var testGroup = new WIDGET3D.Group();
+  testGroup.setRotationY(Math.PI/8);
+  
+  cameraGroup.add(testGroup);
   
   //--------------------------------------------
   // TITLED WINDOW WHERE WE SHOW THE VIDEO
@@ -50,8 +60,10 @@ var init = function(){
     title : "video",
     texture : texture,
     defaultControls : true,
-    //debug : true
+    debug : true
   });
+  
+  videoWindow.setRotationY(-Math.PI/8);
   
   var rollControls = new WIDGET3D.RollControls({component : videoWindow, mouseButton : 0, shiftKey : true});
   
@@ -64,11 +76,11 @@ var init = function(){
     }
   }
   var pauseFunction = createPauseFunction(video);
-  videoWindow.closeButton_.addEventListener("click", pauseFunction);
-  
-  WIDGET3D.getCameraGroup().add(videoWindow);
+  videoWindow.closeButton.addEventListener("click", pauseFunction);
   
   //mainWindow.add(videoWindow);
+  //cameraGroup.add(videoWindow);
+  testGroup.add(videoWindow);
   
   var onResize = function(){
     WIDTH = window.innerWidth;

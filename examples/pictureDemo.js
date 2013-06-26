@@ -35,8 +35,16 @@ var init = function(){
     width : 600,
     height : 500,
     color : 0x000000,
-    defaultControls: true//,
-    //hideGrid : true
+    defaultControls: true,
+    mouseButton : 0,
+    hideGrid : true
+  });
+  
+  var dragControls = new WIDGET3D.DragControls({
+    component : subWindow,
+    mouseButton : 2,
+    width: 800,
+    height: 600
   });
   
   mainWindow.add(subWindow);
@@ -135,12 +143,12 @@ var createMouseclickHandler = function(parameters){
   
   return function(event){
   
-    var width = parameters.button.container_.material.map.image.naturalWidth;
-    var height = parameters.button.container_.material.map.image.naturalHeight;
+    var width = parameters.button.container.material.map.image.naturalWidth;
+    var height = parameters.button.container.material.map.image.naturalHeight;
     var scale = SCALEFACTOR/height;
     
     var display = new THREE.Mesh(new THREE.PlaneGeometry(width*scale, height*scale),
-      parameters.button.container_.material);
+      parameters.button.container.material);
     
     display.position.z = DISPLAY_DISTANCE;
     

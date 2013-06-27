@@ -37,7 +37,7 @@ var init = function(){
     color : 0x000000,
     defaultControls: true,
     mouseButton : 0,
-    hideGrid : true
+    //hideGrid : true
   });
   
   var dragControls = new WIDGET3D.DragControls({

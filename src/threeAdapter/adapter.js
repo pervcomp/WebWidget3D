@@ -101,7 +101,7 @@ var THREEJS_WIDGET3D = {
       
       //intersects checks now all the meshes in scene. It might be good to construct
       // a datastructure that contains meshes of app.childEvents.event array content
-      var intersects = ray.intersectObjects(scene_.children);
+      var intersects = ray.intersectObjects(scene_.children, true);
       
       var closest = false;
       

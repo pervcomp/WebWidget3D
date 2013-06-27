@@ -186,6 +186,6 @@ WIDGET3D.GridIcon.prototype.setToPlace = function(){
     var x = parentLeft + slotCenterX;
     var y = parentTop - slotCenterY; 
   }
-  this.setPosition(x, y, parentLoc.z/this.parent.depth);
+  this.setPosition(x, y, parentLoc.z/this.parent.height);
 };
 

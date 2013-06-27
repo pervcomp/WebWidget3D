@@ -322,7 +322,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
   // if it is a keyboard event keyboarEvent is called and
   // if the event is neither of these triggerEvent is called.
   that.mainEventHandler = function(domEvent){
-    
+  
     var proto = Object.getPrototypeOf(domEvent);
     
     if(proto.hasOwnProperty(String("initMouseEvent"))){
@@ -1455,7 +1455,7 @@ var THREEJS_WIDGET3D = {
       
       //intersects checks now all the meshes in scene. It might be good to construct
       // a datastructure that contains meshes of app.childEvents.event array content
-      var intersects = ray.intersectObjects(scene_.children);
+      var intersects = ray.intersectObjects(scene_.children, true);
       
       var closest = false;
       
@@ -2201,7 +2201,7 @@ WIDGET3D.GridIcon.prototype.setToPlace = function(){
     var x = parentLeft + slotCenterX;
     var y = parentTop - slotCenterY; 
   }
-  this.setPosition(x, y, parentLoc.z/this.parent.depth);
+  this.setPosition(x, y, parentLoc.z/this.parent.height);
 };
 
 //---------------------------------------------------

@@ -42,7 +42,7 @@ WIDGET3D.GridWindow = function(parameters){
   var geometry = new THREE.CubeGeometry( this.width, this.height, this.depth, this.density, this.density, 1 );
   var mesh =  new THREE.Mesh(geometry, this.material);
   this.grid = new WIDGET3D.Basic();
-  this.grid.setMesh(mesh);
+  this.grid.setObject3D(mesh);
   
   var hideGrid = parameters.hideGrid !== undefined ? parameters.hideGrid : false;
   if(hideGrid){
@@ -60,7 +60,7 @@ WIDGET3D.GridWindow = function(parameters){
     var button = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
     var shift = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
     
-    this.controls = new WIDGET3D.RollControls({component : this, mouseButton : button, shiftKey : shift});
+    var control = new WIDGET3D.RollControl(this, {mouseButton : button, shiftKey : shift});
   }
 };
 
@@ -73,7 +73,7 @@ WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
   
   var grid = new THREE.CubeGeometry( this.width, this.height, this.depth, this.density, this.density, 1 );
   var gridMesh =  new THREE.Mesh(grid, this.material);
-  this.grid.setMesh(gridMesh);
+  this.grid.setObject3D(gridMesh);
   
   var tmpChilds = this.icons;
   this.icons = new Array();
@@ -88,7 +88,7 @@ WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
     
     var geometry = new THREE.CubeGeometry(icon.width, icon.height, icon.depth);
     var mesh = new THREE.Mesh( geometry, icon.material);
-    icon.setMesh(mesh);
+    icon.setObject3D(mesh);
     
     icon.setToPlace();
   } 
@@ -142,7 +142,7 @@ WIDGET3D.GridIcon = function(parameters){
   
   var mesh = new THREE.Mesh( geometry, this.material);
   
-  this.setMesh(mesh);
+  this.setObject3D(mesh);
   parent.add(this);
   parent.icons.push(this);
   

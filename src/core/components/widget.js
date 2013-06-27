@@ -1,5 +1,5 @@
 //---------------------------------------------
-// GUI OBJECT : generic abstract object
+// WIDGET : generic abstract object
 //---------------------------------------------
 
 //There are ElementType amount of different kind of bjects
@@ -7,7 +7,7 @@
 //So this Object describes all properties and methods that are
 //for all types of objects
 
-WIDGET3D.ObjectBase = function(){
+WIDGET3D.Widget = function(){
 
   WIDGET3D.GuiObject.call( this );
   
@@ -18,8 +18,10 @@ WIDGET3D.ObjectBase = function(){
   this.controls = new Array();
 };
 
+WIDGET3D.Widget.prototype = WIDGET3D.GuiObject.prototype.inheritance();
+
 //Sets/changes the 3D object for a widget
-WIDGET3D.ObjectBase.prototype.setObject3D = function(obj){
+WIDGET3D.Widget.prototype.setObject3D = function(obj){
 
   obj.visible = this.isVisible;
   
@@ -39,12 +41,11 @@ WIDGET3D.ObjectBase.prototype.setObject3D = function(obj){
   
 };
 
-WIDGET3D.ObjectBase.prototype.applyControl = function(control){
-  control.setComponent(this);
+WIDGET3D.Widget.prototype.applyControl = function(control){
   this.controls.push(control);
 };
 
-WIDGET3D.ObjectBase.prototype.removeControl = function(control){
+WIDGET3D.Widget.prototype.removeControl = function(control){
   for(i = 0; i < this.controls.lenght; ++i){
     if(this.controls[i] === control){
       control.remove();
@@ -54,7 +55,7 @@ WIDGET3D.ObjectBase.prototype.removeControl = function(control){
 };
 
 //Shows object
-WIDGET3D.ObjectBase.prototype.show = function(){
+WIDGET3D.Widget.prototype.show = function(){
   if(!this.isVisible){
     this.isVisible = true;
     if(this.object3D){
@@ -64,7 +65,7 @@ WIDGET3D.ObjectBase.prototype.show = function(){
 };
 
 // hides object
-WIDGET3D.ObjectBase.prototype.hide = function(){
+WIDGET3D.Widget.prototype.hide = function(){
   if(this.isVisible){
     this.isVisible = false;
     if(this.object3D){
@@ -77,7 +78,7 @@ WIDGET3D.ObjectBase.prototype.hide = function(){
 };
 
 //removes object
-WIDGET3D.ObjectBase.prototype.remove = function(){
+WIDGET3D.Widget.prototype.remove = function(){
   this.hide();
   
   for(var i = 0; i < this.controls.length; ++i){
@@ -89,4 +90,13 @@ WIDGET3D.ObjectBase.prototype.remove = function(){
   WIDGET3D.removeObject(this.id);
 };
 
+//---------------------------------------------------------
+// PROTOTYPAL INHERITANCE FUNCTION FOR ABSTRACT WIDGET OBJECT
+//---------------------------------------------------------
+WIDGET3D.Widget.prototype.inheritance = function(){
+  function WIDGET3DWidgetPrototype(){};
+  WIDGET3DWidgetPrototype.prototype = this;
+  var created = new WIDGET3DWidgetPrototype();
+  return created;
+};
 

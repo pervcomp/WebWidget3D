@@ -6,7 +6,7 @@
 //---------------------------------------------
 WIDGET3D.Group = function(){
 
-  WIDGET3D.GuiObject.call( this );
+  WIDGET3D.Widget.call( this );
   WIDGET3D.GroupBase.call( this );
   
   this.parent;
@@ -16,7 +16,9 @@ WIDGET3D.Group = function(){
 
 //-----------------------------------------------------------------------------------------
 // inheriting Group from Basic object
-WIDGET3D.Group.prototype = WIDGET3D.Basic.prototype.inheritance();
+//WIDGET3D.Group.prototype = WIDGET3D.Basic.prototype.inheritance();
+
+WIDGET3D.Group.prototype = WIDGET3D.Widget.prototype.inheritance();
 
 //inheriting some methods from WindowInterface
 
@@ -46,7 +48,8 @@ WIDGET3D.Group.prototype.show = function(){
     for(var i = 0; i < this.children.length; ++i){
       this.children[i].show();
     }
-    this.isVisible = true;
+    
+    WIDGET3D.Widget.prototype.show.call(this);
   }
 };
 
@@ -58,30 +61,19 @@ WIDGET3D.Group.prototype.hide = function(){
       this.children[i].hide();
     }
     
-    this.isVisible = false;
-    if(this.inFocus){
-      this.unfocus();
-    }
+    WIDGET3D.Widget.prototype.hide.call(this);
   }
 };
 
 //removes Group and it's children
 WIDGET3D.Group.prototype.remove = function(){
-  //children needs to be removed  
+
+  //children needs to be removed   
   while(this.children.length > 0){
     this.children[0].remove();
   }
-  //hiding the Group from scene
-  this.hide();
-  //removing event listeners
-  this.removeAllListeners();
   
-  //container has to be removed from parent's container
-  //this.parent.container.remove(this.container);
-  //removing this from parents objects
-  this.parent.removeFromObjects(this);
-  
-  WIDGET3D.removeObject(this.id);
+  WIDGET3D.Widget.prototype.remove.call(this);
 };
 
 WIDGET3D.Group.prototype.addEventListener = function(name, callback, bubbles){

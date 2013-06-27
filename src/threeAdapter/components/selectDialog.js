@@ -69,7 +69,7 @@ WIDGET3D.SelectDialog.prototype.createText = function(){
   mesh.position.y = this.height*0.5 - this.choiceHeight*0.5;
   
   var title = new WIDGET3D.Basic();
-  title.setMesh(mesh);
+  title.setObject3D(mesh);
   
   this.add(title);
   
@@ -114,7 +114,7 @@ WIDGET3D.SelectDialog.prototype.createChoises = function(){
     var material = new THREE.MeshFaceMaterial(materials);
     var mesh = new THREE.Mesh(geometry, material);
 
-    choice.setMesh(mesh);
+    choice.setObject3D(mesh);
     
     var parentLoc = this.getPosition();
     var y = 0;
@@ -208,13 +208,13 @@ WIDGET3D.SelectDialog.prototype.changeChoiceText = function(text, index){
     }
   }
   if(object){
-    var canvas = object.container.material.map.image;
-    var context = object.container.material.map.image.getContext('2d');
+    var canvas = object.object3D.material.map.image;
+    var context = object.object3D.material.map.image.getContext('2d');
     var materials = this.createButtonMaterial(text, context, canvas);
 
-    object.container.geometry.materials = materials;
-    object.container.material = new THREE.MeshFaceMaterial(materials);
-    object.container.needsUpdate = true;
+    object.object3D.geometry.materials = materials;
+    object.object3D.material = new THREE.MeshFaceMaterial(materials);
+    object.object3D.needsUpdate = true;
     return true;
   }
   return false;

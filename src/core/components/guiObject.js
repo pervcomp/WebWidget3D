@@ -208,6 +208,10 @@ WIDGET3D.GuiObject.prototype.addUpdateCallback = function(callback, args){
   this.updateCallbacks.push({callback: callback, arguments: args});
 };
 
+//TODO
+WIDGET3D.GuiObject.prototype.removeUpdateCallback = function(callback){
+};
+
 WIDGET3D.GuiObject.prototype.update = function(){
   for(var i = 0; i < this.updateCallbacks.length; ++i){
     this.updateCallbacks[i].callback(this.updateCallbacks[i].arguments);

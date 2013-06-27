@@ -153,7 +153,7 @@ var THREEJS_WIDGET3D = {
         if(app.childEvents[name.toString()][i].isVisible){
           
           // If the object is the one we hit, we return the object
-          if(mesh === app.childEvents[name.toString()][i].container){
+          if(mesh === app.childEvents[name.toString()][i].object3D){
             
             return app.childEvents[name.toString()][i];
             
@@ -238,7 +238,7 @@ var THREEJS_WIDGET3D = {
           app = WIDGET3D.getApplication();
         }
         
-        scene_.add(app.container);
+        scene_.add(app.object3D);
         projector_ = new THREE.Projector();
         
         //Constructing camera group

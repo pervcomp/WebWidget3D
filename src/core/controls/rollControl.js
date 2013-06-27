@@ -7,13 +7,13 @@
 //            shiftKey: Boolean that tells if the shift key should be pressed down with the mouse button to apply the movement.
 //                      Default value is false.
 //
-WIDGET3D.RollControls = function(parameters){
+WIDGET3D.RollControl = function(component, parameters){
+  
+  var parameters = parameters || {};
+  
+  WIDGET3D.Control.call(this, component, parameters);
   
   var that = this;
-  
-  this.component = parameters.component;
-  this.mouseButton = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
-  this.shiftKey = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
   
   this.clickLocation;
   this.rotationOnMouseDownY;
@@ -88,13 +88,10 @@ WIDGET3D.RollControls = function(parameters){
     
     that.component.setRotationY(newRotY);
     that.component.setRotationX(newRotX);
-  };
-  
+  }; 
   this.component.addUpdateCallback(this.animate);
-  
 };
 
 
-WIDGET3D.RollControls.prototype.remove = function(){
-};
+WIDGET3D.RollControl.prototype = WIDGET3D.Control.prototype.inheritance();
 

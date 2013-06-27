@@ -7,68 +7,62 @@
 //            shiftKey: Boolean that tells if the shift key should be pressed down with the mouse button to apply the movement.
 //                      Default value is false.
 //
-WIDGET3D.DragControls = function(parameters){
+WIDGET3D.DragControl = function(component, parameters){
+
+  var parameters = parameters || {};
+  WIDGET3D.Control.call(this, component, parameters);
+  
+  var width = parameters.width !== undefined ? parameters.width : 2000;
+  var height = parameters.height !== undefined ? parameters.height : 2000;
+  var debug = parameters.debug !== undefined ? parameters.debug : false;
   
   var that = this;
   
+  this.start = false;
+  this.camera = WIDGET3D.getCamera();
+  this.drag = false;
+  this.offset = new THREE.Vector3();
+  
+  //invisible plane that is used as a "draging area".
+  //the planes orientation is the same as the cameras orientation.
+  this.plane = new THREE.Mesh( new THREE.PlaneGeometry( width, height, 8, 8 ), 
+    new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true, side : THREE.DoubleSide } ) );
+  this.plane.visible = debug;
+  
   //To get the right orientation we need to have orientation of a cameras parent and camera and add these together
-  that.setPlaneRotation = function(){
-    
+  this.setPlaneRotation = function(){ 
     var camRot = that.camera.rotation.clone();
     var parent = that.camera.parent;
-    
     
     while(parent != undefined && parent != that.component.parent){
     
       camRot.add(parent.rotation.clone());
       parent = parent.parent;
     }
-    
     that.plane.rotation.copy(camRot);
-    
-  }; 
+  };
   
-  that.component = parameters.component;
-  that.mouseButton = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
-  that.shiftKey = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
+  this.setPlaneRotation();
+  WIDGET3D.getScene().add( this.plane );
   
-  that.start = false;
-  that.camera = WIDGET3D.getCamera();
-  
-  var width = parameters.width !== undefined ? parameters.width : 2000;
-  var height = parameters.height !== undefined ? parameters.height : 2000;
-  var debug = parameters.debug !== undefined ? parameters.debug : false;
-  
-  that.drag = false;
-  that.offset = new THREE.Vector3();
-  
-  //invisible plane that is used as a "draging area".
-  //the planes orientation is the same as the cameras orientation.
-  that.plane = new THREE.Mesh( new THREE.PlaneGeometry( width, height, 8, 8 ), 
-    new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true, side : THREE.DoubleSide } ) );
-  that.plane.visible = debug;
-  
-  that.setPlaneRotation();
-  WIDGET3D.getScene().add( that.plane );
-  
-  that.mouseupHandler = function(event){
+  this.mouseupHandler = function(event){
     if(that.drag){
       that.drag = false;
       
-      that.plane.position.copy(that.component.parent.container.localToWorld(that.component.getPosition().clone()));
+      that.plane.position.copy(that.component.parent.object3D.localToWorld(that.component.getPosition().clone()));
 
       WIDGET3D.getApplication().removeEventListener("mousemove", that.mousemoveHandler);
       WIDGET3D.getApplication().removeEventListener("mouseup", that.mouseupHandler);
     }
   };
   
-  that.mousedownHandler = function(event){
+  this.mousedownHandler = function(event){
     if(event.button === that.mouseButton && event.shiftKey === that.shiftKey){
       that.start = true;
       if(!that.drag){
         
         that.setPlaneRotation();
-        that.plane.position.copy(that.component.parent.container.localToWorld(that.component.getPosition().clone()));
+        that.plane.position.copy(that.component.parent.object3D.localToWorld(that.component.getPosition().clone()));
         //FORCE TO UPDATE MATRIXES OTHERWISE WE MAY GET INCORRECT VALUES FROM INTERSECTION
         that.plane.updateMatrixWorld(true);
         
@@ -91,7 +85,7 @@ WIDGET3D.DragControls = function(parameters){
     }
   };
 
-  that.mousemoveHandler = function(event){
+  this.mousemoveHandler = function(event){
     if(that.drag){
 
       var mouse = WIDGET3D.mouseCoordinates(event);
@@ -103,29 +97,24 @@ WIDGET3D.DragControls = function(parameters){
       
         var pos = intersects[ 0 ].point.sub( that.offset);
         that.plane.position.copy(pos);
-        var vec = that.component.parent.container.worldToLocal(pos);
+        var vec = that.component.parent.object3D.worldToLocal(pos);
         that.component.setPosition(vec.x, vec.y, vec.z);
         
       }
     }
   };
-  
-  that.component.addEventListener("mousedown", that.mousedownHandler, false);
-  
-  
-  that.remove = function(){
-  
-    WIDGET3D.getScene().remove( that.plane);
-    
-    that.plane.geometry.dispose();
-    that.plane.material.dispose();
-    that.plane = undefined;
-  };
-  
+  this.component.addEventListener("mousedown", this.mousedownHandler, false);
 };
 
 
+WIDGET3D.DragControl.prototype = WIDGET3D.Control.prototype.inheritance();
 
-
-
+WIDGET3D.DragControl.prototype.remove = function(){
+  
+  WIDGET3D.getScene().remove(this.plane);
+  
+  this.plane.geometry.dispose();
+  this.plane.material.dispose();
+  this.plane = undefined;
+};
 

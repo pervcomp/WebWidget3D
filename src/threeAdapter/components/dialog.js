@@ -97,7 +97,7 @@ WIDGET3D.Dialog.prototype.createDialogTitle = function(){
   var material = new THREE.MeshFaceMaterial(materials);
   var mesh = new THREE.Mesh(geometry, material);
   var title = new WIDGET3D.Basic();
-  title.setMesh(mesh);
+  title.setObject3D(mesh);
   this.add(title);
 }
 
@@ -144,7 +144,7 @@ WIDGET3D.Dialog.prototype.createButtons = function(){
     var mesh = this.createFaceMaterialsMesh(material, geometry);
     
     var button = new WIDGET3D.Basic();
-    button.setMesh(mesh);
+    button.setObject3D(mesh);
     button.addEventListener("click", this.buttons[i].onclick, false);
     this.add(button);
     
@@ -239,7 +239,7 @@ WIDGET3D.Dialog.prototype.createTextfields = function(){
     var textfield = new WIDGET3D.Text({maxLength : this.fields[i].maxLength});
     
     textfield.setText("");
-    textfield.setMesh(mesh);
+    textfield.setObject3D(mesh);
     
     textfield.addEventListener("click", textBoxClickFactory(textfield), false);
     textfield.addEventListener("keypress", textBoxKeyFactory(textfield));
@@ -279,7 +279,7 @@ WIDGET3D.Dialog.prototype.createTextfields = function(){
     var mesh2 = this.createFaceMaterialsMesh(material2, geometry2);
     
     var description = new WIDGET3D.Basic();
-    description.setMesh(mesh2);
+    description.setObject3D(mesh2);
     this.add(description);
     
     //positioning

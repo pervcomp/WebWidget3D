@@ -36,12 +36,10 @@ var init = function(){
     height : 500,
     color : 0x000000,
     defaultControls: true,
-    mouseButton : 0,
-    //hideGrid : true
+    mouseButton : 0
   });
   
-  var dragControls = new WIDGET3D.DragControls({
-    component : subWindow,
+  var dragControl = new WIDGET3D.DragControl(subWindow, {
     mouseButton : 2,
     width: 800,
     height: 600
@@ -57,7 +55,7 @@ var init = function(){
     new THREE.MeshBasicMaterial({color: 0xFFFFFF}));
   
   var pictureDisplay = new WIDGET3D.Basic();
-  pictureDisplay.setMesh(display);
+  pictureDisplay.setObject3D(display);
   mainWindow.add(pictureDisplay);
   
   var pictureclick = createPictureclickHandler(pictureDisplay);
@@ -143,16 +141,16 @@ var createMouseclickHandler = function(parameters){
   
   return function(event){
   
-    var width = parameters.button.container.material.map.image.naturalWidth;
-    var height = parameters.button.container.material.map.image.naturalHeight;
+    var width = parameters.button.object3D.material.map.image.naturalWidth;
+    var height = parameters.button.object3D.material.map.image.naturalHeight;
     var scale = SCALEFACTOR/height;
     
     var display = new THREE.Mesh(new THREE.PlaneGeometry(width*scale, height*scale),
-      parameters.button.container.material);
+      parameters.button.object3D.material);
     
     display.position.z = DISPLAY_DISTANCE;
     
-    parameters.pictureDisplay.setMesh(display);
+    parameters.pictureDisplay.setObject3D(display);
     parameters.pictureDisplay.show();
     
   }

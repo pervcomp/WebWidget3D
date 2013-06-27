@@ -8,25 +8,25 @@
 
 WIDGET3D.GroupBase = function(){
   this.children = [];
-  this.container = new WIDGET3D.Container();
+  this.object3D = new WIDGET3D.Container();
 };
 
 //Adds children to the group
 WIDGET3D.GroupBase.prototype.add = function(child){
 
-  if(child.parent != undefined){
+  if(child.parent){
   
     //removing event listeners from former parent
     if(child.parent != WIDGET3D.getApplication()){
       child.parent.removeRelatedEventListeners(child);
     }
   
-    child.parent.container.remove(child.container);
+    child.parent.object3D.remove(child.object3D);
     child.parent.removeFromObjects(child);
   }
   child.parent = this;
   this.children.push(child);
-  this.container.add(child.container);
+  this.object3D.add(child.object3D);
 };
 
 // hides unfocused objects in window
@@ -39,13 +39,13 @@ WIDGET3D.GroupBase.prototype.hideNotFocused = function(){
 };
 
 //removes object in place 'index' from object list
-WIDGET3D.GroupBase.prototype.removeFromObjects = function(widget){
+WIDGET3D.GroupBase.prototype.removeFromObjects = function(child){
   
   for(var k = 0; k < this.children.length; ++k){
-    if(this.children[k] === widget){
+    if(this.children[k] === child){
       var removedObj = this.children.splice(k, 1);
       
-      this.container.remove(widget.container);
+      this.object3D.remove(child.object3D);
       
       return removedObj[0];
     }

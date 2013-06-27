@@ -683,6 +683,10 @@ WIDGET3D.GuiObject.prototype.addUpdateCallback = function(callback, args){
   this.updateCallbacks.push({callback: callback, arguments: args});
 };
 
+//TODO
+WIDGET3D.GuiObject.prototype.removeUpdateCallback = function(callback){
+};
+
 WIDGET3D.GuiObject.prototype.update = function(){
   for(var i = 0; i < this.updateCallbacks.length; ++i){
     this.updateCallbacks[i].callback(this.updateCallbacks[i].arguments);
@@ -701,60 +705,78 @@ WIDGET3D.GuiObject.prototype.inheritance = function(){
 };
 
 //---------------------------------------------
-// GUI OBJECT: BASIC
+// WIDGET : generic abstract object
 //---------------------------------------------
-//
-// The basic guiObject that can be moved or hidden and so on.
-// Any other object than main window is this type of object
-//
-WIDGET3D.Basic = function(){
+
+//There are ElementType amount of different kind of bjects
+//with different properties that are inherited from thisObject.
+//So this Object describes all properties and methods that are
+//for all types of objects
+
+WIDGET3D.Widget = function(){
 
   WIDGET3D.GuiObject.call( this );
   
-  this.container;
-  this.parent;
+  this.parent = false;
+  this.object3D = false;
   this.isVisible = true;
+  
+  this.controls = new Array();
 };
 
+WIDGET3D.Widget.prototype = WIDGET3D.GuiObject.prototype.inheritance();
 
-// inheriting basic from GuiObject
-WIDGET3D.Basic.prototype = WIDGET3D.GuiObject.prototype.inheritance();
+//Sets/changes the 3D object for a widget
+WIDGET3D.Widget.prototype.setObject3D = function(obj){
 
-WIDGET3D.Basic.prototype.type = WIDGET3D.ElementType.BASIC;
-
-WIDGET3D.Basic.prototype.setMesh = function(mesh){
-
-  mesh.visible = this.isVisible;
+  obj.visible = this.isVisible;
   
-  if(this.container && this.parent){
-    //removes the old mesh from the scene    
-    this.parent.container.remove(this.container);
-    this.container = mesh;
-    this.parent.container.add(this.container);
+  if(this.object3D && this.parent){
+    //removes the old obj from the scene    
+    this.parent.object3D.remove(this.object3D);
+    this.object3D = obj;
+    this.parent.object3D.add(this.object3D);
   }
   else if(this.parent){
-  
-    this.container = mesh;
-    this.parent.container.add(this.container);
+    this.object3D = obj;
+    this.parent.object3D.add(this.object3D);
   }
   else{
-    this.container = mesh;
+    this.object3D = obj;
+  }
+  
+};
+
+WIDGET3D.Widget.prototype.applyControl = function(control){
+  this.controls.push(control);
+};
+
+WIDGET3D.Widget.prototype.removeControl = function(control){
+  for(i = 0; i < this.controls.lenght; ++i){
+    if(this.controls[i] === control){
+      control.remove();
+      this.controls.splice(i, 1);
+    }
   }
 };
 
-//shows object
-WIDGET3D.Basic.prototype.show = function(){
+//Shows object
+WIDGET3D.Widget.prototype.show = function(){
   if(!this.isVisible){
     this.isVisible = true;
-    this.container.visible = true;
+    if(this.object3D){
+      this.object3D.visible = true;
+    }
   }
 };
 
-//hides object
-WIDGET3D.Basic.prototype.hide = function(){
+// hides object
+WIDGET3D.Widget.prototype.hide = function(){
   if(this.isVisible){
     this.isVisible = false;
-    this.container.visible = false;
+    if(this.object3D){
+      this.object3D.visible = false;
+    }
     if(this.inFocus){
       this.unfocus();
     }
@@ -762,25 +784,29 @@ WIDGET3D.Basic.prototype.hide = function(){
 };
 
 //removes object
-WIDGET3D.Basic.prototype.remove = function(){
+WIDGET3D.Widget.prototype.remove = function(){
   this.hide();
-  //removing event listeners
+  
+  for(var i = 0; i < this.controls.length; ++i){
+    this.controls[i].remove();
+  }
+  
   this.removeAllListeners();
-  //removing object
   this.parent.removeFromObjects(this);
   WIDGET3D.removeObject(this.id);
 };
 
-
-//--------------------------------------------------
-// PROTOTYPAL INHERITANCE FUNCTION FOR BASIC OBJECT
-//--------------------------------------------------
-WIDGET3D.Basic.prototype.inheritance = function(){
-  function WIDGET3DBasicPrototype(){};
-  WIDGET3DBasicPrototype.prototype = this;
-  var created = new WIDGET3DBasicPrototype();
+//---------------------------------------------------------
+// PROTOTYPAL INHERITANCE FUNCTION FOR ABSTRACT WIDGET OBJECT
+//---------------------------------------------------------
+WIDGET3D.Widget.prototype.inheritance = function(){
+  function WIDGET3DWidgetPrototype(){};
+  WIDGET3DWidgetPrototype.prototype = this;
+  var created = new WIDGET3DWidgetPrototype();
   return created;
-};//---------------------------------------------
+};
+
+//---------------------------------------------
 // GENERAL FUNCTIONALITY FOR WINDOWS
 //---------------------------------------------
 //
@@ -790,25 +816,25 @@ WIDGET3D.Basic.prototype.inheritance = function(){
 
 WIDGET3D.GroupBase = function(){
   this.children = [];
-  this.container = new WIDGET3D.Container();
+  this.object3D = new WIDGET3D.Container();
 };
 
 //Adds children to the group
 WIDGET3D.GroupBase.prototype.add = function(child){
 
-  if(child.parent != undefined){
+  if(child.parent){
   
     //removing event listeners from former parent
     if(child.parent != WIDGET3D.getApplication()){
       child.parent.removeRelatedEventListeners(child);
     }
   
-    child.parent.container.remove(child.container);
+    child.parent.object3D.remove(child.object3D);
     child.parent.removeFromObjects(child);
   }
   child.parent = this;
   this.children.push(child);
-  this.container.add(child.container);
+  this.object3D.add(child.object3D);
 };
 
 // hides unfocused objects in window
@@ -821,13 +847,13 @@ WIDGET3D.GroupBase.prototype.hideNotFocused = function(){
 };
 
 //removes object in place 'index' from object list
-WIDGET3D.GroupBase.prototype.removeFromObjects = function(widget){
+WIDGET3D.GroupBase.prototype.removeFromObjects = function(child){
   
   for(var k = 0; k < this.children.length; ++k){
-    if(this.children[k] === widget){
+    if(this.children[k] === child){
       var removedObj = this.children.splice(k, 1);
       
-      this.container.remove(widget.container);
+      this.object3D.remove(child.object3D);
       
       return removedObj[0];
     }
@@ -890,6 +916,32 @@ WIDGET3D.Application.prototype.type = WIDGET3D.ElementType.APPLICATION;
 
 
 //---------------------------------------------
+// GUI OBJECT: BASIC
+//---------------------------------------------
+//
+// The basic guiObject that can be moved or hidden and so on.
+// Any other object than main window is this type of object
+//
+WIDGET3D.Basic = function(){  
+  WIDGET3D.Widget.call( this );
+};
+
+
+// inheriting basic from GuiObject
+//WIDGET3D.Basic.prototype = WIDGET3D.GuiObject.prototype.inheritance();
+WIDGET3D.Basic.prototype = WIDGET3D.Widget.prototype.inheritance();
+
+WIDGET3D.Basic.prototype.type = WIDGET3D.ElementType.BASIC;
+
+//--------------------------------------------------
+// PROTOTYPAL INHERITANCE FUNCTION FOR BASIC OBJECT
+//--------------------------------------------------
+WIDGET3D.Basic.prototype.inheritance = function(){
+  function WIDGET3DBasicPrototype(){};
+  WIDGET3DBasicPrototype.prototype = this;
+  var created = new WIDGET3DBasicPrototype();
+  return created;
+};//---------------------------------------------
 // GUI OBJECT: Group
 //---------------------------------------------
 // Basic Group that can has children.
@@ -897,7 +949,7 @@ WIDGET3D.Application.prototype.type = WIDGET3D.ElementType.APPLICATION;
 //---------------------------------------------
 WIDGET3D.Group = function(){
 
-  WIDGET3D.GuiObject.call( this );
+  WIDGET3D.Widget.call( this );
   WIDGET3D.GroupBase.call( this );
   
   this.parent;
@@ -907,7 +959,9 @@ WIDGET3D.Group = function(){
 
 //-----------------------------------------------------------------------------------------
 // inheriting Group from Basic object
-WIDGET3D.Group.prototype = WIDGET3D.Basic.prototype.inheritance();
+//WIDGET3D.Group.prototype = WIDGET3D.Basic.prototype.inheritance();
+
+WIDGET3D.Group.prototype = WIDGET3D.Widget.prototype.inheritance();
 
 //inheriting some methods from WindowInterface
 
@@ -937,7 +991,8 @@ WIDGET3D.Group.prototype.show = function(){
     for(var i = 0; i < this.children.length; ++i){
       this.children[i].show();
     }
-    this.isVisible = true;
+    
+    WIDGET3D.Widget.prototype.show.call(this);
   }
 };
 
@@ -949,30 +1004,19 @@ WIDGET3D.Group.prototype.hide = function(){
       this.children[i].hide();
     }
     
-    this.isVisible = false;
-    if(this.inFocus){
-      this.unfocus();
-    }
+    WIDGET3D.Widget.prototype.hide.call(this);
   }
 };
 
 //removes Group and it's children
 WIDGET3D.Group.prototype.remove = function(){
-  //children needs to be removed  
+
+  //children needs to be removed   
   while(this.children.length > 0){
     this.children[0].remove();
   }
-  //hiding the Group from scene
-  this.hide();
-  //removing event listeners
-  this.removeAllListeners();
   
-  //container has to be removed from parent's container
-  //this.parent.container.remove(this.container);
-  //removing this from parents objects
-  this.parent.removeFromObjects(this);
-  
-  WIDGET3D.removeObject(this.id);
+  WIDGET3D.Widget.prototype.remove.call(this);
 };
 
 WIDGET3D.Group.prototype.addEventListener = function(name, callback, bubbles){
@@ -1249,10 +1293,36 @@ WIDGET3D.CameraGroup = function(parameters){
   var parameters = parameters || {};
   
   this.camera = parameters.camera;
-  this.container.add(this.camera);
+  this.object3D.add(this.camera);
 };
 
-WIDGET3D.CameraGroup.prototype = WIDGET3D.Group.prototype.inheritance();// ROLL CONTROLS
+WIDGET3D.CameraGroup.prototype = WIDGET3D.Group.prototype.inheritance();// CONTROL BASE CLASS
+//
+
+WIDGET3D.Control = function(component, parameters){
+  
+  this.component = component;
+  this.component.applyControl(this);
+  
+  var parameters = parameters || {};
+  
+  this.mouseButton = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
+  this.shiftKey = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
+}
+
+
+WIDGET3D.Control.prototype.remove = function(){
+};
+
+//--------------------------------------------------
+// PROTOTYPAL INHERITANCE FUNCTION FOR CONTROL
+//--------------------------------------------------
+WIDGET3D.Control.prototype.inheritance = function(){
+  function WIDGET3DControlPrototype(){};
+  WIDGET3DControlPrototype.prototype = this;
+  var created = new WIDGET3DControlPrototype();
+  return created;
+};// ROLL CONTROLS
 //
 //Parameters: component: WIDGET3D.Basic typed object to which the controlls are attached
 //                       COMPONENT MUST BE GIVEN!
@@ -1261,13 +1331,13 @@ WIDGET3D.CameraGroup.prototype = WIDGET3D.Group.prototype.inheritance();// ROLL 
 //            shiftKey: Boolean that tells if the shift key should be pressed down with the mouse button to apply the movement.
 //                      Default value is false.
 //
-WIDGET3D.RollControls = function(parameters){
+WIDGET3D.RollControl = function(component, parameters){
+  
+  var parameters = parameters || {};
+  
+  WIDGET3D.Control.call(this, component, parameters);
   
   var that = this;
-  
-  this.component = parameters.component;
-  this.mouseButton = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
-  this.shiftKey = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
   
   this.clickLocation;
   this.rotationOnMouseDownY;
@@ -1342,15 +1412,12 @@ WIDGET3D.RollControls = function(parameters){
     
     that.component.setRotationY(newRotY);
     that.component.setRotationX(newRotX);
-  };
-  
+  }; 
   this.component.addUpdateCallback(this.animate);
-  
 };
 
 
-WIDGET3D.RollControls.prototype.remove = function(){
-};
+WIDGET3D.RollControl.prototype = WIDGET3D.Control.prototype.inheritance();
 
 /*
 Copyright (C) 2012 Anna-Liisa Mattila / Deparment of Pervasive Computing, Tampere University of Technology
@@ -1507,7 +1574,7 @@ var THREEJS_WIDGET3D = {
         if(app.childEvents[name.toString()][i].isVisible){
           
           // If the object is the one we hit, we return the object
-          if(mesh === app.childEvents[name.toString()][i].container){
+          if(mesh === app.childEvents[name.toString()][i].object3D){
             
             return app.childEvents[name.toString()][i];
             
@@ -1592,7 +1659,7 @@ var THREEJS_WIDGET3D = {
           app = WIDGET3D.getApplication();
         }
         
-        scene_.add(app.container);
+        scene_.add(app.object3D);
         projector_ = new THREE.Projector();
         
         //Constructing camera group
@@ -1614,357 +1681,195 @@ var THREEJS_WIDGET3D = {
 };
 THREEJS_WIDGET3D.createFunctions();
 //---------------------------------------------
-// GUI OBJECT: BASIC EXTENSION FOR THREE.JS
+// EXTENSION FOR THREE.JS TO WIDGET PROPERTIES
 //---------------------------------------------
 //
 //
-
-//Vector3 basic operations
-WIDGET3D.Basic.prototype.getPosition = function(){
-  return this.container.position;
+//Vector3 Widget operations
+WIDGET3D.Widget.prototype.getPosition = function(){
+  return this.object3D.position;
 };
 
-WIDGET3D.Basic.prototype.getPositionX = function(){
-  return this.container.position.x;
+WIDGET3D.Widget.prototype.getPositionX = function(){
+  return this.object3D.position.x;
 };
 
-WIDGET3D.Basic.prototype.getPositionY = function(){
-  return this.container.position.y;
+WIDGET3D.Widget.prototype.getPositionY = function(){
+  return this.object3D.position.y;
 };
 
-WIDGET3D.Basic.prototype.getPositionZ = function(){
-  return this.container.position.z;
+WIDGET3D.Widget.prototype.getPositionZ = function(){
+  return this.object3D.position.z;
 };
 
-WIDGET3D.Basic.prototype.setPosition = function(x, y, z){
+WIDGET3D.Widget.prototype.setPosition = function(x, y, z){
   
-  this.container.position.set(x,y,z);
+  this.object3D.position.set(x,y,z);
 };
 
-WIDGET3D.Basic.prototype.setPositionX = function(x){
-  this.container.position.setX(x);
+WIDGET3D.Widget.prototype.setPositionX = function(x){
+  this.object3D.position.setX(x);
 };
 
-WIDGET3D.Basic.prototype.setPositionY = function(y){
-  this.container.position.setY(y);
+WIDGET3D.Widget.prototype.setPositionY = function(y){
+  this.object3D.position.setY(y);
 };
 
-WIDGET3D.Basic.prototype.setPositionZ = function(z){
-  this.container.position.setZ(z);
+WIDGET3D.Widget.prototype.setPositionZ = function(z){
+  this.object3D.position.setZ(z);
 };
 
-WIDGET3D.Basic.prototype.getRotation = function(){
+WIDGET3D.Widget.prototype.getRotation = function(){
   
-  if(this.container.useQuaternion){
-    this.container.rotation.setEulerFromQuaternion(this.container.quaternion);
+  if(this.object3D.useQuaternion){
+    this.object3D.rotation.setEulerFromQuaternion(this.object3D.quaternion);
   }
   
-  return this.container.rotation;
+  return this.object3D.rotation;
 };
 
-WIDGET3D.Basic.prototype.getRotationX = function(){
-  if(this.container.useQuaternion){
-    this.container.rotation.setEulerFromQuaternion(this.container.quaternion);
+WIDGET3D.Widget.prototype.getRotationX = function(){
+  if(this.object3D.useQuaternion){
+    this.object3D.rotation.setEulerFromQuaternion(this.object3D.quaternion);
   }
   
-  return this.container.rotation.x;
+  return this.object3D.rotation.x;
 };
 
-WIDGET3D.Basic.prototype.getRotationY = function(){
-  if(this.container.useQuaternion){
-    this.container.rotation.setEulerFromQuaternion(this.container.quaternion);
+WIDGET3D.Widget.prototype.getRotationY = function(){
+  if(this.object3D.useQuaternion){
+    this.object3D.rotation.setEulerFromQuaternion(this.object3D.quaternion);
   }
-  return this.container.rotation.y;
+  return this.object3D.rotation.y;
 };
 
-WIDGET3D.Basic.prototype.getRotationZ = function(){
-  if(this.container.useQuaternion){
-    this.container.rotation.setEulerFromQuaternion(this.container.quaternion);
+WIDGET3D.Widget.prototype.getRotationZ = function(){
+  if(this.object3D.useQuaternion){
+    this.object3D.rotation.setEulerFromQuaternion(this.object3D.quaternion);
   }
-  return this.container.rotation.z;
+  return this.object3D.rotation.z;
 };
 
-WIDGET3D.Basic.prototype.getRotationMatrix = function(){
+WIDGET3D.Widget.prototype.getRotationMatrix = function(){
   var m1 = new THREE.Matrix4();
-  m1.extractRotation( this.container.matrix );
+  m1.extractRotation( this.object3D.matrix );
   
   return m1;
 }
 
-WIDGET3D.Basic.prototype.setRotation = function(rotX, rotY, rotZ){
-  if(this.container.useQuaternion){
-    this.container.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.container.eulerOrder);
+WIDGET3D.Widget.prototype.setRotation = function(rotX, rotY, rotZ){
+  if(this.object3D.useQuaternion){
+    this.object3D.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.object3D.eulerOrder);
   }
-  this.container.rotation.set(rotX, rotY, rotZ);
+  this.object3D.rotation.set(rotX, rotY, rotZ);
 };
 
-WIDGET3D.Basic.prototype.setRotationX = function(rotX){
-  if(this.container.useQuaternion){
+WIDGET3D.Widget.prototype.setRotationX = function(rotX){
+  if(this.object3D.useQuaternion){
     var rotY = this.getRotationY();
     var rotZ = this.getRotationZ();
-    this.container.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.container.eulerOrder);
+    this.object3D.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.object3D.eulerOrder);
   }
-  this.container.rotation.setX(rotX);
+  this.object3D.rotation.setX(rotX);
 };
 
-WIDGET3D.Basic.prototype.setRotationY = function(rotY){
-  if(this.container.useQuaternion){
+WIDGET3D.Widget.prototype.setRotationY = function(rotY){
+  if(this.object3D.useQuaternion){
     var rotX = this.getRotationX();
     var rotZ = this.getRotationZ();
-    this.container.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.container.eulerOrder);
+    this.object3D.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.object3D.eulerOrder);
   }
-  this.container.rotation.setY(rotY);
+  this.object3D.rotation.setY(rotY);
 };
 
-WIDGET3D.Basic.prototype.setRotationZ = function(rotZ){
-  if(this.container.useQuaternion){
+WIDGET3D.Widget.prototype.setRotationZ = function(rotZ){
+  if(this.object3D.useQuaternion){
     var rotX = this.getRotationX();
     var rotY = this.getRotationY();
-    this.container.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.container.eulerOrder);
+    this.object3D.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.object3D.eulerOrder);
   }
-  this.container.rotation.setZ(rotZ);
+  this.object3D.rotation.setZ(rotZ);
 };
 
 
 //Object 3D actions
-WIDGET3D.Basic.prototype.useQuaternion = function(){
-  this.container.useQuaternion = true;
+WIDGET3D.Widget.prototype.useQuaternion = function(){
+  this.object3D.useQuaternion = true;
 };
 
-WIDGET3D.Basic.prototype.setEulerOrder = function(order){
-  this.container.eulerOrder = order;
+WIDGET3D.Widget.prototype.setEulerOrder = function(order){
+  this.object3D.eulerOrder = order;
 };
 
-WIDGET3D.Basic.prototype.applyMatrix = function(matrix){
-  this.container.applyMatrix(matrix);
+WIDGET3D.Widget.prototype.applyMatrix = function(matrix){
+  this.object3D.applyMatrix(matrix);
 }
 
-WIDGET3D.Basic.prototype.rotateOnAxis = function(axis, angle){
-  this.container.rotateOnAxis(axis, angle);
+WIDGET3D.Widget.prototype.rotateOnAxis = function(axis, angle){
+  this.object3D.rotateOnAxis(axis, angle);
 };
 
-WIDGET3D.Basic.prototype.translateOnAxis = function(axis, distance){
-  this.container.translateOnAxis(axis, distance);
+WIDGET3D.Widget.prototype.translateOnAxis = function(axis, distance){
+  this.object3D.translateOnAxis(axis, distance);
 };
 
-WIDGET3D.Basic.prototype.translateX = function(distance){
-  this.container.translateX(distance);
+WIDGET3D.Widget.prototype.translateX = function(distance){
+  this.object3D.translateX(distance);
 };
 
-WIDGET3D.Basic.prototype.translateY = function(distance){
-  this.container.translateY(distance);
+WIDGET3D.Widget.prototype.translateY = function(distance){
+  this.object3D.translateY(distance);
 };
 
-WIDGET3D.Basic.prototype.translateZ = function(distance){
-  this.container.translateZ(distance);
+WIDGET3D.Widget.prototype.translateZ = function(distance){
+  this.object3D.translateZ(distance);
 };
 
-WIDGET3D.Basic.prototype.localToWorld = function(){
-  return (this.container.localToWorld());
+WIDGET3D.Widget.prototype.localToWorld = function(){
+  return (this.object3D.localToWorld());
 };
 
-WIDGET3D.Basic.prototype.worldToLocal = function(){
-  return (this.container.worldToLocal());
+WIDGET3D.Widget.prototype.worldToLocal = function(){
+  return (this.object3D.worldToLocal());
 };
 
-WIDGET3D.Basic.prototype.lookAt = function(vector){
-  this.container.lookAt(vector);
+WIDGET3D.Widget.prototype.lookAt = function(vector){
+  this.object3D.lookAt(vector);
 };
 
-WIDGET3D.Basic.prototype.updateMatrix = function(){
-  this.container.updateMatrix();
+WIDGET3D.Widget.prototype.updateMatrix = function(){
+  this.object3D.updateMatrix();
 };
 
-WIDGET3D.Basic.prototype.updateMatrixWorld = function(){
-  this.container.updateMatrixWorld();
+WIDGET3D.Widget.prototype.updateMatrixWorld = function(){
+  this.object3D.updateMatrixWorld();
 };
 
 //Geometry properties
 
-WIDGET3D.Basic.prototype.computeBoundingBox = function(){
-  this.container.geometry.computeBoundingBox();
+WIDGET3D.Widget.prototype.computeBoundingBox = function(){
+  this.object3D.geometry.computeBoundingBox();
   return this.getBoundingBox();
 };
 
-WIDGET3D.Basic.prototype.getBoundingBox = function(){
-  return this.container.geometry.boundingBox;
+WIDGET3D.Widget.prototype.getBoundingBox = function(){
+  return this.object3D.geometry.boundingBox;
 };
 
-WIDGET3D.Basic.prototype.computeBoundingSphere = function(){
-  this.container.geometry.computeBoundingSphere();
+WIDGET3D.Widget.prototype.computeBoundingSphere = function(){
+  this.object3D.geometry.computeBoundingSphere();
   return this.getBoundingSphere();
 };
 
-WIDGET3D.Basic.prototype.getBoundingSphere = function(){
-  return this.container.geometry.boundingSphere;
+WIDGET3D.Widget.prototype.getBoundingSphere = function(){
+  return this.object3D.geometry.boundingSphere;
 };
 
 //---------------------------------------------
-// GUI OBJECT: GROUP EXTENSION FOR THREE.JS
+// EXTENSION FOR THREE.JS TO GROUP PROPERTIES
 //---------------------------------------------
 //
 //
-
-//Vector3 basic operations
-WIDGET3D.Group.prototype.getPosition = function(){
-  return this.container.position;
-};
-
-WIDGET3D.Group.prototype.getPositionX = function(){
-  return this.container.position.x;
-};
-
-WIDGET3D.Group.prototype.getPositionY = function(){
-  return this.container.position.y;
-};
-
-WIDGET3D.Group.prototype.getPositionZ = function(){
-  return this.container.position.z;
-};
-
-WIDGET3D.Group.prototype.setPosition = function(x, y, z){
-  
-  this.container.position.set(x,y,z);
-};
-
-WIDGET3D.Group.prototype.setPositionX = function(x){
-  this.container.position.setX(x);
-};
-
-WIDGET3D.Group.prototype.setPositionY = function(y){
-  this.container.position.setY(y);
-};
-
-WIDGET3D.Group.prototype.setPositionZ = function(z){
-  this.container.position.setZ(z);
-};
-
-WIDGET3D.Group.prototype.getRotation = function(){
-  if(this.container.useQuaternion){
-    this.container.rotation.setEulerFromQuaternion(this.container.quaternion);
-  }
-  return this.container.rotation;
-};
-
-WIDGET3D.Group.prototype.getRotationX = function(){
-  if(this.container.useQuaternion){
-    this.container.rotation.setEulerFromQuaternion(this.container.quaternion);
-  }
-  return this.container.rotation.x;
-};
-
-WIDGET3D.Group.prototype.getRotationY = function(){
-  if(this.container.useQuaternion){
-    this.container.rotation.setEulerFromQuaternion(this.container.quaternion);
-  }
-  return this.container.rotation.y;
-};
-
-WIDGET3D.Group.prototype.getRotation.z = function(){
-  if(this.container.useQuaternion){
-    this.container.rotation.setEulerFromQuaternion(this.container.quaternion);
-  }
-  return this.container.rotation.z;
-};
-
-WIDGET3D.Group.prototype.getRotationMatrix = function(){
-  var m1 = new THREE.Matrix4();
-  m1.extractRotation( this.container.matrix );
-  
-  return m1;
-}
-
-WIDGET3D.Group.prototype.setRotation = function(rotX, rotY, rotZ){
-
-  if(this.container.useQuaternion){
-    this.container.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.container.eulerOrder);
-  }
-  
-  this.container.rotation.set(rotX, rotY, rotZ);
-};
-
-WIDGET3D.Group.prototype.setRotationX = function(rotX){
-  if(this.container.useQuaternion){
-    var rotY = this.getRotationY();
-    var rotZ = this.getRotationZ();
-    this.container.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.container.eulerOrder);
-  }
-  this.container.rotation.setX(rotX);
-};
-
-WIDGET3D.Group.prototype.setRotationY = function(rotY){
-  if(this.container.useQuaternion){
-    var rotX = this.getRotationX();
-    var rotZ = this.getRotationZ();
-    this.container.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.container.eulerOrder);
-  }
-  this.container.rotation.setY(rotY);
-};
-
-WIDGET3D.Group.prototype.setRotationZ = function(rotZ){
-  if(this.container.useQuaternion){
-    var rotX = this.getRotationX();
-    var rotY = this.getRotationY();
-    this.container.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.container.eulerOrder);
-  }
-  this.container.rotation.setZ(rotZ);
-};
-
-
-//Object 3D actions
-
-WIDGET3D.Group.prototype.useQuaternion = function(){
-  this.container.useQuaternion = true;
-};
-
-WIDGET3D.Group.prototype.setEulerOrder = function(order){
-  this.container.eulerOrder = order;
-};
-
-WIDGET3D.Group.prototype.applyMatrix = function(matrix){
-  this.container.applyMatrix(matrix);
-}
-
-WIDGET3D.Group.prototype.rotateOnAxis = function(axis, angle){
-  this.container.rotateOnAxis(axis, angle);
-};
-
-WIDGET3D.Group.prototype.translateOnAxis = function(axis, distance){
-  this.container.translateOnAxis(axis, distance);
-};
-
-WIDGET3D.Group.prototype.translateX = function(distance){
-  this.container.translateX(distance);
-};
-
-WIDGET3D.Group.prototype.translateY = function(distance){
-  this.container.translateY(distance);
-};
-
-WIDGET3D.Group.prototype.translateZ = function(distance){
-  this.container.translateZ(distance);
-};
-
-WIDGET3D.Group.prototype.localToWorld = function(){
-  return (this.container.localToWorld());
-};
-
-WIDGET3D.Group.prototype.worldToLocal = function(){
-  return (this.container.worldToLocal());
-};
-
-WIDGET3D.Group.prototype.lookAt = function(vector){
-  this.container.lookAt(vector);
-};
-
-WIDGET3D.Group.prototype.updateMatrix = function(){
-  this.container.updateMatrix();
-};
-
-WIDGET3D.Group.prototype.updateMatrixWorld = function(){
-  this.container.updateMatrixWorld();
-};
-
 
 //Bounding boxes and spheres
 WIDGET3D.Group.prototype.computeBoundingBox = function(){
@@ -2057,7 +1962,7 @@ WIDGET3D.GridWindow = function(parameters){
   var geometry = new THREE.CubeGeometry( this.width, this.height, this.depth, this.density, this.density, 1 );
   var mesh =  new THREE.Mesh(geometry, this.material);
   this.grid = new WIDGET3D.Basic();
-  this.grid.setMesh(mesh);
+  this.grid.setObject3D(mesh);
   
   var hideGrid = parameters.hideGrid !== undefined ? parameters.hideGrid : false;
   if(hideGrid){
@@ -2075,7 +1980,7 @@ WIDGET3D.GridWindow = function(parameters){
     var button = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
     var shift = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
     
-    this.controls = new WIDGET3D.RollControls({component : this, mouseButton : button, shiftKey : shift});
+    var control = new WIDGET3D.RollControl(this, {mouseButton : button, shiftKey : shift});
   }
 };
 
@@ -2088,7 +1993,7 @@ WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
   
   var grid = new THREE.CubeGeometry( this.width, this.height, this.depth, this.density, this.density, 1 );
   var gridMesh =  new THREE.Mesh(grid, this.material);
-  this.grid.setMesh(gridMesh);
+  this.grid.setObject3D(gridMesh);
   
   var tmpChilds = this.icons;
   this.icons = new Array();
@@ -2103,7 +2008,7 @@ WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
     
     var geometry = new THREE.CubeGeometry(icon.width, icon.height, icon.depth);
     var mesh = new THREE.Mesh( geometry, icon.material);
-    icon.setMesh(mesh);
+    icon.setObject3D(mesh);
     
     icon.setToPlace();
   } 
@@ -2157,7 +2062,7 @@ WIDGET3D.GridIcon = function(parameters){
   
   var mesh = new THREE.Mesh( geometry, this.material);
   
-  this.setMesh(mesh);
+  this.setObject3D(mesh);
   parent.add(this);
   parent.icons.push(this);
   
@@ -2248,7 +2153,7 @@ WIDGET3D.TitledWindow = function(parameters){
   //---------------------------------------------------
   this.title = new WIDGET3D.Basic();
   var mainMesh = this.createTitle(text, material.side);
-  this.title.setMesh(mainMesh);
+  this.title.setObject3D(mainMesh);
   this.add(this.title);
   
   //---------------------------------------------------
@@ -2256,7 +2161,7 @@ WIDGET3D.TitledWindow = function(parameters){
   //---------------------------------------------------
   this.content =  new WIDGET3D.Basic();
   var mesh =  new THREE.Mesh( new THREE.PlaneGeometry( this.width, this.height ), material);
-  this.content.setMesh(mesh);
+  this.content.setObject3D(mesh);
   this.add(this.content);
   
   
@@ -2268,7 +2173,7 @@ WIDGET3D.TitledWindow = function(parameters){
   var buttonMesh = new THREE.Mesh( new THREE.PlaneGeometry( this.width/10.0, this.height/10.0 ),
     new THREE.MeshBasicMaterial( { color: 0xAA0000, side : material.side} ) );
   
-  this.closeButton.setMesh(buttonMesh);
+  this.closeButton.setObject3D(buttonMesh);
   this.closeButton.setPosition(((this.width/2.0)-(this.width/20.0)), ((this.height/2.0)+(this.height/20.0)), 0);
   
   this.add(this.closeButton);
@@ -2291,9 +2196,8 @@ WIDGET3D.TitledWindow = function(parameters){
     var attached = parameters.attached !== undefined ? parameters.attached : false;
     var debug = parameters.debug !== undefined ? parameters.debug : false;
     
-    this.controls = new WIDGET3D.DragControls({
+    var control = new WIDGET3D.DragControl(this, {
       debug: debug,
-      component : this,
       mouseButton : button,
       shiftKey : shift,
       width : (this.width*2),
@@ -2348,7 +2252,7 @@ WIDGET3D.TitledWindow.prototype.setTitle = function(text){
 WIDGET3D.TitledWindow.prototype.updateTitle = function(text){
 
   this.setTitle(text);
-  this.title.container.material.map.needsUpdate = true;
+  this.title.object3D.material.map.needsUpdate = true;
 }
 
 
@@ -2360,10 +2264,6 @@ WIDGET3D.TitledWindow.prototype.remove = function(){
   //removing texturecanvases from DOM
   var canvas = this.textureCanvas;
   document.body.removeChild(canvas);
-  
-  if(this.defaultControls){
-    this.controls.remove();
-  }
   
   WIDGET3D.Group.prototype.remove.call( this );
 };
@@ -2472,7 +2372,7 @@ WIDGET3D.Dialog.prototype.createDialogTitle = function(){
   var material = new THREE.MeshFaceMaterial(materials);
   var mesh = new THREE.Mesh(geometry, material);
   var title = new WIDGET3D.Basic();
-  title.setMesh(mesh);
+  title.setObject3D(mesh);
   this.add(title);
 }
 
@@ -2519,7 +2419,7 @@ WIDGET3D.Dialog.prototype.createButtons = function(){
     var mesh = this.createFaceMaterialsMesh(material, geometry);
     
     var button = new WIDGET3D.Basic();
-    button.setMesh(mesh);
+    button.setObject3D(mesh);
     button.addEventListener("click", this.buttons[i].onclick, false);
     this.add(button);
     
@@ -2614,7 +2514,7 @@ WIDGET3D.Dialog.prototype.createTextfields = function(){
     var textfield = new WIDGET3D.Text({maxLength : this.fields[i].maxLength});
     
     textfield.setText("");
-    textfield.setMesh(mesh);
+    textfield.setObject3D(mesh);
     
     textfield.addEventListener("click", textBoxClickFactory(textfield), false);
     textfield.addEventListener("keypress", textBoxKeyFactory(textfield));
@@ -2654,7 +2554,7 @@ WIDGET3D.Dialog.prototype.createTextfields = function(){
     var mesh2 = this.createFaceMaterialsMesh(material2, geometry2);
     
     var description = new WIDGET3D.Basic();
-    description.setMesh(mesh2);
+    description.setObject3D(mesh2);
     this.add(description);
     
     //positioning
@@ -2782,7 +2682,7 @@ WIDGET3D.SelectDialog.prototype.createText = function(){
   mesh.position.y = this.height*0.5 - this.choiceHeight*0.5;
   
   var title = new WIDGET3D.Basic();
-  title.setMesh(mesh);
+  title.setObject3D(mesh);
   
   this.add(title);
   
@@ -2827,7 +2727,7 @@ WIDGET3D.SelectDialog.prototype.createChoises = function(){
     var material = new THREE.MeshFaceMaterial(materials);
     var mesh = new THREE.Mesh(geometry, material);
 
-    choice.setMesh(mesh);
+    choice.setObject3D(mesh);
     
     var parentLoc = this.getPosition();
     var y = 0;
@@ -2921,13 +2821,13 @@ WIDGET3D.SelectDialog.prototype.changeChoiceText = function(text, index){
     }
   }
   if(object){
-    var canvas = object.container.material.map.image;
-    var context = object.container.material.map.image.getContext('2d');
+    var canvas = object.object3D.material.map.image;
+    var context = object.object3D.material.map.image.getContext('2d');
     var materials = this.createButtonMaterial(text, context, canvas);
 
-    object.container.geometry.materials = materials;
-    object.container.material = new THREE.MeshFaceMaterial(materials);
-    object.container.needsUpdate = true;
+    object.object3D.geometry.materials = materials;
+    object.object3D.material = new THREE.MeshFaceMaterial(materials);
+    object.object3D.needsUpdate = true;
     return true;
   }
   return false;
@@ -2959,68 +2859,62 @@ WIDGET3D.SelectDialog.prototype.remove = function(){
 //            shiftKey: Boolean that tells if the shift key should be pressed down with the mouse button to apply the movement.
 //                      Default value is false.
 //
-WIDGET3D.DragControls = function(parameters){
+WIDGET3D.DragControl = function(component, parameters){
+
+  var parameters = parameters || {};
+  WIDGET3D.Control.call(this, component, parameters);
+  
+  var width = parameters.width !== undefined ? parameters.width : 2000;
+  var height = parameters.height !== undefined ? parameters.height : 2000;
+  var debug = parameters.debug !== undefined ? parameters.debug : false;
   
   var that = this;
   
+  this.start = false;
+  this.camera = WIDGET3D.getCamera();
+  this.drag = false;
+  this.offset = new THREE.Vector3();
+  
+  //invisible plane that is used as a "draging area".
+  //the planes orientation is the same as the cameras orientation.
+  this.plane = new THREE.Mesh( new THREE.PlaneGeometry( width, height, 8, 8 ), 
+    new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true, side : THREE.DoubleSide } ) );
+  this.plane.visible = debug;
+  
   //To get the right orientation we need to have orientation of a cameras parent and camera and add these together
-  that.setPlaneRotation = function(){
-    
+  this.setPlaneRotation = function(){ 
     var camRot = that.camera.rotation.clone();
     var parent = that.camera.parent;
-    
     
     while(parent != undefined && parent != that.component.parent){
     
       camRot.add(parent.rotation.clone());
       parent = parent.parent;
     }
-    
     that.plane.rotation.copy(camRot);
-    
-  }; 
+  };
   
-  that.component = parameters.component;
-  that.mouseButton = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
-  that.shiftKey = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
+  this.setPlaneRotation();
+  WIDGET3D.getScene().add( this.plane );
   
-  that.start = false;
-  that.camera = WIDGET3D.getCamera();
-  
-  var width = parameters.width !== undefined ? parameters.width : 2000;
-  var height = parameters.height !== undefined ? parameters.height : 2000;
-  var debug = parameters.debug !== undefined ? parameters.debug : false;
-  
-  that.drag = false;
-  that.offset = new THREE.Vector3();
-  
-  //invisible plane that is used as a "draging area".
-  //the planes orientation is the same as the cameras orientation.
-  that.plane = new THREE.Mesh( new THREE.PlaneGeometry( width, height, 8, 8 ), 
-    new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true, side : THREE.DoubleSide } ) );
-  that.plane.visible = debug;
-  
-  that.setPlaneRotation();
-  WIDGET3D.getScene().add( that.plane );
-  
-  that.mouseupHandler = function(event){
+  this.mouseupHandler = function(event){
     if(that.drag){
       that.drag = false;
       
-      that.plane.position.copy(that.component.parent.container.localToWorld(that.component.getPosition().clone()));
+      that.plane.position.copy(that.component.parent.object3D.localToWorld(that.component.getPosition().clone()));
 
       WIDGET3D.getApplication().removeEventListener("mousemove", that.mousemoveHandler);
       WIDGET3D.getApplication().removeEventListener("mouseup", that.mouseupHandler);
     }
   };
   
-  that.mousedownHandler = function(event){
+  this.mousedownHandler = function(event){
     if(event.button === that.mouseButton && event.shiftKey === that.shiftKey){
       that.start = true;
       if(!that.drag){
         
         that.setPlaneRotation();
-        that.plane.position.copy(that.component.parent.container.localToWorld(that.component.getPosition().clone()));
+        that.plane.position.copy(that.component.parent.object3D.localToWorld(that.component.getPosition().clone()));
         //FORCE TO UPDATE MATRIXES OTHERWISE WE MAY GET INCORRECT VALUES FROM INTERSECTION
         that.plane.updateMatrixWorld(true);
         
@@ -3043,7 +2937,7 @@ WIDGET3D.DragControls = function(parameters){
     }
   };
 
-  that.mousemoveHandler = function(event){
+  this.mousemoveHandler = function(event){
     if(that.drag){
 
       var mouse = WIDGET3D.mouseCoordinates(event);
@@ -3055,29 +2949,24 @@ WIDGET3D.DragControls = function(parameters){
       
         var pos = intersects[ 0 ].point.sub( that.offset);
         that.plane.position.copy(pos);
-        var vec = that.component.parent.container.worldToLocal(pos);
+        var vec = that.component.parent.object3D.worldToLocal(pos);
         that.component.setPosition(vec.x, vec.y, vec.z);
         
       }
     }
   };
-  
-  that.component.addEventListener("mousedown", that.mousedownHandler, false);
-  
-  
-  that.remove = function(){
-  
-    WIDGET3D.getScene().remove( that.plane);
-    
-    that.plane.geometry.dispose();
-    that.plane.material.dispose();
-    that.plane = undefined;
-  };
-  
+  this.component.addEventListener("mousedown", this.mousedownHandler, false);
 };
 
 
+WIDGET3D.DragControl.prototype = WIDGET3D.Control.prototype.inheritance();
 
-
-
+WIDGET3D.DragControl.prototype.remove = function(){
+  
+  WIDGET3D.getScene().remove(this.plane);
+  
+  this.plane.geometry.dispose();
+  this.plane.material.dispose();
+  this.plane = undefined;
+};
 

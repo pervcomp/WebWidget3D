@@ -37,7 +37,8 @@ var init = function(){
 
   dialog.setPositionX(-300);
   dialog.setRotationX(-Math.PI/10);
-  var rollControls = new WIDGET3D.RollControls({component : dialog, preventClick : true});
+  var rollControl = new WIDGET3D.RollControl(dialog);
+  var drag = new WIDGET3D.DragControl(dialog, {mouseButton : 2, width : 700, height: 700});
   
   mainWindow.add(dialog);
   
@@ -58,7 +59,8 @@ var init = function(){
   select.setPositionX(300);
   select.setRotationY(Math.PI/10);
   
-  var rollControls2 = new WIDGET3D.RollControls({component : select});
+  var rollControl2 = new WIDGET3D.RollControl(select);
+  var drag2 = new WIDGET3D.DragControl(select, {mouseButton : 2, width: 700, height: 700});
   
   mainWindow.add(select);
   

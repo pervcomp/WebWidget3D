@@ -59,13 +59,12 @@ var init = function(){
     height : 204,
     title : "video",
     texture : texture,
-    defaultControls : true,
-    debug : true
+    defaultControls : true
   });
   
   videoWindow.setRotationY(-Math.PI/8);
   
-  var rollControls = new WIDGET3D.RollControls({component : videoWindow, mouseButton : 0, shiftKey : true});
+  new WIDGET3D.RollControl(videoWindow, {mouseButton : 0, shiftKey : true});
   
   //CALLBACK FOR UPDATING TEXTURE
   videoWindow.addUpdateCallback(function(texture){texture.needsUpdate = true}, texture);

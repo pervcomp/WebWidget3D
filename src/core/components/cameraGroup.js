@@ -13,7 +13,7 @@ WIDGET3D.CameraGroup = function(parameters){
   var parameters = parameters || {};
   
   this.camera = parameters.camera;
-  this.container.add(this.camera);
+  this.object3D.add(this.camera);
 };
 
 WIDGET3D.CameraGroup.prototype = WIDGET3D.Group.prototype.inheritance();

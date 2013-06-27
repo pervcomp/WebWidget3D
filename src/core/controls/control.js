@@ -1,12 +1,19 @@
 // CONTROL BASE CLASS
 //
 
-WIDGET3D.Control = function(component){
-
+WIDGET3D.Control = function(component, parameters){
+  
   this.component = component;
+  this.component.applyControl(this);
+  
+  var parameters = parameters || {};
+  
+  this.mouseButton = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
+  this.shiftKey = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
 }
 
-WIDGET3D.Control.prototype.remove(){
+
+WIDGET3D.Control.prototype.remove = function(){
 };
 
 //--------------------------------------------------

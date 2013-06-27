@@ -42,7 +42,7 @@ WIDGET3D.TitledWindow = function(parameters){
   //---------------------------------------------------
   this.title = new WIDGET3D.Basic();
   var mainMesh = this.createTitle(text, material.side);
-  this.title.setMesh(mainMesh);
+  this.title.setObject3D(mainMesh);
   this.add(this.title);
   
   //---------------------------------------------------
@@ -50,7 +50,7 @@ WIDGET3D.TitledWindow = function(parameters){
   //---------------------------------------------------
   this.content =  new WIDGET3D.Basic();
   var mesh =  new THREE.Mesh( new THREE.PlaneGeometry( this.width, this.height ), material);
-  this.content.setMesh(mesh);
+  this.content.setObject3D(mesh);
   this.add(this.content);
   
   
@@ -62,7 +62,7 @@ WIDGET3D.TitledWindow = function(parameters){
   var buttonMesh = new THREE.Mesh( new THREE.PlaneGeometry( this.width/10.0, this.height/10.0 ),
     new THREE.MeshBasicMaterial( { color: 0xAA0000, side : material.side} ) );
   
-  this.closeButton.setMesh(buttonMesh);
+  this.closeButton.setObject3D(buttonMesh);
   this.closeButton.setPosition(((this.width/2.0)-(this.width/20.0)), ((this.height/2.0)+(this.height/20.0)), 0);
   
   this.add(this.closeButton);
@@ -85,9 +85,8 @@ WIDGET3D.TitledWindow = function(parameters){
     var attached = parameters.attached !== undefined ? parameters.attached : false;
     var debug = parameters.debug !== undefined ? parameters.debug : false;
     
-    this.controls = new WIDGET3D.DragControls({
+    var control = new WIDGET3D.DragControl(this, {
       debug: debug,
-      component : this,
       mouseButton : button,
       shiftKey : shift,
       width : (this.width*2),
@@ -142,7 +141,7 @@ WIDGET3D.TitledWindow.prototype.setTitle = function(text){
 WIDGET3D.TitledWindow.prototype.updateTitle = function(text){
 
   this.setTitle(text);
-  this.title.container.material.map.needsUpdate = true;
+  this.title.object3D.material.map.needsUpdate = true;
 }
 
 
@@ -154,10 +153,6 @@ WIDGET3D.TitledWindow.prototype.remove = function(){
   //removing texturecanvases from DOM
   var canvas = this.textureCanvas;
   document.body.removeChild(canvas);
-  
-  if(this.defaultControls){
-    this.controls.remove();
-  }
   
   WIDGET3D.Group.prototype.remove.call( this );
 };

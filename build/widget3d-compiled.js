@@ -564,11 +564,10 @@ WIDGET3D.GuiObject = function(){
 //set focus on object
 WIDGET3D.GuiObject.prototype.focus = function(){
   if(!this.inFocus){
-  
     this.inFocus = true;
     WIDGET3D.addFocus(this);
-    
   }
+  return this;
 };
 
 //unfocus object
@@ -577,6 +576,7 @@ WIDGET3D.GuiObject.prototype.unfocus = function(){
     this.inFocus = false; 
     WIDGET3D.removeFocus(this);
   }
+  return this;
 };
 
 // Adds event listner to object
@@ -599,6 +599,8 @@ WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, bubbles
     bubbles = true;
   }
   this.events.addCallback(name, callback, bubbles, index);
+  
+  return this;
 };
 
 // Removes eventlistener from object
@@ -669,6 +671,7 @@ WIDGET3D.GuiObject.prototype.removeAllListeners = function(){
       mainWindow.childEvents[name][k].setNewEventIndex(name, k);
     }
   }
+  return this;
 }
 
 WIDGET3D.GuiObject.prototype.setNewEventIndex = function(name, index){
@@ -679,18 +682,26 @@ WIDGET3D.GuiObject.prototype.setNewEventIndex = function(name, index){
   WIDGET3D.getApplication().childEvents[name.toString()][index] = this;
 }
 
-WIDGET3D.GuiObject.prototype.addUpdateCallback = function(callback, args){
-  this.updateCallbacks.push({callback: callback, arguments: args});
+WIDGET3D.GuiObject.prototype.addUpdateCallback = function(callback){
+  this.updateCallbacks.push(callback);
+  return this;
 };
 
-//TODO
 WIDGET3D.GuiObject.prototype.removeUpdateCallback = function(callback){
+  for(var i = 0; i < this.updateCallbacks.length; ++i){
+    if(this.updateCallbacks[i] === callback){
+      this.updateCallbacks.splice(i, 1);
+      break;
+    }
+  }
+  return this;
 };
 
 WIDGET3D.GuiObject.prototype.update = function(){
   for(var i = 0; i < this.updateCallbacks.length; ++i){
-    this.updateCallbacks[i].callback(this.updateCallbacks[i].arguments);
+    this.updateCallbacks[i]();
   }
+  return this;
 };
 
 
@@ -744,11 +755,12 @@ WIDGET3D.Widget.prototype.setObject3D = function(obj){
   else{
     this.object3D = obj;
   }
-  
+  return this;
 };
 
 WIDGET3D.Widget.prototype.applyControl = function(control){
   this.controls.push(control);
+  return this;
 };
 
 WIDGET3D.Widget.prototype.removeControl = function(control){
@@ -756,8 +768,10 @@ WIDGET3D.Widget.prototype.removeControl = function(control){
     if(this.controls[i] === control){
       control.remove();
       this.controls.splice(i, 1);
+      break;
     }
   }
+  return this;
 };
 
 //Shows object
@@ -768,6 +782,7 @@ WIDGET3D.Widget.prototype.show = function(){
       this.object3D.visible = true;
     }
   }
+  return this;
 };
 
 // hides object
@@ -781,6 +796,7 @@ WIDGET3D.Widget.prototype.hide = function(){
       this.unfocus();
     }
   }
+  return this;
 };
 
 //removes object
@@ -822,19 +838,27 @@ WIDGET3D.GroupBase = function(){
 //Adds children to the group
 WIDGET3D.GroupBase.prototype.add = function(child){
 
-  if(child.parent){
-  
-    //removing event listeners from former parent
-    if(child.parent != WIDGET3D.getApplication()){
-      child.parent.removeRelatedEventListeners(child);
+  if(child != this){
+    if(child.parent){
+    
+      //removing event listeners from former parent
+      if(child.parent != WIDGET3D.getApplication()){
+        child.parent.removeRelatedEventListeners(child);
+      }
+    
+      child.parent.object3D.remove(child.object3D);
+      child.parent.removeFromObjects(child);
     }
-  
-    child.parent.object3D.remove(child.object3D);
-    child.parent.removeFromObjects(child);
+    child.parent = this;
+    this.children.push(child);
+    this.object3D.add(child.object3D);
+    return this;
   }
-  child.parent = this;
-  this.children.push(child);
-  this.object3D.add(child.object3D);
+  else{
+    console.log("You can't add object to it self!");
+    return false;
+  }
+  
 };
 
 // hides unfocused objects in window
@@ -844,6 +868,7 @@ WIDGET3D.GroupBase.prototype.hideNotFocused = function(){
       this.children[i].hide();
     }
   }
+  return this;
 };
 
 //removes object in place 'index' from object list
@@ -859,7 +884,9 @@ WIDGET3D.GroupBase.prototype.removeFromObjects = function(child){
     }
   }
   return false;
-};//------------------------------------------------
+};
+
+//------------------------------------------------
 // MAIN WINDOW: Singleton root window
 //
 // The Main Window is inited by widget3d by default.
@@ -978,10 +1005,14 @@ WIDGET3D.Group.prototype.type = WIDGET3D.ElementType.GROUP;
 
 WIDGET3D.Group.prototype.add = function(child){
 
-  WIDGET3D.GroupBase.prototype.add.call(this, child);
-  
-  //Adding event listeners from this object
-  this.addRelatedEventListeners(child);
+  if(WIDGET3D.GroupBase.prototype.add.call(this, child)){
+    //Adding event listeners from this object
+    this.addRelatedEventListeners(child);
+    return this;
+  }
+  else{
+    return false;
+  }
 }
 
 // shows Group
@@ -994,6 +1025,8 @@ WIDGET3D.Group.prototype.show = function(){
     
     WIDGET3D.Widget.prototype.show.call(this);
   }
+  
+  return this;
 };
 
 // hides Group
@@ -1006,6 +1039,7 @@ WIDGET3D.Group.prototype.hide = function(){
     
     WIDGET3D.Widget.prototype.hide.call(this);
   }
+  return this;
 };
 
 //removes Group and it's children
@@ -1026,6 +1060,8 @@ WIDGET3D.Group.prototype.addEventListener = function(name, callback, bubbles){
   for(var i = 0; i < this.children.length; ++i){
     this.children[i].addEventListener(name, callback, bubbles);
   }
+  
+  return this;
 };
 
 WIDGET3D.Group.prototype.removeEventListener = function(name, callback){
@@ -1035,6 +1071,8 @@ WIDGET3D.Group.prototype.removeEventListener = function(name, callback){
   for(var i = 0; i < this.children.length; ++i){
     this.children[i].removeEventListener(name, callback);
   }
+  
+  return this;
 };
 
 WIDGET3D.Group.prototype.removeEventListeners = function(name){
@@ -1046,8 +1084,9 @@ WIDGET3D.Group.prototype.removeEventListeners = function(name){
       this.children[i].removeEventListener(name, callback);
     }
   }
-  
   WIDGET3D.GuiObject.prototype.removeEventListeners.call(this, name);
+  
+  return this;
 };
 
 WIDGET3D.Group.prototype.removeAllListeners = function(){
@@ -1068,8 +1107,9 @@ WIDGET3D.Group.prototype.removeAllListeners = function(){
       }
     }
   }
-  
   WIDGET3D.GuiObject.prototype.removeAllListeners.call(this);
+  
+  return this;
 };
 
 WIDGET3D.Group.prototype.removeRelatedEventListeners = function(child){
@@ -1087,6 +1127,8 @@ WIDGET3D.Group.prototype.removeRelatedEventListeners = function(child){
       }
     }
   }
+  
+  return this;
 };
 
 WIDGET3D.Group.prototype.addRelatedEventListeners = function(child){
@@ -1105,6 +1147,7 @@ WIDGET3D.Group.prototype.addRelatedEventListeners = function(child){
       }
     }
   }
+  return this;
 };
 
 
@@ -1175,9 +1218,10 @@ WIDGET3D.Text.prototype.setText = function(text){
     for(var i = 0; i < text.length; ++i){
       this.addLetter(text[i]);
     }
-    
     this.update();
   }
+  
+  return this;
 };
 
 WIDGET3D.Text.prototype.addLetter = function(letter){
@@ -1213,6 +1257,7 @@ WIDGET3D.Text.prototype.addLetter = function(letter){
     
     this.update();
   }
+  return this;
 };
 
 WIDGET3D.Text.prototype.erase = function(amount){
@@ -1247,6 +1292,8 @@ WIDGET3D.Text.prototype.erase = function(amount){
     
     this.update();
   }
+  
+  return this;
 };
 
 //set focus on textobject
@@ -1256,6 +1303,8 @@ WIDGET3D.Text.prototype.focus = function(){
   }
   WIDGET3D.Basic.prototype.focus.call(this);
   this.update();
+  
+  return this;
 };
 
 //unfocus textobject
@@ -1265,6 +1314,8 @@ WIDGET3D.Text.prototype.unfocus = function(){
   }
   WIDGET3D.Basic.prototype.unfocus.call(this);
   this.update();
+  
+  return this;
 };
 
 
@@ -1703,20 +1754,23 @@ WIDGET3D.Widget.prototype.getPositionZ = function(){
 };
 
 WIDGET3D.Widget.prototype.setPosition = function(x, y, z){
-  
   this.object3D.position.set(x,y,z);
+  return this;
 };
 
 WIDGET3D.Widget.prototype.setPositionX = function(x){
   this.object3D.position.setX(x);
+  return this;
 };
 
 WIDGET3D.Widget.prototype.setPositionY = function(y){
   this.object3D.position.setY(y);
+  return this;
 };
 
 WIDGET3D.Widget.prototype.setPositionZ = function(z){
   this.object3D.position.setZ(z);
+  return this;
 };
 
 WIDGET3D.Widget.prototype.getRotation = function(){
@@ -1762,6 +1816,8 @@ WIDGET3D.Widget.prototype.setRotation = function(rotX, rotY, rotZ){
     this.object3D.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.object3D.eulerOrder);
   }
   this.object3D.rotation.set(rotX, rotY, rotZ);
+  
+  return this;
 };
 
 WIDGET3D.Widget.prototype.setRotationX = function(rotX){
@@ -1771,6 +1827,8 @@ WIDGET3D.Widget.prototype.setRotationX = function(rotX){
     this.object3D.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.object3D.eulerOrder);
   }
   this.object3D.rotation.setX(rotX);
+  
+  return this;
 };
 
 WIDGET3D.Widget.prototype.setRotationY = function(rotY){
@@ -1780,6 +1838,8 @@ WIDGET3D.Widget.prototype.setRotationY = function(rotY){
     this.object3D.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.object3D.eulerOrder);
   }
   this.object3D.rotation.setY(rotY);
+  
+  return this;
 };
 
 WIDGET3D.Widget.prototype.setRotationZ = function(rotZ){
@@ -1789,40 +1849,50 @@ WIDGET3D.Widget.prototype.setRotationZ = function(rotZ){
     this.object3D.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.object3D.eulerOrder);
   }
   this.object3D.rotation.setZ(rotZ);
+  
+  return this;
 };
 
 
 //Object 3D actions
 WIDGET3D.Widget.prototype.useQuaternion = function(){
   this.object3D.useQuaternion = true;
+  return this;
 };
 
 WIDGET3D.Widget.prototype.setEulerOrder = function(order){
   this.object3D.eulerOrder = order;
+  return this;
 };
 
 WIDGET3D.Widget.prototype.applyMatrix = function(matrix){
   this.object3D.applyMatrix(matrix);
+  return this;
 }
 
 WIDGET3D.Widget.prototype.rotateOnAxis = function(axis, angle){
   this.object3D.rotateOnAxis(axis, angle);
+  return this;
 };
 
 WIDGET3D.Widget.prototype.translateOnAxis = function(axis, distance){
   this.object3D.translateOnAxis(axis, distance);
+  return this;
 };
 
 WIDGET3D.Widget.prototype.translateX = function(distance){
   this.object3D.translateX(distance);
+  return this;
 };
 
 WIDGET3D.Widget.prototype.translateY = function(distance){
   this.object3D.translateY(distance);
+  return this;
 };
 
 WIDGET3D.Widget.prototype.translateZ = function(distance){
   this.object3D.translateZ(distance);
+  return this;
 };
 
 WIDGET3D.Widget.prototype.localToWorld = function(){
@@ -1835,14 +1905,17 @@ WIDGET3D.Widget.prototype.worldToLocal = function(){
 
 WIDGET3D.Widget.prototype.lookAt = function(vector){
   this.object3D.lookAt(vector);
+  return this;
 };
 
 WIDGET3D.Widget.prototype.updateMatrix = function(){
   this.object3D.updateMatrix();
+  return this;
 };
 
 WIDGET3D.Widget.prototype.updateMatrixWorld = function(){
   this.object3D.updateMatrixWorld();
+  return this;
 };
 
 //Geometry properties
@@ -2011,7 +2084,9 @@ WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
     icon.setObject3D(mesh);
     
     icon.setToPlace();
-  } 
+  }
+  
+  return this;
 }
 
 //---------------------------------------------------
@@ -2107,6 +2182,8 @@ WIDGET3D.GridIcon.prototype.setToPlace = function(){
     var y = parentTop - slotCenterY; 
   }
   this.setPosition(x, y, parentLoc.z/this.parent.height);
+  
+  return this;
 };
 
 //---------------------------------------------------
@@ -2250,9 +2327,10 @@ WIDGET3D.TitledWindow.prototype.setTitle = function(text){
 };
 
 WIDGET3D.TitledWindow.prototype.updateTitle = function(text){
-
   this.setTitle(text);
   this.title.object3D.material.map.needsUpdate = true;
+  
+  return this;
 }
 
 
@@ -2881,17 +2959,18 @@ WIDGET3D.DragControl = function(component, parameters){
     new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true, side : THREE.DoubleSide } ) );
   this.plane.visible = debug;
   
-  //To get the right orientation we need to have orientation of a cameras parent and camera and add these together
-  this.setPlaneRotation = function(){ 
-    var camRot = that.camera.rotation.clone();
-    var parent = that.camera.parent;
+  //To get the right orientation we need to do some matrix tricks
+  this.setPlaneRotation = function(){
+  
+    //The orientation of camera is a combination of its ancestors orientations
+    //thats why the rotation needs to be extracted from world matrix
+    var matrixWorld = that.camera.matrixWorld.clone();
+    var rotation = new THREE.Matrix4();
+    rotation.extractRotation(matrixWorld);
     
-    while(parent != undefined && parent != that.component.parent){
-    
-      camRot.add(parent.rotation.clone());
-      parent = parent.parent;
-    }
-    that.plane.rotation.copy(camRot);
+    //And then the rotation matrix is applied to the plane
+    that.plane.rotation.setEulerFromRotationMatrix(rotation, that.camera.eulerOrder);
+    that.plane.updateMatrix();
   };
   
   this.setPlaneRotation();

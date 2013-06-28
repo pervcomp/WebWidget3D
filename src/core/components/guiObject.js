@@ -89,11 +89,10 @@ WIDGET3D.GuiObject = function(){
 //set focus on object
 WIDGET3D.GuiObject.prototype.focus = function(){
   if(!this.inFocus){
-  
     this.inFocus = true;
     WIDGET3D.addFocus(this);
-    
   }
+  return this;
 };
 
 //unfocus object
@@ -102,6 +101,7 @@ WIDGET3D.GuiObject.prototype.unfocus = function(){
     this.inFocus = false; 
     WIDGET3D.removeFocus(this);
   }
+  return this;
 };
 
 // Adds event listner to object
@@ -124,6 +124,8 @@ WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, bubbles
     bubbles = true;
   }
   this.events.addCallback(name, callback, bubbles, index);
+  
+  return this;
 };
 
 // Removes eventlistener from object
@@ -194,6 +196,7 @@ WIDGET3D.GuiObject.prototype.removeAllListeners = function(){
       mainWindow.childEvents[name][k].setNewEventIndex(name, k);
     }
   }
+  return this;
 }
 
 WIDGET3D.GuiObject.prototype.setNewEventIndex = function(name, index){
@@ -204,18 +207,26 @@ WIDGET3D.GuiObject.prototype.setNewEventIndex = function(name, index){
   WIDGET3D.getApplication().childEvents[name.toString()][index] = this;
 }
 
-WIDGET3D.GuiObject.prototype.addUpdateCallback = function(callback, args){
-  this.updateCallbacks.push({callback: callback, arguments: args});
+WIDGET3D.GuiObject.prototype.addUpdateCallback = function(callback){
+  this.updateCallbacks.push(callback);
+  return this;
 };
 
-//TODO
 WIDGET3D.GuiObject.prototype.removeUpdateCallback = function(callback){
+  for(var i = 0; i < this.updateCallbacks.length; ++i){
+    if(this.updateCallbacks[i] === callback){
+      this.updateCallbacks.splice(i, 1);
+      break;
+    }
+  }
+  return this;
 };
 
 WIDGET3D.GuiObject.prototype.update = function(){
   for(var i = 0; i < this.updateCallbacks.length; ++i){
-    this.updateCallbacks[i].callback(this.updateCallbacks[i].arguments);
+    this.updateCallbacks[i]();
   }
+  return this;
 };
 
 

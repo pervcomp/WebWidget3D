@@ -14,19 +14,27 @@ WIDGET3D.GroupBase = function(){
 //Adds children to the group
 WIDGET3D.GroupBase.prototype.add = function(child){
 
-  if(child.parent){
-  
-    //removing event listeners from former parent
-    if(child.parent != WIDGET3D.getApplication()){
-      child.parent.removeRelatedEventListeners(child);
+  if(child != this){
+    if(child.parent){
+    
+      //removing event listeners from former parent
+      if(child.parent != WIDGET3D.getApplication()){
+        child.parent.removeRelatedEventListeners(child);
+      }
+    
+      child.parent.object3D.remove(child.object3D);
+      child.parent.removeFromObjects(child);
     }
-  
-    child.parent.object3D.remove(child.object3D);
-    child.parent.removeFromObjects(child);
+    child.parent = this;
+    this.children.push(child);
+    this.object3D.add(child.object3D);
+    return this;
   }
-  child.parent = this;
-  this.children.push(child);
-  this.object3D.add(child.object3D);
+  else{
+    console.log("You can't add object to it self!");
+    return false;
+  }
+  
 };
 
 // hides unfocused objects in window
@@ -36,6 +44,7 @@ WIDGET3D.GroupBase.prototype.hideNotFocused = function(){
       this.children[i].hide();
     }
   }
+  return this;
 };
 
 //removes object in place 'index' from object list
@@ -52,3 +61,4 @@ WIDGET3D.GroupBase.prototype.removeFromObjects = function(child){
   }
   return false;
 };
+

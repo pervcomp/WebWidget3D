@@ -139,9 +139,10 @@ WIDGET3D.TitledWindow.prototype.setTitle = function(text){
 };
 
 WIDGET3D.TitledWindow.prototype.updateTitle = function(text){
-
   this.setTitle(text);
   this.title.object3D.material.map.needsUpdate = true;
+  
+  return this;
 }
 
 

@@ -91,7 +91,9 @@ WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
     icon.setObject3D(mesh);
     
     icon.setToPlace();
-  } 
+  }
+  
+  return this;
 }
 
 //---------------------------------------------------
@@ -187,5 +189,7 @@ WIDGET3D.GridIcon.prototype.setToPlace = function(){
     var y = parentTop - slotCenterY; 
   }
   this.setPosition(x, y, parentLoc.z/this.parent.height);
+  
+  return this;
 };
 

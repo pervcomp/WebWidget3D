@@ -38,11 +38,12 @@ WIDGET3D.Widget.prototype.setObject3D = function(obj){
   else{
     this.object3D = obj;
   }
-  
+  return this;
 };
 
 WIDGET3D.Widget.prototype.applyControl = function(control){
   this.controls.push(control);
+  return this;
 };
 
 WIDGET3D.Widget.prototype.removeControl = function(control){
@@ -50,8 +51,10 @@ WIDGET3D.Widget.prototype.removeControl = function(control){
     if(this.controls[i] === control){
       control.remove();
       this.controls.splice(i, 1);
+      break;
     }
   }
+  return this;
 };
 
 //Shows object
@@ -62,6 +65,7 @@ WIDGET3D.Widget.prototype.show = function(){
       this.object3D.visible = true;
     }
   }
+  return this;
 };
 
 // hides object
@@ -75,6 +79,7 @@ WIDGET3D.Widget.prototype.hide = function(){
       this.unfocus();
     }
   }
+  return this;
 };
 
 //removes object

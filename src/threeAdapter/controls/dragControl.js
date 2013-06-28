@@ -29,17 +29,18 @@ WIDGET3D.DragControl = function(component, parameters){
     new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true, side : THREE.DoubleSide } ) );
   this.plane.visible = debug;
   
-  //To get the right orientation we need to have orientation of a cameras parent and camera and add these together
-  this.setPlaneRotation = function(){ 
-    var camRot = that.camera.rotation.clone();
-    var parent = that.camera.parent;
+  //To get the right orientation we need to do some matrix tricks
+  this.setPlaneRotation = function(){
+  
+    //The orientation of camera is a combination of its ancestors orientations
+    //thats why the rotation needs to be extracted from world matrix
+    var matrixWorld = that.camera.matrixWorld.clone();
+    var rotation = new THREE.Matrix4();
+    rotation.extractRotation(matrixWorld);
     
-    while(parent != undefined && parent != that.component.parent){
-    
-      camRot.add(parent.rotation.clone());
-      parent = parent.parent;
-    }
-    that.plane.rotation.copy(camRot);
+    //And then the rotation matrix is applied to the plane
+    that.plane.rotation.setEulerFromRotationMatrix(rotation, that.camera.eulerOrder);
+    that.plane.updateMatrix();
   };
   
   this.setPlaneRotation();

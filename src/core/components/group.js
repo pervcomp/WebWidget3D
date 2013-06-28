@@ -35,10 +35,14 @@ WIDGET3D.Group.prototype.type = WIDGET3D.ElementType.GROUP;
 
 WIDGET3D.Group.prototype.add = function(child){
 
-  WIDGET3D.GroupBase.prototype.add.call(this, child);
-  
-  //Adding event listeners from this object
-  this.addRelatedEventListeners(child);
+  if(WIDGET3D.GroupBase.prototype.add.call(this, child)){
+    //Adding event listeners from this object
+    this.addRelatedEventListeners(child);
+    return this;
+  }
+  else{
+    return false;
+  }
 }
 
 // shows Group
@@ -51,6 +55,8 @@ WIDGET3D.Group.prototype.show = function(){
     
     WIDGET3D.Widget.prototype.show.call(this);
   }
+  
+  return this;
 };
 
 // hides Group
@@ -63,6 +69,7 @@ WIDGET3D.Group.prototype.hide = function(){
     
     WIDGET3D.Widget.prototype.hide.call(this);
   }
+  return this;
 };
 
 //removes Group and it's children
@@ -83,6 +90,8 @@ WIDGET3D.Group.prototype.addEventListener = function(name, callback, bubbles){
   for(var i = 0; i < this.children.length; ++i){
     this.children[i].addEventListener(name, callback, bubbles);
   }
+  
+  return this;
 };
 
 WIDGET3D.Group.prototype.removeEventListener = function(name, callback){
@@ -92,6 +101,8 @@ WIDGET3D.Group.prototype.removeEventListener = function(name, callback){
   for(var i = 0; i < this.children.length; ++i){
     this.children[i].removeEventListener(name, callback);
   }
+  
+  return this;
 };
 
 WIDGET3D.Group.prototype.removeEventListeners = function(name){
@@ -103,8 +114,9 @@ WIDGET3D.Group.prototype.removeEventListeners = function(name){
       this.children[i].removeEventListener(name, callback);
     }
   }
-  
   WIDGET3D.GuiObject.prototype.removeEventListeners.call(this, name);
+  
+  return this;
 };
 
 WIDGET3D.Group.prototype.removeAllListeners = function(){
@@ -125,8 +137,9 @@ WIDGET3D.Group.prototype.removeAllListeners = function(){
       }
     }
   }
-  
   WIDGET3D.GuiObject.prototype.removeAllListeners.call(this);
+  
+  return this;
 };
 
 WIDGET3D.Group.prototype.removeRelatedEventListeners = function(child){
@@ -144,6 +157,8 @@ WIDGET3D.Group.prototype.removeRelatedEventListeners = function(child){
       }
     }
   }
+  
+  return this;
 };
 
 WIDGET3D.Group.prototype.addRelatedEventListeners = function(child){
@@ -162,6 +177,7 @@ WIDGET3D.Group.prototype.addRelatedEventListeners = function(child){
       }
     }
   }
+  return this;
 };
 
 

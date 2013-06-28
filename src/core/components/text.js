@@ -54,9 +54,10 @@ WIDGET3D.Text.prototype.setText = function(text){
     for(var i = 0; i < text.length; ++i){
       this.addLetter(text[i]);
     }
-    
     this.update();
   }
+  
+  return this;
 };
 
 WIDGET3D.Text.prototype.addLetter = function(letter){
@@ -92,6 +93,7 @@ WIDGET3D.Text.prototype.addLetter = function(letter){
     
     this.update();
   }
+  return this;
 };
 
 WIDGET3D.Text.prototype.erase = function(amount){
@@ -126,6 +128,8 @@ WIDGET3D.Text.prototype.erase = function(amount){
     
     this.update();
   }
+  
+  return this;
 };
 
 //set focus on textobject
@@ -135,6 +139,8 @@ WIDGET3D.Text.prototype.focus = function(){
   }
   WIDGET3D.Basic.prototype.focus.call(this);
   this.update();
+  
+  return this;
 };
 
 //unfocus textobject
@@ -144,6 +150,8 @@ WIDGET3D.Text.prototype.unfocus = function(){
   }
   WIDGET3D.Basic.prototype.unfocus.call(this);
   this.update();
+  
+  return this;
 };
 
 

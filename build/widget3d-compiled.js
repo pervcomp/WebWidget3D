@@ -1390,31 +1390,32 @@ WIDGET3D.RollControl = function(component, parameters){
   
   var that = this;
   
-  this.clickLocation;
-  this.rotationOnMouseDownY;
-  this.rotationOnMousedownX;
+  var clickLocation;
+  var rotationOnMouseDownY;
+  var rotationOnMousedownX;
   
-  var initialRotation = this.component.getRotation();
-  this.modelRotationY = initialRotation.y;
-  this.modelRotationX = initialRotation.x;
   
-  this.rotate = false;
+  //var initialRotation = this.component.getRotation();
+  var modelRotationY = this.component.getRotationY();//initialRotation.y;
+  var modelRotationX = this.component.getRotationX();//initialRotation.x;
+  
+  var rotate = false;
 
-  this.mouseupHandler = function(event){
-    if(that.rotate){
+  var mouseupHandler = function(event){
+    if(rotate){
       
       event.stopPropagation();
       event.preventDefault();
       
-      that.rotate = false;
+      rotate = false;
       
       var mainWindow = WIDGET3D.getApplication();
-      mainWindow.removeEventListener("mousemove", that.mousemoveHandler);
-      mainWindow.removeEventListener("mouseup", that.mouseupHandler);
+      mainWindow.removeEventListener("mousemove", mousemoveHandler);
+      mainWindow.removeEventListener("mouseup", mouseupHandler);
     }
   };
   
-  this.mousedownHandler = function(event){
+  var mousedownHandler = function(event){
     
     if(event.button === that.mouseButton && event.shiftKey === that.shiftKey){
       
@@ -1422,49 +1423,49 @@ WIDGET3D.RollControl = function(component, parameters){
       event.preventDefault();
       
       that.component.focus();
-      if(!that.rotate){
-        that.rotate = true;
+      if(!rotate){
+        rotate = true;
         
-        that.clickLocation = WIDGET3D.mouseCoordinates(event);
-        that.rotationOnMouseDownY = that.modelRotationY;
-        that.rotationOnMouseDownX = that.modelRotationX;
+        clickLocation = WIDGET3D.mouseCoordinates(event);
+        rotationOnMouseDownY = modelRotationY;
+        rotationOnMousedownX = modelRotationX;
         
         var mainWindow = WIDGET3D.getApplication();
-        mainWindow.addEventListener("mousemove", that.mousemoveHandler, false);
-        mainWindow.addEventListener("mouseup", that.mouseupHandler, false);
+        mainWindow.addEventListener("mousemove", mousemoveHandler, false);
+        mainWindow.addEventListener("mouseup", mouseupHandler, false);
       }
     }
   };
 
-  this.mousemoveHandler = function(event){
+  var mousemoveHandler = function(event){
 
-    if (that.rotate){
+    if (rotate){
     
       event.stopPropagation();
       event.preventDefault();
       
       var mouse = WIDGET3D.mouseCoordinates(event);
-      that.modelRotationY = that.rotationOnMouseDownY + ( mouse.x - that.clickLocation.x );
-      that.modelRotationX = that.rotationOnMouseDownX + ( mouse.y - that.clickLocation.y );
+      modelRotationY = rotationOnMouseDownY + ( mouse.x - clickLocation.x );
+      modelRotationX = rotationOnMousedownX + ( mouse.y - clickLocation.y );
     }
   };
   
-  this.component.addEventListener("mousedown", this.mousedownHandler, false);
+  this.component.addEventListener("mousedown", mousedownHandler, false);
   
   
   //Animate must be called before the component is rendered to apply
   //the change in components rotation
-  this.animate = function(){
+  var animate = function(){
 
     var rot = that.component.getRotation();
     
-    var newRotY = rot.y + ((that.modelRotationY - rot.y)*0.04);
-    var newRotX = rot.x + ((that.modelRotationX - rot.x)*0.04);
+    var newRotY = rot.y + ((modelRotationY - rot.y)*0.04);
+    var newRotX = rot.x + ((modelRotationX - rot.x)*0.04);
     
     that.component.setRotationY(newRotY);
     that.component.setRotationX(newRotX);
   }; 
-  this.component.addUpdateCallback(this.animate);
+  this.component.addUpdateCallback(animate);
 };
 
 
@@ -2942,16 +2943,11 @@ WIDGET3D.DragControl = function(component, parameters){
   var parameters = parameters || {};
   WIDGET3D.Control.call(this, component, parameters);
   
+  var that = this;
+  
   var width = parameters.width !== undefined ? parameters.width : 2000;
   var height = parameters.height !== undefined ? parameters.height : 2000;
   var debug = parameters.debug !== undefined ? parameters.debug : false;
-  
-  var that = this;
-  
-  this.start = false;
-  this.camera = WIDGET3D.getCamera();
-  this.drag = false;
-  this.offset = new THREE.Vector3();
   
   //invisible plane that is used as a "draging area".
   //the planes orientation is the same as the cameras orientation.
@@ -2959,74 +2955,73 @@ WIDGET3D.DragControl = function(component, parameters){
     new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true, side : THREE.DoubleSide } ) );
   this.plane.visible = debug;
   
-  //To get the right orientation we need to do some matrix tricks
-  this.setPlaneRotation = function(){
+  var camera = WIDGET3D.getCamera();
+  var drag = false;
+  var offset = new THREE.Vector3();
   
+  
+  //To get the right orientation we need to do some matrix tricks
+  var setPlaneRotation = function(){
     //The orientation of camera is a combination of its ancestors orientations
     //thats why the rotation needs to be extracted from world matrix
-    var matrixWorld = that.camera.matrixWorld.clone();
+    var matrixWorld = camera.matrixWorld.clone();
     var rotation = new THREE.Matrix4();
     rotation.extractRotation(matrixWorld);
     
     //And then the rotation matrix is applied to the plane
-    that.plane.rotation.setEulerFromRotationMatrix(rotation, that.camera.eulerOrder);
+    that.plane.rotation.setEulerFromRotationMatrix(rotation, camera.eulerOrder);
     that.plane.updateMatrix();
   };
   
-  this.setPlaneRotation();
-  WIDGET3D.getScene().add( this.plane );
-  
-  this.mouseupHandler = function(event){
-    if(that.drag){
-      that.drag = false;
+  var mouseupHandler = function(event){
+    if(drag){
+      drag = false;
       
       that.plane.position.copy(that.component.parent.object3D.localToWorld(that.component.getPosition().clone()));
 
-      WIDGET3D.getApplication().removeEventListener("mousemove", that.mousemoveHandler);
-      WIDGET3D.getApplication().removeEventListener("mouseup", that.mouseupHandler);
+      WIDGET3D.getApplication().removeEventListener("mousemove", mousemoveHandler);
+      WIDGET3D.getApplication().removeEventListener("mouseup", mouseupHandler);
     }
   };
   
-  this.mousedownHandler = function(event){
+  var mousedownHandler = function(event){
     if(event.button === that.mouseButton && event.shiftKey === that.shiftKey){
-      that.start = true;
-      if(!that.drag){
+      if(!drag){
         
-        that.setPlaneRotation();
+        setPlaneRotation();
         that.plane.position.copy(that.component.parent.object3D.localToWorld(that.component.getPosition().clone()));
         //FORCE TO UPDATE MATRIXES OTHERWISE WE MAY GET INCORRECT VALUES FROM INTERSECTION
         that.plane.updateMatrixWorld(true);
         
         var mouse = WIDGET3D.mouseCoordinates(event);
         var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
-        var ray = WIDGET3D.getProjector().pickingRay(vector, that.camera);
+        var ray = WIDGET3D.getProjector().pickingRay(vector, camera);
         
         var intersects = ray.intersectObject( that.plane );
         if(intersects.length > 0){
-          that.offset.copy( intersects[ 0 ].point ).sub( that.plane.position );
+          offset.copy( intersects[ 0 ].point ).sub( that.plane.position );
         }
         
-        
-        WIDGET3D.getApplication().addEventListener("mousemove", that.mousemoveHandler, false);
-        WIDGET3D.getApplication().addEventListener("mouseup", that.mouseupHandler, false);
+        WIDGET3D.getApplication().addEventListener("mousemove", mousemoveHandler, false);
+        WIDGET3D.getApplication().addEventListener("mouseup", mouseupHandler, false);
         
         that.component.focus();
-        that.drag = true;
+        drag = true;
       }
     }
   };
 
-  this.mousemoveHandler = function(event){
-    if(that.drag){
+  var mousemoveHandler = function(event){
+    if(drag){
 
       var mouse = WIDGET3D.mouseCoordinates(event);
       var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
-      var ray = WIDGET3D.getProjector().pickingRay(vector, that.camera);
+      var ray = WIDGET3D.getProjector().pickingRay(vector, camera);
       
       var intersects = ray.intersectObject( that.plane );
       if(intersects.length > 0){
       
-        var pos = intersects[ 0 ].point.sub( that.offset);
+        var pos = intersects[ 0 ].point.sub(offset);
         that.plane.position.copy(pos);
         var vec = that.component.parent.object3D.worldToLocal(pos);
         that.component.setPosition(vec.x, vec.y, vec.z);
@@ -3034,7 +3029,11 @@ WIDGET3D.DragControl = function(component, parameters){
       }
     }
   };
-  this.component.addEventListener("mousedown", this.mousedownHandler, false);
+  
+  setPlaneRotation();
+  WIDGET3D.getScene().add( this.plane );
+  
+  this.component.addEventListener("mousedown", mousedownHandler, false);
 };
 
 

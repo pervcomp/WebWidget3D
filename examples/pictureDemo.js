@@ -21,7 +21,7 @@ var init = function(){
     antialias : true,
     width : WIDTH,
     height : HEIGHT,
-    clearColor : 0xf9f9f9,
+    clearColor : 0xFAFAFA,
   });
   
   WIDGET3D.getCameraGroup().setPositionZ(1000);
@@ -70,13 +70,63 @@ var init = function(){
   mainWindow.addEventListener("drop", drop);
   
   var onResize = function(){
-    WIDTH = 0.90 * window.innerWidth;
-    HEIGHT = 0.83 * window.innerHeight;
+    
+    var WIDTH = 0.90 * window.innerWidth;
+    var HEIGHT = 0.83 * window.innerHeight;
+    
+    var minWidth = 512;
+    var minCanvasHeight = 128;
+    if(WIDTH < minWidth){
+      WIDTH = minWidth;
+    }
+    if(HEIGHT < minCanvasHeight){
+      HEIGHT = minCanvasHeight;
+    }
+    WIDTH = Math.floor(WIDTH);
+    HEIGHT = Math.floor(HEIGHT);
     
     var aspect = WIDTH / HEIGHT;
-    
     WIDGET3D.setViewport(WIDTH, HEIGHT, aspect);
+
+    var container = document.getElementById("container");
+    container.style.width = WIDTH.toString()+"px";
+    container.style.height = HEIGHT.toString()+"px";
+
+  
+    //AND THEN WE SCALE THE FONT AND EVERYTHING ELSE!!
+    var minStatsHeight = 30;
+    var statsHeight = HEIGHT/20;
+    if(statsHeight < minStatsHeight){
+      statsHeight = minStatsHeight;
+    }
+  
+    var navigation = document.getElementById("navigation");
+    navigation.style.width = WIDTH.toString()+"px";
+    navigation.style.height = statsHeight.toString()+"px";
+    var footer = document.getElementById("footer");
+    
+    footer.style.width = navigation.style.width;
+    footer.style.height = navigation.style.height;
+  
+    document.getElementById("data").style.width = navigation.style.width;
+  
+    //For footer and navigation
+    var scaleFactor = 0.15;
+    var maxScale = 85;
+    var minScale = 60;
+    
+    var fontSize = WIDTH * scaleFactor;
+    if (fontSize > maxScale){
+      fontSize = maxScale;
+    }
+    if (fontSize < minScale){
+      fontSize = minScale;
+    }
+    navigation.style.fontSize = fontSize.toString()+"%";
+    footer.style.fontSize = navigation.style.fontSize;
+
   };
+  onResize();
   mainWindow.addEventListener("resize", onResize);
   
   var mainLoop = function(){
@@ -137,7 +187,7 @@ var createPictureclickHandler = function(pd){
 
 var createMouseclickHandler = function(parameters){
   var DISPLAY_DISTANCE = 400;
-  var SCALEFACTOR = 525;
+  var SCALEFACTOR = 512;
   
   return function(event){
   

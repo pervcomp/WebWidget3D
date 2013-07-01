@@ -15,31 +15,32 @@ WIDGET3D.RollControl = function(component, parameters){
   
   var that = this;
   
-  this.clickLocation;
-  this.rotationOnMouseDownY;
-  this.rotationOnMousedownX;
+  var clickLocation;
+  var rotationOnMouseDownY;
+  var rotationOnMousedownX;
   
-  var initialRotation = this.component.getRotation();
-  this.modelRotationY = initialRotation.y;
-  this.modelRotationX = initialRotation.x;
   
-  this.rotate = false;
+  //var initialRotation = this.component.getRotation();
+  var modelRotationY = this.component.getRotationY();//initialRotation.y;
+  var modelRotationX = this.component.getRotationX();//initialRotation.x;
+  
+  var rotate = false;
 
-  this.mouseupHandler = function(event){
-    if(that.rotate){
+  var mouseupHandler = function(event){
+    if(rotate){
       
       event.stopPropagation();
       event.preventDefault();
       
-      that.rotate = false;
+      rotate = false;
       
       var mainWindow = WIDGET3D.getApplication();
-      mainWindow.removeEventListener("mousemove", that.mousemoveHandler);
-      mainWindow.removeEventListener("mouseup", that.mouseupHandler);
+      mainWindow.removeEventListener("mousemove", mousemoveHandler);
+      mainWindow.removeEventListener("mouseup", mouseupHandler);
     }
   };
   
-  this.mousedownHandler = function(event){
+  var mousedownHandler = function(event){
     
     if(event.button === that.mouseButton && event.shiftKey === that.shiftKey){
       
@@ -47,49 +48,49 @@ WIDGET3D.RollControl = function(component, parameters){
       event.preventDefault();
       
       that.component.focus();
-      if(!that.rotate){
-        that.rotate = true;
+      if(!rotate){
+        rotate = true;
         
-        that.clickLocation = WIDGET3D.mouseCoordinates(event);
-        that.rotationOnMouseDownY = that.modelRotationY;
-        that.rotationOnMouseDownX = that.modelRotationX;
+        clickLocation = WIDGET3D.mouseCoordinates(event);
+        rotationOnMouseDownY = modelRotationY;
+        rotationOnMousedownX = modelRotationX;
         
         var mainWindow = WIDGET3D.getApplication();
-        mainWindow.addEventListener("mousemove", that.mousemoveHandler, false);
-        mainWindow.addEventListener("mouseup", that.mouseupHandler, false);
+        mainWindow.addEventListener("mousemove", mousemoveHandler, false);
+        mainWindow.addEventListener("mouseup", mouseupHandler, false);
       }
     }
   };
 
-  this.mousemoveHandler = function(event){
+  var mousemoveHandler = function(event){
 
-    if (that.rotate){
+    if (rotate){
     
       event.stopPropagation();
       event.preventDefault();
       
       var mouse = WIDGET3D.mouseCoordinates(event);
-      that.modelRotationY = that.rotationOnMouseDownY + ( mouse.x - that.clickLocation.x );
-      that.modelRotationX = that.rotationOnMouseDownX + ( mouse.y - that.clickLocation.y );
+      modelRotationY = rotationOnMouseDownY + ( mouse.x - clickLocation.x );
+      modelRotationX = rotationOnMousedownX + ( mouse.y - clickLocation.y );
     }
   };
   
-  this.component.addEventListener("mousedown", this.mousedownHandler, false);
+  this.component.addEventListener("mousedown", mousedownHandler, false);
   
   
   //Animate must be called before the component is rendered to apply
   //the change in components rotation
-  this.animate = function(){
+  var animate = function(){
 
     var rot = that.component.getRotation();
     
-    var newRotY = rot.y + ((that.modelRotationY - rot.y)*0.04);
-    var newRotX = rot.x + ((that.modelRotationX - rot.x)*0.04);
+    var newRotY = rot.y + ((modelRotationY - rot.y)*0.04);
+    var newRotX = rot.x + ((modelRotationX - rot.x)*0.04);
     
     that.component.setRotationY(newRotY);
     that.component.setRotationX(newRotX);
   }; 
-  this.component.addUpdateCallback(this.animate);
+  this.component.addUpdateCallback(animate);
 };
 
 

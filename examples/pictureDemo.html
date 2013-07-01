@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
   <head>
     <title>Picture Viewer</title>
@@ -5,20 +6,42 @@
       body{
         margin-top:0%;
         padding:0px;
-        text-align:center;
-        background-color:#DFDFDF;
+        background-color: #F0F0F0;
       }
       canvas{
-        outline:0;
+        outline: 0;
         margin: 0;
+        padding : 0;
       }
       H1{
-        font:bold 28px Courier New;
+        outline: 0;
+        margin: 0;
+        padding : 0;
+        font:bold 2em Courier New;
       }
-      #container{
-        position:relative;
-        margin:2%;
+
+      .sheet{
+        outline: 0;
+        margin: 0;
+        padding : 0;
+      }
+      .nav{
+        background-color:#344152;
+        margin: 0;
         padding:0;
+        outline:0;
+        font:bold 1em Courier New;
+        color : #CDC1C5;
+        text-align : center;
+      }
+
+      #data{
+        position:relative;
+        margin:10px auto;
+        padding:0;
+        background-color: #FAFAFA;
+        color : #344152;
+        text-align : center;
       }
     </style>
     
@@ -30,8 +53,15 @@
     
   </head>
   <body onload="init();">
-    <div id="container">
-      <H1>Drag your pictures here!</H1>
+  
+    <div id = "data">
+      <div id = "navigation" class = "nav">
+        <H1>Drag your picture files here!</H1>
+      </div>
+      <div id = "container", class = "sheet"></div>
+      <footer id ="footer" class = "nav">
+        Use mouse left button to roll and right button to drag the grid.
+      </footer>
     </div>
   </boby>
 </html>

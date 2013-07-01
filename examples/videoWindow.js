@@ -54,8 +54,7 @@ var init = function(){
     height : 204,
     title : "video",
     texture : texture,
-    defaultControls : true,
-    debug : true
+    defaultControls : true
   });
   
   new WIDGET3D.RollControl(videoWindow, {mouseButton : 0, shiftKey : true});

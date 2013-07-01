@@ -19,10 +19,8 @@ WIDGET3D.RollControl = function(component, parameters){
   var rotationOnMouseDownY;
   var rotationOnMousedownX;
   
-  
-  //var initialRotation = this.component.getRotation();
-  var modelRotationY = this.component.getRotationY();//initialRotation.y;
-  var modelRotationX = this.component.getRotationX();//initialRotation.x;
+  var modelRotationY = this.component.getRotationY();
+  var modelRotationX = this.component.getRotationX();
   
   var rotate = false;
 
@@ -37,6 +35,8 @@ WIDGET3D.RollControl = function(component, parameters){
       var mainWindow = WIDGET3D.getApplication();
       mainWindow.removeEventListener("mousemove", mousemoveHandler);
       mainWindow.removeEventListener("mouseup", mouseupHandler);
+      mainWindow.removeEventListener("touchmove", mousemoveHandler);
+      mainWindow.removeEventListener("touchend", mouseupHandler);
     }
   };
   
@@ -58,6 +58,8 @@ WIDGET3D.RollControl = function(component, parameters){
         var mainWindow = WIDGET3D.getApplication();
         mainWindow.addEventListener("mousemove", mousemoveHandler, false);
         mainWindow.addEventListener("mouseup", mouseupHandler, false);
+        mainWindow.addEventListener("touchmove", mousemoveHandler, false);
+        mainWindow.addEventListener("touchend", mouseupHandler, false);
       }
     }
   };
@@ -76,6 +78,7 @@ WIDGET3D.RollControl = function(component, parameters){
   };
   
   this.component.addEventListener("mousedown", mousedownHandler, false);
+  this.component.addEventListener("touchstart", mousedownHandler, false);
   
   
   //Animate must be called before the component is rendered to apply
@@ -92,7 +95,6 @@ WIDGET3D.RollControl = function(component, parameters){
   }; 
   this.component.addUpdateCallback(animate);
 };
-
 
 WIDGET3D.RollControl.prototype = WIDGET3D.Control.prototype.inheritance();
 

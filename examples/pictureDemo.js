@@ -34,9 +34,8 @@ var init = function(){
   var subWindow = new WIDGET3D.GridWindow({
     width : 600,
     height : 500,
-    color : 0x000000,
-    defaultControls: true,
-    mouseButton : 0
+    color : 0x000030,
+    defaultControls: true
   });
   
   var dragControl = new WIDGET3D.DragControl(subWindow, {
@@ -74,7 +73,7 @@ var init = function(){
     var WIDTH = 0.90 * window.innerWidth;
     var HEIGHT = 0.83 * window.innerHeight;
     
-    var minWidth = 512;
+    var minWidth = 600;
     var minCanvasHeight = 128;
     if(WIDTH < minWidth){
       WIDTH = minWidth;

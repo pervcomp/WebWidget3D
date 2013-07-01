@@ -322,12 +322,12 @@ WIDGET3D.DomEvents = function(collisionCallback){
   // if it is a keyboard event keyboarEvent is called and
   // if the event is neither of these triggerEvent is called.
   that.mainEventHandler = function(domEvent){
-  
+    
     var proto = Object.getPrototypeOf(domEvent);
     
-    if(proto.hasOwnProperty(String("initMouseEvent"))){
-      that.mouseEvent(domEvent);
-      return false;
+    if(proto.hasOwnProperty(String("initMouseEvent")) || proto.hasOwnProperty(String("initTouchEvent"))){
+      return that.mouseEvent(domEvent);
+      
     }
     else if(proto.hasOwnProperty(String("initKeyboardEvent"))){
       return that.keyboardEvent(domEvent);
@@ -1394,10 +1394,8 @@ WIDGET3D.RollControl = function(component, parameters){
   var rotationOnMouseDownY;
   var rotationOnMousedownX;
   
-  
-  //var initialRotation = this.component.getRotation();
-  var modelRotationY = this.component.getRotationY();//initialRotation.y;
-  var modelRotationX = this.component.getRotationX();//initialRotation.x;
+  var modelRotationY = this.component.getRotationY();
+  var modelRotationX = this.component.getRotationX();
   
   var rotate = false;
 
@@ -1412,6 +1410,8 @@ WIDGET3D.RollControl = function(component, parameters){
       var mainWindow = WIDGET3D.getApplication();
       mainWindow.removeEventListener("mousemove", mousemoveHandler);
       mainWindow.removeEventListener("mouseup", mouseupHandler);
+      mainWindow.removeEventListener("touchmove", mousemoveHandler);
+      mainWindow.removeEventListener("touchend", mouseupHandler);
     }
   };
   
@@ -1433,6 +1433,8 @@ WIDGET3D.RollControl = function(component, parameters){
         var mainWindow = WIDGET3D.getApplication();
         mainWindow.addEventListener("mousemove", mousemoveHandler, false);
         mainWindow.addEventListener("mouseup", mouseupHandler, false);
+        mainWindow.addEventListener("touchmove", mousemoveHandler, false);
+        mainWindow.addEventListener("touchend", mouseupHandler, false);
       }
     }
   };
@@ -1451,6 +1453,7 @@ WIDGET3D.RollControl = function(component, parameters){
   };
   
   this.component.addEventListener("mousedown", mousedownHandler, false);
+  this.component.addEventListener("touchstart", mousedownHandler, false);
   
   
   //Animate must be called before the component is rendered to apply
@@ -1467,7 +1470,6 @@ WIDGET3D.RollControl = function(component, parameters){
   }; 
   this.component.addUpdateCallback(animate);
 };
-
 
 WIDGET3D.RollControl.prototype = WIDGET3D.Control.prototype.inheritance();
 

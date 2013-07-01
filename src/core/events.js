@@ -45,12 +45,12 @@ WIDGET3D.DomEvents = function(collisionCallback){
   // if it is a keyboard event keyboarEvent is called and
   // if the event is neither of these triggerEvent is called.
   that.mainEventHandler = function(domEvent){
-  
+    
     var proto = Object.getPrototypeOf(domEvent);
     
-    if(proto.hasOwnProperty(String("initMouseEvent"))){
-      that.mouseEvent(domEvent);
-      return false;
+    if(proto.hasOwnProperty(String("initMouseEvent")) || proto.hasOwnProperty(String("initTouchEvent"))){
+      return that.mouseEvent(domEvent);
+      
     }
     else if(proto.hasOwnProperty(String("initKeyboardEvent"))){
       return that.keyboardEvent(domEvent);

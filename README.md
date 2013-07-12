@@ -34,5 +34,4 @@ TODO:
 -------
 * Example pages.
 * More controls.
-* Finnishing drag control so that it works even if cameras ancesters have rotations.
 * Adapters to other 3D engines.

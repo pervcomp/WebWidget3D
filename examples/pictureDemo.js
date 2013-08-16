@@ -1,4 +1,4 @@
-//Picturedisplay demo by Anna-Liisa Mattila
+//Picture display demo by Anna-Liisa Mattila
 //made with widget3D and three.js
 
 //INIT FUNCTION
@@ -11,10 +11,10 @@ var init = function(){
   // WIDGET3D INIT, MAIN WINDOW
   //--------------------------------------------
   
-  // THREEJS_WIDGET3D is a adapter that provides nesesary plugin for widget3D
+  // THREEJS_WIDGET3D is a adapter that provides necessary plug-in for widget3D
   // widget3D doesn't use any 3D-engine in default
   // THREEJS_WIDGET3D defines the necessary callbacks for widget3D using three.js
-  // When usin three.js and widget3D, initializing widget3D can be done by WIDGET3D.THREE_Application.
+  // When using three.js and widget3D, initializing widget3D can be done by WIDGET3D.THREE_Application.
   
   var mainWindow = WIDGET3D.THREE_Application({
     domParent : document.getElementById("container"),

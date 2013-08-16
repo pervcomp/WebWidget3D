@@ -1,8 +1,8 @@
 // DRAG CONTROLS for WIDGET3D three.js version
 //
-//Parameters: component: WIDGET3D.Basic typed object to which the controlls are attached
+//Parameters: component: WIDGET3D.Basic typed object to which the controls are attached
 //                       COMPONENT MUST BE GIVEN!
-//            mouseButtom: integer 0, 1 or 2. Tells which mouse button the controll is attached.
+//            mouseButtom: integer 0, 1 or 2. Tells which mouse button the control is attached.
 //                         0 = left button (default), 1 = middle button if present, 2 = right button
 //            shiftKey: Boolean that tells if the shift key should be pressed down with the mouse button to apply the movement.
 //                      Default value is false.
@@ -18,7 +18,7 @@ WIDGET3D.DragControl = function(component, parameters){
   var height = parameters.height !== undefined ? parameters.height : 2000;
   var debug = parameters.debug !== undefined ? parameters.debug : false;
   
-  //invisible plane that is used as a "draging area".
+  //invisible plane that is used as a "dragging area".
   //the planes orientation is the same as the cameras orientation.
   this.plane = new THREE.Mesh( new THREE.PlaneGeometry( width, height, 8, 8 ), 
     new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true, side : THREE.DoubleSide } ) );
@@ -32,7 +32,7 @@ WIDGET3D.DragControl = function(component, parameters){
   //To get the right orientation we need to do some matrix tricks
   var setPlaneRotation = function(){
     //The orientation of camera is a combination of its ancestors orientations
-    //thats why the rotation needs to be extracted from world matrix
+    //that's why the rotation needs to be extracted from world matrix
     var matrixWorld = camera.matrixWorld.clone();
     var rotation = new THREE.Matrix4();
     rotation.extractRotation(matrixWorld);

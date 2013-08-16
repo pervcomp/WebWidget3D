@@ -1,8 +1,8 @@
 // ROLL CONTROLS
 //
-//Parameters: component: WIDGET3D.Basic typed object to which the controlls are attached
+//Parameters: component: WIDGET3D.Basic typed object to which the controls are attached
 //                       COMPONENT MUST BE GIVEN!
-//            mouseButtom: integer 0, 1 or 2. Tells which mouse button the controll is attached.
+//            mouseButtom: integer 0, 1 or 2. Tells which mouse button the control is attached.
 //                         0 = left button (default), 1 = middle button if present, 2 = right button
 //            shiftKey: Boolean that tells if the shift key should be pressed down with the mouse button to apply the movement.
 //                      Default value is false.
@@ -14,6 +14,8 @@ WIDGET3D.RollControl = function(component, parameters){
   WIDGET3D.Control.call(this, component, parameters);
   
   var that = this;
+  
+  this.velocity = parameters.velocity !== undefined ? parameters.velocity : 0.04;
   
   var clickLocation;
   var rotationOnMouseDownY;
@@ -35,8 +37,6 @@ WIDGET3D.RollControl = function(component, parameters){
       var mainWindow = WIDGET3D.getApplication();
       mainWindow.removeEventListener("mousemove", mousemoveHandler);
       mainWindow.removeEventListener("mouseup", mouseupHandler);
-      mainWindow.removeEventListener("touchmove", mousemoveHandler);
-      mainWindow.removeEventListener("touchend", mouseupHandler);
     }
   };
   
@@ -58,8 +58,6 @@ WIDGET3D.RollControl = function(component, parameters){
         var mainWindow = WIDGET3D.getApplication();
         mainWindow.addEventListener("mousemove", mousemoveHandler, false);
         mainWindow.addEventListener("mouseup", mouseupHandler, false);
-        mainWindow.addEventListener("touchmove", mousemoveHandler, false);
-        mainWindow.addEventListener("touchend", mouseupHandler, false);
       }
     }
   };
@@ -78,8 +76,6 @@ WIDGET3D.RollControl = function(component, parameters){
   };
   
   this.component.addEventListener("mousedown", mousedownHandler, false);
-  this.component.addEventListener("touchstart", mousedownHandler, false);
-  
   
   //Animate must be called before the component is rendered to apply
   //the change in components rotation
@@ -87,8 +83,8 @@ WIDGET3D.RollControl = function(component, parameters){
 
     var rot = that.component.getRotation();
     
-    var newRotY = rot.y + ((modelRotationY - rot.y)*0.04);
-    var newRotX = rot.x + ((modelRotationX - rot.x)*0.04);
+    var newRotY = rot.y + ((modelRotationY - rot.y)*that.velocity);
+    var newRotX = rot.x + ((modelRotationX - rot.x)*that.velocity);
     
     that.component.setRotationY(newRotY);
     that.component.setRotationX(newRotX);

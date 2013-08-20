@@ -1894,12 +1894,12 @@ WIDGET3D.Widget.prototype.translateZ = function(distance){
   return this;
 };
 
-WIDGET3D.Widget.prototype.localToWorld = function(){
-  return (this.object3D.localToWorld());
+WIDGET3D.Widget.prototype.localToWorld = function(vector){
+  return (this.object3D.localToWorld(vector));
 };
 
-WIDGET3D.Widget.prototype.worldToLocal = function(){
-  return (this.object3D.worldToLocal());
+WIDGET3D.Widget.prototype.worldToLocal = function(vector){
+  return (this.object3D.worldToLocal(vector));
 };
 
 WIDGET3D.Widget.prototype.lookAt = function(vector){

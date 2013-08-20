@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Picture Viewer</title>
+    <style>
+      body{
+        margin-top:0%;
+        padding:0px;
+        background-color: #F0F0F0;
+      }
+      canvas{
+        outline: 0;
+        margin: 0;
+        padding : 0;
+      }
+      H1{
+        outline: 0;
+        margin: 0;
+        padding : 0;
+        font:bold 2em Courier New;
+      }
+
+      .sheet{
+        outline: 0;
+        margin: 0;
+        padding : 0;
+      }
+      .nav{
+        background-color:#344152;
+        margin: 0;
+        padding:0;
+        outline:0;
+        font:bold 1em Courier New;
+        color : #CDCDCD;
+        text-align : center;
+      }
+
+      #data{
+        position:relative;
+        margin:10px auto;
+        padding:0;
+        background-color: #FAFAFA;
+        color : #344152;
+        text-align : center;
+      }
+    </style>
+    
+    
+    <script type="text/javascript" src="../externals/threeJS/build_r58/three.js"></script>
+    <script type="text/javascript" src="../build/widget3d-compiled.js"></script>
+    <script type="text/javascript" src="interactiveCubes.js"></script>
+    
+    
+  </head>
+  <body onload="init();">
+  
+    <div id = "data">
+      <div id = "navigation" class = "nav">
+        <H1>Interactive Cubes</H1>
+      </div>
+      <div id = "container", class = "sheet"></div>
+      <footer id ="footer" class = "nav">
+        Use mouse left button to drag the cubes. To drag multiple cubes hold ctrl.
+      </footer>
+    </div>
+  </boby>
+</html>

@@ -406,7 +406,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
     }
     
     //TODO REFACTOR
-    //If mainwindow handler wasn't called yet it will be called now.
+    //If main window handler wasn't called yet it will be called now.
     if(!mainWindow.inFocus){
       if(mainWindow.events.hasOwnProperty(name.toString())){      
         for(var l = 0; l < mainWindow.events[name.toString()].length; ++l){
@@ -1350,19 +1350,15 @@ WIDGET3D.CameraGroup = function(parameters){
 WIDGET3D.CameraGroup.prototype = WIDGET3D.Group.prototype.inheritance();// CONTROL BASE CLASS
 //
 
-WIDGET3D.Control = function(component, parameters){
+WIDGET3D.Control = function(component){
   
   this.component = component;
   this.component.applyControl(this);
-  
-  var parameters = parameters || {};
-  
-  this.mouseButton = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
-  this.shiftKey = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
 }
 
 
 WIDGET3D.Control.prototype.remove = function(){
+  this.component.removeControl(this);
 };
 
 //--------------------------------------------------
@@ -1384,13 +1380,17 @@ WIDGET3D.Control.prototype.inheritance = function(){
 //
 WIDGET3D.RollControl = function(component, parameters){
   
+  WIDGET3D.Control.call(this, component);
+  
   var parameters = parameters || {};
   
-  WIDGET3D.Control.call(this, component, parameters);
-  
-  var that = this;
+  this.mouseButton = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
+  this.shiftKey = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
   
   this.velocity = parameters.velocity !== undefined ? parameters.velocity : 0.04;
+  this.rotate = false;
+  
+  var that = this;
   
   var clickLocation;
   var rotationOnMouseDownY;
@@ -1398,24 +1398,22 @@ WIDGET3D.RollControl = function(component, parameters){
   
   var modelRotationY = this.component.getRotationY();
   var modelRotationX = this.component.getRotationX();
-  
-  var rotate = false;
 
-  var mouseupHandler = function(event){
-    if(rotate){
+  this.mouseupHandler = function(event){
+    if(that.rotate){
       
       event.stopPropagation();
       event.preventDefault();
       
-      rotate = false;
+      that.rotate = false;
       
       var mainWindow = WIDGET3D.getApplication();
       mainWindow.removeEventListener("mousemove", mousemoveHandler);
-      mainWindow.removeEventListener("mouseup", mouseupHandler);
+      mainWindow.removeEventListener("mouseup", that.mouseupHandler);
     }
   };
   
-  var mousedownHandler = function(event){
+  this.mousedownHandler = function(event){
     
     if(event.button === that.mouseButton && event.shiftKey === that.shiftKey){
       
@@ -1423,8 +1421,8 @@ WIDGET3D.RollControl = function(component, parameters){
       event.preventDefault();
       
       that.component.focus();
-      if(!rotate){
-        rotate = true;
+      if(!that.rotate){
+        that.rotate = true;
         
         clickLocation = WIDGET3D.mouseCoordinates(event);
         rotationOnMouseDownY = modelRotationY;
@@ -1432,15 +1430,14 @@ WIDGET3D.RollControl = function(component, parameters){
         
         var mainWindow = WIDGET3D.getApplication();
         mainWindow.addEventListener("mousemove", mousemoveHandler, false);
-        mainWindow.addEventListener("mouseup", mouseupHandler, false);
+        mainWindow.addEventListener("mouseup", that.mouseupHandler, false);
       }
     }
   };
 
   var mousemoveHandler = function(event){
 
-    if (rotate){
-    
+    if(that.rotate){
       event.stopPropagation();
       event.preventDefault();
       
@@ -1450,7 +1447,7 @@ WIDGET3D.RollControl = function(component, parameters){
     }
   };
   
-  this.component.addEventListener("mousedown", mousedownHandler, false);
+  this.component.addEventListener("mousedown", this.mousedownHandler, false);
   
   //Animate must be called before the component is rendered to apply
   //the change in components rotation
@@ -1468,6 +1465,17 @@ WIDGET3D.RollControl = function(component, parameters){
 };
 
 WIDGET3D.RollControl.prototype = WIDGET3D.Control.prototype.inheritance();
+
+WIDGET3D.RollControl.prototype.remove = function(){
+
+  this.component.removeEventListener("mousedown", this.mousedownHandler);
+  
+  if(this.rotate){
+    this.mouseupHandler();
+  }
+  
+  WIDGET3D.Control.prototype.remove.call( this );
+};
 
 /*
 Copyright (C) 2012 Anna-Liisa Mattila / Deparment of Pervasive Computing, Tampere University of Technology
@@ -1870,7 +1878,7 @@ WIDGET3D.Widget.prototype.applyMatrix = function(matrix){
 }
 
 WIDGET3D.Widget.prototype.rotateOnAxis = function(axis, angle){
-  this.object3D.rotateOnAxis(axis, angle);
+  var rot = this.object3D.rotateOnAxis(axis, angle);
   return this;
 };
 
@@ -2929,7 +2937,7 @@ WIDGET3D.SelectDialog.prototype.remove = function(){
 
 // DRAG CONTROLS for WIDGET3D three.js version
 //
-//Parameters: component: WIDGET3D.Basic typed object to which the controls are attached
+//Parameters: component: WIDGET3D object to which the controls are attached
 //                       COMPONENT MUST BE GIVEN!
 //            mouseButtom: integer 0, 1 or 2. Tells which mouse button the control is attached.
 //                         0 = left button (default), 1 = middle button if present, 2 = right button
@@ -2937,9 +2945,13 @@ WIDGET3D.SelectDialog.prototype.remove = function(){
 //                      Default value is false.
 //
 WIDGET3D.DragControl = function(component, parameters){
-
+  
+  WIDGET3D.Control.call(this, component);
+  
   var parameters = parameters || {};
-  WIDGET3D.Control.call(this, component, parameters);
+  
+  this.mouseButton = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
+  this.shiftKey = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
   
   var that = this;
   
@@ -2953,38 +2965,25 @@ WIDGET3D.DragControl = function(component, parameters){
     new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true, side : THREE.DoubleSide } ) );
   this.plane.visible = debug;
   
+  this.drag = false;
+  
   var camera = WIDGET3D.getCamera();
-  var drag = false;
   var offset = new THREE.Vector3();
   
-  
-  //To get the right orientation we need to do some matrix tricks
-  var setPlaneRotation = function(){
-    //The orientation of camera is a combination of its ancestors orientations
-    //that's why the rotation needs to be extracted from world matrix
-    var matrixWorld = camera.matrixWorld.clone();
-    var rotation = new THREE.Matrix4();
-    rotation.extractRotation(matrixWorld);
-    
-    //And then the rotation matrix is applied to the plane
-    that.plane.rotation.setEulerFromRotationMatrix(rotation, camera.eulerOrder);
-    that.plane.updateMatrix();
-  };
-  
-  var mouseupHandler = function(event){
-    if(drag){
-      drag = false;
+  this.mouseupHandler = function(event){
+    if(that.drag){
+      that.drag = false;
       
       that.plane.position.copy(that.component.parent.object3D.localToWorld(that.component.getPosition().clone()));
 
       WIDGET3D.getApplication().removeEventListener("mousemove", mousemoveHandler);
-      WIDGET3D.getApplication().removeEventListener("mouseup", mouseupHandler);
+      WIDGET3D.getApplication().removeEventListener("mouseup", that.mouseupHandler);
     }
   };
   
-  var mousedownHandler = function(event){
+  this.mousedownHandler = function(event){
     if(event.button === that.mouseButton && event.shiftKey === that.shiftKey){
-      if(!drag){
+      if(!that.drag){
         
         setPlaneRotation();
         that.plane.position.copy(that.component.parent.object3D.localToWorld(that.component.getPosition().clone()));
@@ -3001,16 +3000,16 @@ WIDGET3D.DragControl = function(component, parameters){
         }
         
         WIDGET3D.getApplication().addEventListener("mousemove", mousemoveHandler, false);
-        WIDGET3D.getApplication().addEventListener("mouseup", mouseupHandler, false);
+        WIDGET3D.getApplication().addEventListener("mouseup", that.mouseupHandler, false);
         
         that.component.focus();
-        drag = true;
+        that.drag = true;
       }
     }
   };
-
+  
   var mousemoveHandler = function(event){
-    if(drag){
+    if(that.drag){
 
       var mouse = WIDGET3D.mouseCoordinates(event);
       var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
@@ -3028,21 +3027,127 @@ WIDGET3D.DragControl = function(component, parameters){
     }
   };
   
+  //To get the right orientation we need to do some matrix tricks
+  var setPlaneRotation = function(){
+    //The orientation of camera is a combination of its ancestors orientations
+    //that's why the rotation needs to be extracted from world matrix
+    var matrixWorld = camera.matrixWorld.clone();
+    var rotation = new THREE.Matrix4();
+    rotation.extractRotation(matrixWorld);
+    
+    //And then the rotation matrix is applied to the plane
+    that.plane.rotation.setEulerFromRotationMatrix(rotation, camera.eulerOrder);
+    that.plane.updateMatrix();
+  };
+  
   setPlaneRotation();
   WIDGET3D.getScene().add( this.plane );
   
-  this.component.addEventListener("mousedown", mousedownHandler, false);
+  this.component.addEventListener("mousedown", this.mousedownHandler, false);
 };
 
 
 WIDGET3D.DragControl.prototype = WIDGET3D.Control.prototype.inheritance();
 
 WIDGET3D.DragControl.prototype.remove = function(){
+
+  this.component.removeEventListener("mousedown", this.mousedownHandler);
+  
+  if(this.drag){
+    this.mouseupHandler();
+  }
   
   WIDGET3D.getScene().remove(this.plane);
   
   this.plane.geometry.dispose();
   this.plane.material.dispose();
   this.plane = undefined;
+  
+  WIDGET3D.Control.prototype.remove.call( this );
 };
 
+// FPS CONTROLS for WIDGET3D three.js version
+//
+//Parameters: component: Camera group
+//
+
+WIDGET3D.FlyControl = function(component, parameters){
+  
+  WIDGET3D.Control.call(this, component);
+  
+  var parameters = parameters || {};
+  
+  this.left = parameters.leftKeyCode !== undefined ? parameters.leftKeyCode : 65; //a
+  this.right = parameters.rightKeyCode !== undefined ? parameters.rigthKeyCode : 68; //d
+  this.forward = parameters.forwardKeyCode !== undefined ? parameters.forwardKeyCode : 87; //w
+  this.backward = parameters.backwardKeyCode !== undefined ? parameters.backwardKeyCode : 83; //s
+  this.up= parameters.upKeyCode !== undefined ? parameters.upKeyCode : 82; //r
+  this.down = parameters.downKeyCode !== undefined ? parameters.downKeyCode : 70; //f
+  
+  
+  this.lookLeft = parameters.lookLeftKeyCode !== undefined ? parameters.lookLeftKeyCode : 74; //j
+  this.lookRight = parameters.lookRightKeyCode !== undefined ? parameters.lookRightKeyCode : 76; //l
+  this.lookUp = parameters.lookUpKeyCode !== undefined ? parameters.lookUpKeyCode : 73; //i
+  this.lookDown = parameters.lookDownKeyCode !== undefined ? parameters.lookDownKeyCode : 75; //k
+  
+  this.ds = parameters.moveDelta !== undefined ? parameters.moveDelta: 50;
+  this.da = parameters.angleDelta !== undefined ? parameters.angleDelta : Math.PI/50.0; 
+  
+  var that = this;
+  
+  var maxA = Math.PI-(Math.PI/100.0);
+  var minA = -maxA;
+  
+  
+  this.onkeydownHandler = function(event){
+    switch(event.keyCode){
+      case that.left:
+        that.component.translateX(-that.ds);
+        break;
+      case that.right:
+        that.component.translateX(that.ds);
+        break;
+      case that.forward:
+        that.component.translateZ(-that.ds);
+        break;
+      case that.backward:
+        that.component.translateZ(that.ds);
+        break;
+      case that.up:
+        that.component.translateY(that.ds);
+        break;
+      case that.down:
+        that.component.translateY(-that.ds);
+        break;
+      case that.lookLeft:
+        that.component.rotateOnAxis(new THREE.Vector3(0,1,0), that.da);
+        break;
+      case that.lookRight:
+        that.component.rotateOnAxis(new THREE.Vector3(0,1,0), -that.da);
+        break;
+      case that.lookUp:
+        that.component.rotateOnAxis(new THREE.Vector3(1,0,0), that.da);
+        break;
+      case that.lookDown:
+        that.component.rotateOnAxis(new THREE.Vector3(1,0,0), -that.da);
+        break;
+      
+      default:
+        return;
+    }
+  };
+  
+  this.onkeyupHandler = function(event){
+  };
+  
+  WIDGET3D.getApplication().addEventListener("keydown", this.onkeydownHandler);
+};
+
+
+WIDGET3D.FlyControl.prototype = WIDGET3D.Control.prototype.inheritance();
+
+WIDGET3D.FlyControl.prototype.remove = function(){
+  
+  WIDGET3D.getApplication().removeEventListener("keydown", this.onkeydownHandler);
+  WIDGET3D.Control.prototype.remove.call( this );
+};

@@ -70,7 +70,8 @@ var srcFiles = {
     "../src/threeAdapter/components/dialog.js", "../src/threeAdapter/components/selectDialog.js",
     
     
-    "../src/threeAdapter/controls/dragControl.js"
+    "../src/threeAdapter/controls/dragControl.js",
+    "../src/threeAdapter/controls/flyControl.js"
   ]
 }
 
@@ -104,7 +105,8 @@ var deps = {
   "../src/threeAdapter/components/dialog.js" : ["../src/core/components/basic.js", "../src/core/components/group.js", "../src/threeAdapter/adapter.js"],
   "../src/threeAdapter/components/selectDialog.js" : ["../src/core/components/basic.js", "../src/core/components/group.js", "../src/threeAdapter/adapter.js"],
   
-  "../src/threeAdapter/controls/dragControl.js": ["../src/core/controls/control.js", "../src/threeAdapter/adapter.js"]
+  "../src/threeAdapter/controls/dragControl.js": ["../src/core/controls/control.js", "../src/threeAdapter/adapter.js"],
+  "../src/threeAdapter/controls/flyControl.js": ["../src/core/controls/control.js", "../src/threeAdapter/adapter.js"]
 };
 
 var listFiles = function(list, all){

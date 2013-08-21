@@ -129,7 +129,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
     }
     
     //TODO REFACTOR
-    //If mainwindow handler wasn't called yet it will be called now.
+    //If main window handler wasn't called yet it will be called now.
     if(!mainWindow.inFocus){
       if(mainWindow.events.hasOwnProperty(name.toString())){      
         for(var l = 0; l < mainWindow.events[name.toString()].length; ++l){

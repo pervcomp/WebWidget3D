@@ -16,6 +16,7 @@ var init = function(){
     width : WIDTH,
     height : HEIGHT,
     clearColor : 0xFAFAFA,
+    far : 20000
   });
   
   WIDGET3D.getCameraGroup().setPositionZ(1000);
@@ -27,8 +28,12 @@ var init = function(){
   var dragControl = new WIDGET3D.DragControl(selected, {
     mouseButton : 0,
     width: 10000,
-    height: 10000
+    height: 10000,
+    debug: false
   });
+  
+  
+  var cameraMovement = new WIDGET3D.FlyControl(WIDGET3D.getCameraGroup());
   
   mainWindow.add(selected);
   
@@ -38,11 +43,11 @@ var init = function(){
       if(cube.parent != group){
         if(event.ctrlKey){
           var position = cube.getPosition().clone();
+          
           group.worldToLocal(position);
-          
           group.add(cube);
-          
           cube.setPosition(position.x, position.y, position.z);
+          
 
         }
         else{
@@ -58,8 +63,8 @@ var init = function(){
           }
           
           var position = cube.getPosition().clone();
-          group.worldToLocal(position);
           
+          group.worldToLocal(position);
           group.add(cube);
           cube.setPosition(position.x, position.y, position.z);
         }
@@ -80,9 +85,15 @@ var init = function(){
     var cube = new WIDGET3D.Basic();
     cube.setObject3D(mesh);
     
-    cube.setPositionX(-((cubeSize+25)*CUBES/2.0)+(i*(cubeSize+50)));
+    cube.setPositionX(-((cubeSize+(cubeSize/4.0))*CUBES/2.0)+(i*(cubeSize+(cubeSize/2.0))));
     
     cube.addEventListener("mousedown", selectCube(cube, selected, mainWindow));
+    
+    var rollControl = new WIDGET3D.RollControl(cube, {
+      mouseButton : 0,
+      shiftKey : true
+    });
+    
     mainWindow.add(cube);
   }
   
@@ -123,7 +134,7 @@ var init = function(){
     var footer = document.getElementById("footer");
     
     footer.style.width = navigation.style.width;
-    footer.style.height = navigation.style.height;
+    footer.style.height = (statsHeight*2.0).toString()+"px";
   
     document.getElementById("data").style.width = navigation.style.width;
   

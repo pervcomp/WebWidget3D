@@ -138,7 +138,7 @@ WIDGET3D.Widget.prototype.applyMatrix = function(matrix){
 }
 
 WIDGET3D.Widget.prototype.rotateOnAxis = function(axis, angle){
-  this.object3D.rotateOnAxis(axis, angle);
+  var rot = this.object3D.rotateOnAxis(axis, angle);
   return this;
 };
 

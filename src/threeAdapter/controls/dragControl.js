@@ -1,6 +1,6 @@
 // DRAG CONTROLS for WIDGET3D three.js version
 //
-//Parameters: component: WIDGET3D.Basic typed object to which the controls are attached
+//Parameters: component: WIDGET3D object to which the controls are attached
 //                       COMPONENT MUST BE GIVEN!
 //            mouseButtom: integer 0, 1 or 2. Tells which mouse button the control is attached.
 //                         0 = left button (default), 1 = middle button if present, 2 = right button
@@ -8,9 +8,13 @@
 //                      Default value is false.
 //
 WIDGET3D.DragControl = function(component, parameters){
-
+  
+  WIDGET3D.Control.call(this, component);
+  
   var parameters = parameters || {};
-  WIDGET3D.Control.call(this, component, parameters);
+  
+  this.mouseButton = parameters.mouseButton !== undefined ? parameters.mouseButton : 0;
+  this.shiftKey = parameters.shiftKey !== undefined ? parameters.shiftKey : false;
   
   var that = this;
   
@@ -24,38 +28,25 @@ WIDGET3D.DragControl = function(component, parameters){
     new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true, side : THREE.DoubleSide } ) );
   this.plane.visible = debug;
   
+  this.drag = false;
+  
   var camera = WIDGET3D.getCamera();
-  var drag = false;
   var offset = new THREE.Vector3();
   
-  
-  //To get the right orientation we need to do some matrix tricks
-  var setPlaneRotation = function(){
-    //The orientation of camera is a combination of its ancestors orientations
-    //that's why the rotation needs to be extracted from world matrix
-    var matrixWorld = camera.matrixWorld.clone();
-    var rotation = new THREE.Matrix4();
-    rotation.extractRotation(matrixWorld);
-    
-    //And then the rotation matrix is applied to the plane
-    that.plane.rotation.setEulerFromRotationMatrix(rotation, camera.eulerOrder);
-    that.plane.updateMatrix();
-  };
-  
-  var mouseupHandler = function(event){
-    if(drag){
-      drag = false;
+  this.mouseupHandler = function(event){
+    if(that.drag){
+      that.drag = false;
       
       that.plane.position.copy(that.component.parent.object3D.localToWorld(that.component.getPosition().clone()));
 
       WIDGET3D.getApplication().removeEventListener("mousemove", mousemoveHandler);
-      WIDGET3D.getApplication().removeEventListener("mouseup", mouseupHandler);
+      WIDGET3D.getApplication().removeEventListener("mouseup", that.mouseupHandler);
     }
   };
   
-  var mousedownHandler = function(event){
+  this.mousedownHandler = function(event){
     if(event.button === that.mouseButton && event.shiftKey === that.shiftKey){
-      if(!drag){
+      if(!that.drag){
         
         setPlaneRotation();
         that.plane.position.copy(that.component.parent.object3D.localToWorld(that.component.getPosition().clone()));
@@ -72,16 +63,16 @@ WIDGET3D.DragControl = function(component, parameters){
         }
         
         WIDGET3D.getApplication().addEventListener("mousemove", mousemoveHandler, false);
-        WIDGET3D.getApplication().addEventListener("mouseup", mouseupHandler, false);
+        WIDGET3D.getApplication().addEventListener("mouseup", that.mouseupHandler, false);
         
         that.component.focus();
-        drag = true;
+        that.drag = true;
       }
     }
   };
-
+  
   var mousemoveHandler = function(event){
-    if(drag){
+    if(that.drag){
 
       var mouse = WIDGET3D.mouseCoordinates(event);
       var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
@@ -99,21 +90,42 @@ WIDGET3D.DragControl = function(component, parameters){
     }
   };
   
+  //To get the right orientation we need to do some matrix tricks
+  var setPlaneRotation = function(){
+    //The orientation of camera is a combination of its ancestors orientations
+    //that's why the rotation needs to be extracted from world matrix
+    var matrixWorld = camera.matrixWorld.clone();
+    var rotation = new THREE.Matrix4();
+    rotation.extractRotation(matrixWorld);
+    
+    //And then the rotation matrix is applied to the plane
+    that.plane.rotation.setEulerFromRotationMatrix(rotation, camera.eulerOrder);
+    that.plane.updateMatrix();
+  };
+  
   setPlaneRotation();
   WIDGET3D.getScene().add( this.plane );
   
-  this.component.addEventListener("mousedown", mousedownHandler, false);
+  this.component.addEventListener("mousedown", this.mousedownHandler, false);
 };
 
 
 WIDGET3D.DragControl.prototype = WIDGET3D.Control.prototype.inheritance();
 
 WIDGET3D.DragControl.prototype.remove = function(){
+
+  this.component.removeEventListener("mousedown", this.mousedownHandler);
+  
+  if(this.drag){
+    this.mouseupHandler();
+  }
   
   WIDGET3D.getScene().remove(this.plane);
   
   this.plane.geometry.dispose();
   this.plane.material.dispose();
   this.plane = undefined;
+  
+  WIDGET3D.Control.prototype.remove.call( this );
 };
 

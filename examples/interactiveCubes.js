@@ -26,7 +26,7 @@ var init = function(){
   //--------------------------------------------
   var selected = new WIDGET3D.Group();
   var dragControl = new WIDGET3D.DragControl(selected, {
-    mouseButton : 0,
+    mouseButton : 2,
     width: 10000,
     height: 10000,
     debug: false
@@ -87,14 +87,22 @@ var init = function(){
     
     cube.setPositionX(-((cubeSize+(cubeSize/4.0))*CUBES/2.0)+(i*(cubeSize+(cubeSize/2.0))));
     
-    cube.addEventListener("mousedown", selectCube(cube, selected, mainWindow));
+    //cube.addEventListener("mousedown", selectCube(cube, selected, mainWindow));
     
-    var rollControl = new WIDGET3D.RollControl(cube, {
+    var roll = new WIDGET3D.RollControl(cube, {
       mouseButton : 0,
       shiftKey : true
     });
     
-    mainWindow.add(cube);
+    var drag = new WIDGET3D.DragControl(cube, {
+      mouseButton: 0,
+      shiftKey: false,
+      width : 20*cubeSize,
+      height : 20*cubeSize,
+      debug : false
+    });
+    
+    selected.add(cube);
   }
   
   var onResize = function(){

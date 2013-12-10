@@ -1,17 +1,19 @@
-widget3D
+WebWidget3D
 =======
 -------
 
 3D widget library for the web.
 
-Experimenting ways to make 3D UIs in the web. At the moment library can be used with the [three.js](http://github.com/mrdoob/three.js) 3D-engine.
+Experimenting ways to make interactive 3D graphics in the web. At the moment library can be used with the [three.js](http://github.com/mrdoob/three.js) 3D-engine.
+
+WebWidget3D is a interaction wrapper wraps 3D-engine's 3D objects into 3D widget building blocks.
 
 Work in progress.
 
 Features:
 -------
 * Basic widget buildingblocks that can be used to create 3D widgets.
-* Event system that handles DOM events inside the 3D world. Events are bind directly to 3D widgets.
+* Event system that handles DOM events inside the 3D world. Events are bind directly to 3D building blocks.
 You need to just define the event handler callback. Collision detection and all the complicated stuff is done by the library.
 * Few styled predefined 3D widgets (see the examples)
 

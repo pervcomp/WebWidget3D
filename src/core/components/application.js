@@ -49,8 +49,3 @@ WIDGET3D.Application.prototype.hideNotFocused = WIDGET3D.GroupBase.prototype.hid
 // removes object from window
 WIDGET3D.Application.prototype.removeFromObjects = WIDGET3D.GroupBase.prototype.removeFromObjects;
 
-//-----------------------------------------------------------------------------------------
-WIDGET3D.Application.prototype.type = WIDGET3D.ElementType.APPLICATION;
-//-----------------------------------------------------------------------------------------
-
-

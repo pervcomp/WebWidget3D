@@ -48,7 +48,10 @@ WIDGET3D.DomEvents = function(collisionCallback){
     
     var proto = Object.getPrototypeOf(domEvent);
     
-    if(proto.hasOwnProperty(String("initMouseEvent")) || proto.hasOwnProperty(String("initTouchEvent"))){
+    //proto.hasOwnProperty(String("initTouchEvent"))
+    //support for touch events is needed!
+    
+    if(proto.hasOwnProperty(String("initMouseEvent"))){
       return that.mouseEvent(domEvent);
       
     }

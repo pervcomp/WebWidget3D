@@ -24,9 +24,6 @@ SOFTWARE.
 //some kind of gui thing
 
 WIDGET3D = {
-
-  ElementType : {"APPLICATION":0, "GROUP":1, "BASIC":2, "TEXT":3, "UNDEFINED":666 },
-  
   //Creating functions
   createFunctions : function(){
     //Some private variables inside a closure
@@ -325,7 +322,10 @@ WIDGET3D.DomEvents = function(collisionCallback){
     
     var proto = Object.getPrototypeOf(domEvent);
     
-    if(proto.hasOwnProperty(String("initMouseEvent")) || proto.hasOwnProperty(String("initTouchEvent"))){
+    //proto.hasOwnProperty(String("initTouchEvent"))
+    //support for touch events is needed!
+    
+    if(proto.hasOwnProperty(String("initMouseEvent"))){
       return that.mouseEvent(domEvent);
       
     }
@@ -937,17 +937,11 @@ WIDGET3D.Application.prototype.hideNotFocused = WIDGET3D.GroupBase.prototype.hid
 // removes object from window
 WIDGET3D.Application.prototype.removeFromObjects = WIDGET3D.GroupBase.prototype.removeFromObjects;
 
-//-----------------------------------------------------------------------------------------
-WIDGET3D.Application.prototype.type = WIDGET3D.ElementType.APPLICATION;
-//-----------------------------------------------------------------------------------------
-
-
 //---------------------------------------------
 // GUI OBJECT: BASIC
 //---------------------------------------------
 //
 // The basic guiObject that can be moved or hidden and so on.
-// Any other object than main window is this type of object
 //
 WIDGET3D.Basic = function(){  
   WIDGET3D.Widget.call( this );
@@ -957,8 +951,6 @@ WIDGET3D.Basic = function(){
 // inheriting basic from GuiObject
 //WIDGET3D.Basic.prototype = WIDGET3D.GuiObject.prototype.inheritance();
 WIDGET3D.Basic.prototype = WIDGET3D.Widget.prototype.inheritance();
-
-WIDGET3D.Basic.prototype.type = WIDGET3D.ElementType.BASIC;
 
 //--------------------------------------------------
 // PROTOTYPAL INHERITANCE FUNCTION FOR BASIC OBJECT
@@ -998,10 +990,6 @@ WIDGET3D.Group.prototype = WIDGET3D.Widget.prototype.inheritance();
 WIDGET3D.Group.prototype.hideNotFocused = WIDGET3D.GroupBase.prototype.hideNotFocused;
 // removes object from Group
 WIDGET3D.Group.prototype.removeFromObjects = WIDGET3D.GroupBase.prototype.removeFromObjects;
-
-//-----------------------------------------------------------------------------------------
-WIDGET3D.Group.prototype.type = WIDGET3D.ElementType.GROUP;
-//-----------------------------------------------------------------------------------------
 
 WIDGET3D.Group.prototype.add = function(child){
 
@@ -1210,8 +1198,6 @@ WIDGET3D.Text = function(parameters){
 
 // inheriting Text from Basic
 WIDGET3D.Text.prototype = WIDGET3D.Basic.prototype.inheritance();
-
-WIDGET3D.Text.prototype.type = WIDGET3D.ElementType.TEXT;
 
 WIDGET3D.Text.prototype.setText = function(text){
   if(this.mutable){
@@ -1582,17 +1568,14 @@ var THREEJS_WIDGET3D = {
       // a datastructure that contains meshes of app.childEvents.event array content
       var intersects = ray.intersectObjects(scene_.children, true);
       
-      var closest = false;
-      
       var found = [];
       
       if(intersects.length > 0){
-        //finding closest
-        //closest object is the first visible object in intersects
+        //Finding objects that were intersected
         for(var m = 0; m < intersects.length; ++m){
           
           if(intersects[m].object.visible){
-            closest = intersects[m].object;
+            var obj = intersects[m].object;
             var inv = new THREE.Matrix4();
             inv.getInverse(intersects[m].object.matrixWorld);
             
@@ -1600,17 +1583,15 @@ var THREEJS_WIDGET3D = {
             //what should be done to this?
             var objPos = intersects[m].point.clone().applyProjection(inv);
             
-            var hit = WIDGET3D.findObject(closest, event.type);
+            var hit = WIDGET3D.findObject(obj, event.type);
             
             if(hit){
-              //Info about object and world coordinates are atached to
-              //the event object so that the data may be used in eventhandlers like
-              //controls.
               
               //event.objectCoordinates = objPos;
               //event.worldCoordinates = intersects[m].point;
               //var data = {widget : hit, eventObject : event};
               
+              //TODO: we might want to give some info where the object was hit.
               found.push(hit);
               
             }
@@ -1781,33 +1762,18 @@ WIDGET3D.Widget.prototype.setPositionZ = function(z){
 };
 
 WIDGET3D.Widget.prototype.getRotation = function(){
-  
-  /*if(this.object3D.useQuaternion){
-    this.object3D.rotation.setEulerFromQuaternion(this.object3D.quaternion);
-  }*/
-  
   return this.object3D.rotation;
 };
 
 WIDGET3D.Widget.prototype.getRotationX = function(){
-  /*if(this.object3D.useQuaternion){
-    this.object3D.rotation.setEulerFromQuaternion(this.object3D.quaternion);
-  }*/
-  
   return this.object3D.rotation.x;
 };
 
 WIDGET3D.Widget.prototype.getRotationY = function(){
-  /*if(this.object3D.useQuaternion){
-    this.object3D.rotation.setEulerFromQuaternion(this.object3D.quaternion);
-  }*/
   return this.object3D.rotation.y;
 };
 
 WIDGET3D.Widget.prototype.getRotationZ = function(){
-  /*if(this.object3D.useQuaternion){
-    this.object3D.rotation.setEulerFromQuaternion(this.object3D.quaternion);
-  }*/
   return this.object3D.rotation.z;
 };
 
@@ -1819,61 +1785,31 @@ WIDGET3D.Widget.prototype.getRotationMatrix = function(){
 }
 
 WIDGET3D.Widget.prototype.setRotation = function(rotX, rotY, rotZ){
-  /*if(this.object3D.useQuaternion){
-    this.object3D.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.object3D.eulerOrder);
-  }*/
   this.object3D.rotation.set(rotX, rotY, rotZ);
   
   return this;
 };
 
 WIDGET3D.Widget.prototype.setRotationX = function(rotX){
-  /*if(this.object3D.useQuaternion){
-    var rotY = this.getRotationY();
-    var rotZ = this.getRotationZ();
-    this.object3D.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.object3D.eulerOrder);
-  }
-  this.object3D.rotation.setX(rotX);*/
-  
-  this.setRotation(rotX, this.getRotationY(), this.getRotationZ());
+  this.object3D.rotation.x = rotX;
   
   return this;
 };
 
 WIDGET3D.Widget.prototype.setRotationY = function(rotY){
-  /*if(this.object3D.useQuaternion){
-    var rotX = this.getRotationX();
-    var rotZ = this.getRotationZ();
-    this.object3D.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.object3D.eulerOrder);
-  }
-  this.object3D.rotation.setY(rotY);*/
-  
-  this.setRotation(this.getRotationX(), rotY, this.getRotationZ());
+  this.object3D.rotation.y = rotY;
   
   return this;
 };
 
 WIDGET3D.Widget.prototype.setRotationZ = function(rotZ){
-  /*if(this.object3D.useQuaternion){
-    var rotX = this.getRotationX();
-    var rotY = this.getRotationY();
-    this.object3D.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.object3D.eulerOrder);
-  }
-  
-  this.object3D.rotation.setZ(rotZ);*/
-  
-  this.setRotation(this.getRotationX(), this.getRotationY(), rotZ);
+  this.object3D.rotation.z = rotZ;
   
   return this;
 };
 
 
 //Object 3D actions
-
-WIDGET3D.Widget.prototype.setEulerOrder = function(order){
-  this.object3D.eulerOrder = order;
-  return this;
-};
 
 WIDGET3D.Widget.prototype.applyMatrix = function(matrix){
   this.object3D.applyMatrix(matrix);
@@ -1923,8 +1859,8 @@ WIDGET3D.Widget.prototype.updateMatrix = function(){
   return this;
 };
 
-WIDGET3D.Widget.prototype.updateMatrixWorld = function(){
-  this.object3D.updateMatrixWorld();
+WIDGET3D.Widget.prototype.updateMatrixWorld = function(force){
+  this.object3D.updateMatrixWorld(force);
   return this;
 };
 
@@ -3039,7 +2975,6 @@ WIDGET3D.DragControl = function(component, parameters){
     rotation.extractRotation(matrixWorld);
     
     //And then the rotation matrix is applied to the plane
-    //that.plane.rotation.setEulerFromRotationMatrix(rotation, camera.eulerOrder);
     that.plane.setRotationFromMatrix(rotation);
     that.plane.updateMatrix();
   };

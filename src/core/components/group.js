@@ -29,10 +29,6 @@ WIDGET3D.Group.prototype.hideNotFocused = WIDGET3D.GroupBase.prototype.hideNotFo
 // removes object from Group
 WIDGET3D.Group.prototype.removeFromObjects = WIDGET3D.GroupBase.prototype.removeFromObjects;
 
-//-----------------------------------------------------------------------------------------
-WIDGET3D.Group.prototype.type = WIDGET3D.ElementType.GROUP;
-//-----------------------------------------------------------------------------------------
-
 WIDGET3D.Group.prototype.add = function(child){
 
   if(WIDGET3D.GroupBase.prototype.add.call(this, child)){

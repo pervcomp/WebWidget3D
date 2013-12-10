@@ -103,17 +103,14 @@ var THREEJS_WIDGET3D = {
       // a datastructure that contains meshes of app.childEvents.event array content
       var intersects = ray.intersectObjects(scene_.children, true);
       
-      var closest = false;
-      
       var found = [];
       
       if(intersects.length > 0){
-        //finding closest
-        //closest object is the first visible object in intersects
+        //Finding objects that were intersected
         for(var m = 0; m < intersects.length; ++m){
           
           if(intersects[m].object.visible){
-            closest = intersects[m].object;
+            var obj = intersects[m].object;
             var inv = new THREE.Matrix4();
             inv.getInverse(intersects[m].object.matrixWorld);
             
@@ -121,17 +118,15 @@ var THREEJS_WIDGET3D = {
             //what should be done to this?
             var objPos = intersects[m].point.clone().applyProjection(inv);
             
-            var hit = WIDGET3D.findObject(closest, event.type);
+            var hit = WIDGET3D.findObject(obj, event.type);
             
             if(hit){
-              //Info about object and world coordinates are atached to
-              //the event object so that the data may be used in eventhandlers like
-              //controls.
               
               //event.objectCoordinates = objPos;
               //event.worldCoordinates = intersects[m].point;
               //var data = {widget : hit, eventObject : event};
               
+              //TODO: we might want to give some info where the object was hit.
               found.push(hit);
               
             }

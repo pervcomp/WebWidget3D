@@ -24,9 +24,6 @@ SOFTWARE.
 //some kind of gui thing
 
 WIDGET3D = {
-
-  ElementType : {"APPLICATION":0, "GROUP":1, "BASIC":2, "TEXT":3, "UNDEFINED":666 },
-  
   //Creating functions
   createFunctions : function(){
     //Some private variables inside a closure

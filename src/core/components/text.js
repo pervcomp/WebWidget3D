@@ -47,8 +47,6 @@ WIDGET3D.Text = function(parameters){
 // inheriting Text from Basic
 WIDGET3D.Text.prototype = WIDGET3D.Basic.prototype.inheritance();
 
-WIDGET3D.Text.prototype.type = WIDGET3D.ElementType.TEXT;
-
 WIDGET3D.Text.prototype.setText = function(text){
   if(this.mutable){
     for(var i = 0; i < text.length; ++i){

@@ -70,19 +70,19 @@ WIDGET3D.Widget.prototype.setRotation = function(rotX, rotY, rotZ){
 };
 
 WIDGET3D.Widget.prototype.setRotationX = function(rotX){
-  this.setRotation(rotX, this.getRotationY(), this.getRotationZ());
+  this.object3D.rotation.x = rotX;
   
   return this;
 };
 
 WIDGET3D.Widget.prototype.setRotationY = function(rotY){
-  this.setRotation(this.getRotationX(), rotY, this.getRotationZ());
+  this.object3D.rotation.y = rotY;
   
   return this;
 };
 
-WIDGET3D.Widget.prototype.setRotationZ = function(rotZ){  
-  this.setRotation(this.getRotationX(), this.getRotationY(), rotZ);
+WIDGET3D.Widget.prototype.setRotationZ = function(rotZ){
+  this.object3D.rotation.z = rotZ;
   
   return this;
 };

@@ -38,8 +38,6 @@ var init = function(){
     defaultControls: true
   });
   
-  console.log(subWindow);
-  
   var dragControl = new WIDGET3D.DragControl(subWindow, {
     mouseButton : 2,
     width: 800,

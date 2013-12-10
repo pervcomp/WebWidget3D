@@ -1782,32 +1782,32 @@ WIDGET3D.Widget.prototype.setPositionZ = function(z){
 
 WIDGET3D.Widget.prototype.getRotation = function(){
   
-  if(this.object3D.useQuaternion){
+  /*if(this.object3D.useQuaternion){
     this.object3D.rotation.setEulerFromQuaternion(this.object3D.quaternion);
-  }
+  }*/
   
   return this.object3D.rotation;
 };
 
 WIDGET3D.Widget.prototype.getRotationX = function(){
-  if(this.object3D.useQuaternion){
+  /*if(this.object3D.useQuaternion){
     this.object3D.rotation.setEulerFromQuaternion(this.object3D.quaternion);
-  }
+  }*/
   
   return this.object3D.rotation.x;
 };
 
 WIDGET3D.Widget.prototype.getRotationY = function(){
-  if(this.object3D.useQuaternion){
+  /*if(this.object3D.useQuaternion){
     this.object3D.rotation.setEulerFromQuaternion(this.object3D.quaternion);
-  }
+  }*/
   return this.object3D.rotation.y;
 };
 
 WIDGET3D.Widget.prototype.getRotationZ = function(){
-  if(this.object3D.useQuaternion){
+  /*if(this.object3D.useQuaternion){
     this.object3D.rotation.setEulerFromQuaternion(this.object3D.quaternion);
-  }
+  }*/
   return this.object3D.rotation.z;
 };
 
@@ -1819,53 +1819,56 @@ WIDGET3D.Widget.prototype.getRotationMatrix = function(){
 }
 
 WIDGET3D.Widget.prototype.setRotation = function(rotX, rotY, rotZ){
-  if(this.object3D.useQuaternion){
+  /*if(this.object3D.useQuaternion){
     this.object3D.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.object3D.eulerOrder);
-  }
+  }*/
   this.object3D.rotation.set(rotX, rotY, rotZ);
   
   return this;
 };
 
 WIDGET3D.Widget.prototype.setRotationX = function(rotX){
-  if(this.object3D.useQuaternion){
+  /*if(this.object3D.useQuaternion){
     var rotY = this.getRotationY();
     var rotZ = this.getRotationZ();
     this.object3D.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.object3D.eulerOrder);
   }
-  this.object3D.rotation.setX(rotX);
+  this.object3D.rotation.setX(rotX);*/
+  
+  this.setRotation(rotX, this.getRotationY(), this.getRotationZ());
   
   return this;
 };
 
 WIDGET3D.Widget.prototype.setRotationY = function(rotY){
-  if(this.object3D.useQuaternion){
+  /*if(this.object3D.useQuaternion){
     var rotX = this.getRotationX();
     var rotZ = this.getRotationZ();
     this.object3D.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.object3D.eulerOrder);
   }
-  this.object3D.rotation.setY(rotY);
+  this.object3D.rotation.setY(rotY);*/
+  
+  this.setRotation(this.getRotationX(), rotY, this.getRotationZ());
   
   return this;
 };
 
 WIDGET3D.Widget.prototype.setRotationZ = function(rotZ){
-  if(this.object3D.useQuaternion){
+  /*if(this.object3D.useQuaternion){
     var rotX = this.getRotationX();
     var rotY = this.getRotationY();
     this.object3D.quaternion.setFromEuler(new THREE.Vec3(rotX, rotY, rotZ), this.object3D.eulerOrder);
   }
-  this.object3D.rotation.setZ(rotZ);
+  
+  this.object3D.rotation.setZ(rotZ);*/
+  
+  this.setRotation(this.getRotationX(), this.getRotationY(), rotZ);
   
   return this;
 };
 
 
 //Object 3D actions
-WIDGET3D.Widget.prototype.useQuaternion = function(){
-  this.object3D.useQuaternion = true;
-  return this;
-};
 
 WIDGET3D.Widget.prototype.setEulerOrder = function(order){
   this.object3D.eulerOrder = order;
@@ -3036,7 +3039,8 @@ WIDGET3D.DragControl = function(component, parameters){
     rotation.extractRotation(matrixWorld);
     
     //And then the rotation matrix is applied to the plane
-    that.plane.rotation.setEulerFromRotationMatrix(rotation, camera.eulerOrder);
+    //that.plane.rotation.setEulerFromRotationMatrix(rotation, camera.eulerOrder);
+    that.plane.setRotationFromMatrix(rotation);
     that.plane.updateMatrix();
   };
   

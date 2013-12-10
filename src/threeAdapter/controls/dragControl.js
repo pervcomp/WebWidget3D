@@ -99,7 +99,8 @@ WIDGET3D.DragControl = function(component, parameters){
     rotation.extractRotation(matrixWorld);
     
     //And then the rotation matrix is applied to the plane
-    that.plane.rotation.setEulerFromRotationMatrix(rotation, camera.eulerOrder);
+    //that.plane.rotation.setEulerFromRotationMatrix(rotation, camera.eulerOrder);
+    that.plane.setRotationFromMatrix(rotation);
     that.plane.updateMatrix();
   };
   

@@ -31,46 +31,9 @@ var init = function(){
     height: 10000,
     debug: false
   });
-  
-  
-  var cameraMovement = new WIDGET3D.FlyControl(WIDGET3D.getCameraGroup());
-  
   mainWindow.add(selected);
   
-  var selectCube = function(cube, group, application){
-  
-    return function(event){
-      if(cube.parent != group){
-        if(event.ctrlKey){
-          var position = cube.getPosition().clone();
-          
-          group.worldToLocal(position);
-          group.add(cube);
-          cube.setPosition(position.x, position.y, position.z);
-          
-
-        }
-        else{
-          while(group.children.length > 0){
-          
-            var child = group.children[0];
-            var position = child.getPosition().clone();
-            
-            group.localToWorld(position);
-            application.add(child);
-            
-            child.setPosition(position.x, position.y, position.z);
-          }
-          
-          var position = cube.getPosition().clone();
-          
-          group.worldToLocal(position);
-          group.add(cube);
-          cube.setPosition(position.x, position.y, position.z);
-        }
-      }
-    };
-  };
+  var cameraMovement = new WIDGET3D.FlyControl(WIDGET3D.getCameraGroup());
   
   var cubeSize = 100;
   
@@ -86,8 +49,6 @@ var init = function(){
     cube.setObject3D(mesh);
     
     cube.setPositionX(-((cubeSize+(cubeSize/4.0))*CUBES/2.0)+(i*(cubeSize+(cubeSize/2.0))));
-    
-    //cube.addEventListener("mousedown", selectCube(cube, selected, mainWindow));
     
     var roll = new WIDGET3D.RollControl(cube, {
       mouseButton : 0,

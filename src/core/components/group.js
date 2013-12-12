@@ -10,7 +10,7 @@ WIDGET3D.Group = function(){
   WIDGET3D.GroupBase.call( this );
   
   this.parent;
-  this.isVisible = true;
+  //this.isVisible = true;
 };
 
 
@@ -29,6 +29,10 @@ WIDGET3D.Group.prototype.hideNotFocused = WIDGET3D.GroupBase.prototype.hideNotFo
 // removes object from Group
 WIDGET3D.Group.prototype.removeFromObjects = WIDGET3D.GroupBase.prototype.removeFromObjects;
 
+WIDGET3D.Group.prototype.show = WIDGET3D.GroupBase.prototype.show;
+
+WIDGET3D.Group.prototype.hide = WIDGET3D.GroupBase.prototype.hide;
+
 WIDGET3D.Group.prototype.add = function(child){
 
   if(WIDGET3D.GroupBase.prototype.add.call(this, child)){
@@ -40,33 +44,6 @@ WIDGET3D.Group.prototype.add = function(child){
     return false;
   }
 }
-
-// shows Group
-WIDGET3D.Group.prototype.show = function(){
-
-  if(!this.isVisible){
-    for(var i = 0; i < this.children.length; ++i){
-      this.children[i].show();
-    }
-    
-    WIDGET3D.Widget.prototype.show.call(this);
-  }
-  
-  return this;
-};
-
-// hides Group
-WIDGET3D.Group.prototype.hide = function(){
-
-  if(this.isVisible){
-    for(var i = 0; i < this.children.length; ++i){
-      this.children[i].hide();
-    }
-    
-    WIDGET3D.Widget.prototype.hide.call(this);
-  }
-  return this;
-};
 
 //removes Group and it's children
 WIDGET3D.Group.prototype.remove = function(){

@@ -833,6 +833,7 @@ WIDGET3D.Widget.prototype.inheritance = function(){
 WIDGET3D.GroupBase = function(){
   this.children = [];
   this.object3D = new WIDGET3D.Container();
+  this.isVisible = true;
 };
 
 //Adds children to the group
@@ -860,6 +861,34 @@ WIDGET3D.GroupBase.prototype.add = function(child){
   }
   
 };
+
+// shows Group
+WIDGET3D.GroupBase.prototype.show = function(){
+
+  if(!this.isVisible){
+    for(var i = 0; i < this.children.length; ++i){
+      this.children[i].show();
+    }
+    
+    WIDGET3D.Widget.prototype.show.call(this);
+  }
+  
+  return this;
+};
+
+//hide group
+WIDGET3D.GroupBase.prototype.hide = function(){
+
+  if(this.isVisible){
+    for(var i = 0; i < this.children.length; ++i){
+      this.children[i].hide();
+    }
+    
+    WIDGET3D.Widget.prototype.hide.call(this);
+  }
+  return this;
+};
+
 
 // hides unfocused objects in window
 WIDGET3D.GroupBase.prototype.hideNotFocused = function(){
@@ -937,6 +966,10 @@ WIDGET3D.Application.prototype.hideNotFocused = WIDGET3D.GroupBase.prototype.hid
 // removes object from window
 WIDGET3D.Application.prototype.removeFromObjects = WIDGET3D.GroupBase.prototype.removeFromObjects;
 
+WIDGET3D.Application.prototype.show = WIDGET3D.GroupBase.prototype.show;
+
+WIDGET3D.Application.prototype.hide = WIDGET3D.GroupBase.prototype.hide;
+
 //---------------------------------------------
 // GUI OBJECT: BASIC
 //---------------------------------------------
@@ -972,7 +1005,7 @@ WIDGET3D.Group = function(){
   WIDGET3D.GroupBase.call( this );
   
   this.parent;
-  this.isVisible = true;
+  //this.isVisible = true;
 };
 
 
@@ -991,6 +1024,10 @@ WIDGET3D.Group.prototype.hideNotFocused = WIDGET3D.GroupBase.prototype.hideNotFo
 // removes object from Group
 WIDGET3D.Group.prototype.removeFromObjects = WIDGET3D.GroupBase.prototype.removeFromObjects;
 
+WIDGET3D.Group.prototype.show = WIDGET3D.GroupBase.prototype.show;
+
+WIDGET3D.Group.prototype.hide = WIDGET3D.GroupBase.prototype.hide;
+
 WIDGET3D.Group.prototype.add = function(child){
 
   if(WIDGET3D.GroupBase.prototype.add.call(this, child)){
@@ -1002,33 +1039,6 @@ WIDGET3D.Group.prototype.add = function(child){
     return false;
   }
 }
-
-// shows Group
-WIDGET3D.Group.prototype.show = function(){
-
-  if(!this.isVisible){
-    for(var i = 0; i < this.children.length; ++i){
-      this.children[i].show();
-    }
-    
-    WIDGET3D.Widget.prototype.show.call(this);
-  }
-  
-  return this;
-};
-
-// hides Group
-WIDGET3D.Group.prototype.hide = function(){
-
-  if(this.isVisible){
-    for(var i = 0; i < this.children.length; ++i){
-      this.children[i].hide();
-    }
-    
-    WIDGET3D.Widget.prototype.hide.call(this);
-  }
-  return this;
-};
 
 //removes Group and it's children
 WIDGET3D.Group.prototype.remove = function(){

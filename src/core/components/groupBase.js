@@ -9,6 +9,7 @@
 WIDGET3D.GroupBase = function(){
   this.children = [];
   this.object3D = new WIDGET3D.Container();
+  this.isVisible = true;
 };
 
 //Adds children to the group
@@ -36,6 +37,34 @@ WIDGET3D.GroupBase.prototype.add = function(child){
   }
   
 };
+
+// shows Group
+WIDGET3D.GroupBase.prototype.show = function(){
+
+  if(!this.isVisible){
+    for(var i = 0; i < this.children.length; ++i){
+      this.children[i].show();
+    }
+    
+    WIDGET3D.Widget.prototype.show.call(this);
+  }
+  
+  return this;
+};
+
+//hide group
+WIDGET3D.GroupBase.prototype.hide = function(){
+
+  if(this.isVisible){
+    for(var i = 0; i < this.children.length; ++i){
+      this.children[i].hide();
+    }
+    
+    WIDGET3D.Widget.prototype.hide.call(this);
+  }
+  return this;
+};
+
 
 // hides unfocused objects in window
 WIDGET3D.GroupBase.prototype.hideNotFocused = function(){

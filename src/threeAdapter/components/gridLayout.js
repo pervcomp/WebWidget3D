@@ -50,7 +50,7 @@ WIDGET3D.GridWindow = function(parameters){
   }
   this.add(this.grid);
   
-  this.icons = new Array();;
+  this.icons = new Array();
   
   //default mouse controls in use
   this.defaultControls = parameters.defaultControls !== undefined ? parameters.defaultControls : false;
@@ -94,6 +94,61 @@ WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
   }
   
   return this;
+};
+
+//Adds children to the group
+WIDGET3D.GridWindow.prototype.add = function(child){
+
+  if(child != this){
+    if(child.parent){
+      //removing event listeners from former parent
+      if(child.parent != WIDGET3D.getApplication()){
+        child.parent.removeRelatedEventListeners(child);
+      }
+    
+      child.parent.object3D.remove(child.object3D);
+      child.parent.removeFromObjects(child);
+      child.parent.removeFromIcons(child);
+      
+      for(var i = 0; i < child.parent.icons.length; ++i){
+        child.parent.icons[i].setToPlace();
+      }
+    }
+    child.parent = this;
+    this.children.push(child);
+    this.object3D.add(child.object3D);
+    
+    if(child != this.grid){
+      this.icons.push(child);
+      if(this.icons.length > this.maxChildren){
+        console.log("Grid is full! Creating bigger one");
+        this.addSlots(Math.ceil(this.density * 1.5));
+      }
+      else{
+        child.setToPlace();
+      }
+    }
+    
+    return this;
+  }
+  else{
+    console.log("You can't add object to it self!");
+    return false;
+  }
+  
+};
+
+WIDGET3D.GridWindow.prototype.removeFromIcons = function(child){
+  for(var k = 0; k < this.icons.length; ++k){
+    if(this.icons[k] === child){
+      var removedObj = this.icons.splice(k, 1);
+      
+      this.object3D.remove(child.object3D);
+      
+      return removedObj[0];
+    }
+  }
+  return false;
 }
 
 //---------------------------------------------------
@@ -111,12 +166,7 @@ WIDGET3D.GridIcon = function(parameters){
     console.log("Parent has to be given in parameters.");
     return false;
   }
-  
-  if(parent.icons.length >= parent.maxChildren){
-    console.log("Grid is full! Creating bigger one");
-    parent.addSlots(Math.ceil(parent.density * 1.5));
-  }
-  
+    
   this.color = parameters.color !== undefined ? parameters.color : 0xFFFFFF;
   this.url = parameters.url !== undefined ? parameters.url : false;
   this.img = parameters.img !== undefined ? parameters.img : false;
@@ -146,10 +196,6 @@ WIDGET3D.GridIcon = function(parameters){
   
   this.setObject3D(mesh);
   parent.add(this);
-  parent.icons.push(this);
-  
-  this.setToPlace();
-  
 };
 
 WIDGET3D.GridIcon.prototype = WIDGET3D.Basic.prototype.inheritance();

@@ -2013,7 +2013,6 @@ WIDGET3D.GridWindow = function(parameters){
   }
   
   this.calculateGrid();
-  console.log(this);
 };
 
 
@@ -2040,15 +2039,11 @@ WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
     var icon = tmpChilds[i];
     this.icons.push(icon);
     
-    icon.width = this.width/(this.density + 3.3);
-    icon.height = this.height/(this.density + 3.3);
-    
-    var geometry = new THREE.CubeGeometry(icon.width, icon.height, icon.depth);
-    var mesh = new THREE.Mesh( geometry, icon.material);
-    icon.setObject3D(mesh);
+    icon.setNewSize();
     
     var pos = this.gridIndexes[i];
     icon.setPosition(pos.x, pos.y, pos.z);
+    
   }
   
   return this;
@@ -2078,6 +2073,7 @@ WIDGET3D.GridWindow.prototype.add = function(child){
     
     if(child != this.grid){
       this.icons.push(child);
+      child.setNewSize();
       if(this.icons.length > this.maxChildren){
         console.log("Grid is full! Creating bigger one");
         this.addSlots(Math.ceil(this.density * 1.5));
@@ -2195,6 +2191,15 @@ WIDGET3D.GridIcon = function(parameters){
 };
 
 WIDGET3D.GridIcon.prototype = WIDGET3D.Basic.prototype.inheritance();
+
+WIDGET3D.GridIcon.prototype.setNewSize = function(){
+  this.width = this.parent.width/(this.parent.density + 3.3);
+  this.height = this.parent.height/(this.parent.density + 3.3);
+  
+  var geometry = new THREE.CubeGeometry(this.width, this.height, this.depth);
+  var mesh = new THREE.Mesh( geometry, this.material);
+  this.setObject3D(mesh);
+};
 //---------------------------------------------------
 //
 // STYLED WIDGETS THAT CAN BE USED WITH THREEJS PLUGIN

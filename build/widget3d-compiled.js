@@ -344,8 +344,6 @@ WIDGET3D.DomEvents = function(collisionCallback){
     var name = domEvent.type;
     var mainWindow = WIDGET3D.getApplication();
     
-    var bubbles = true;
-    
     //Widget event listeners
     for(var i = 0; i < found.length; ++i){
       
@@ -355,37 +353,18 @@ WIDGET3D.DomEvents = function(collisionCallback){
       if(hit && hit.events.hasOwnProperty(name.toString())){
         for(var k = 0; k < hit.events[name.toString()].length; ++k){
           
-          //All the event handlers of the current object is to be called but
-          //bubbling to other widgets is prevented.
-          if(!hit.events[name.toString()][k].bubbles){
-            bubbles = false;
-          }
-          
           hit.events[name.toString()][k].callback(domEvent);
         }
       }
-      
-      if(!bubbles){
-        break;
-      }
     }
-    
-    //if mainwindow has eventlistener it is executed also if bubbling is not prevented
-    if(bubbles && mainWindow.events.hasOwnProperty(name.toString())){
-      for(var j = 0; j < mainWindow.events[name.toString()].length; ++j){
-      
-        if(!mainWindow.events[name.toString()][j].bubbles){
-          bubbles = false;
-        }
-        
+
+    if(mainWindow.events.hasOwnProperty(name.toString())){
+      for(var j = 0; j < mainWindow.events[name.toString()].length; ++j){  
         mainWindow.events[name.toString()][j].callback(domEvent);
       }
     }
-    
-    return bubbles;
   };
   
-  //NOTICE KEYBOARD EVENTS DOESN'T CARE ON BUBBLES PARAMETER!
   that.keyboardEvent = function(domEvent){
     
     var name = domEvent.type;
@@ -501,13 +480,13 @@ WIDGET3D.GuiObject = function(){
       }
     },
     
-    addCallback : function(name, callback, bubbles, index){
+    addCallback : function(name, callback, index){
       if(!this.hasOwnProperty(name.toString()) ||
       (this.hasOwnProperty(name.toString()) && this[name.toString()] === false))
       {
         this[name.toString()] = [];  
       }
-      this[name.toString()].push({callback : callback, bubbles: bubbles, index : index});
+      this[name.toString()].push({callback : callback, index : index});
     },
     
     removeCallback : function(name, callback){
@@ -581,9 +560,8 @@ WIDGET3D.GuiObject.prototype.unfocus = function(){
 
 // Adds event listner to object
 // callback: callback function that is called when the event is triggered to object
-// bubbles: preventing event from bubbling to other widgets set bubbles to false
 //
-WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, bubbles){
+WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback){
 
   if(!WIDGET3D.getEvents().enabled[name.toString()]){
     WIDGET3D.getEvents().enableEvent(name);
@@ -595,10 +573,7 @@ WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, bubbles
     var index = this.events[name.toString()][0].index;
   }
   
-  if(bubbles == undefined){
-    bubbles = true;
-  }
-  this.events.addCallback(name, callback, bubbles, index);
+  this.events.addCallback(name, callback, index);
   
   return this;
 };
@@ -1423,8 +1398,8 @@ WIDGET3D.RollControl = function(component, parameters){
         rotationOnMousedownX = modelRotationX;
         
         var mainWindow = WIDGET3D.getApplication();
-        mainWindow.addEventListener("mousemove", mousemoveHandler, false);
-        mainWindow.addEventListener("mouseup", that.mouseupHandler, false);
+        mainWindow.addEventListener("mousemove", mousemoveHandler);
+        mainWindow.addEventListener("mouseup", that.mouseupHandler);
       }
     }
   };
@@ -1441,7 +1416,7 @@ WIDGET3D.RollControl = function(component, parameters){
     }
   };
   
-  this.component.addEventListener("mousedown", this.mousedownHandler, false);
+  this.component.addEventListener("mousedown", this.mousedownHandler);
   
   //Animate must be called before the component is rendered to apply
   //the change in components rotation
@@ -2059,13 +2034,6 @@ WIDGET3D.GridWindow.prototype.add = function(child){
         child.parent.removeRelatedEventListeners(child);
       }
       child.parent.removeFromObjects(child);
-      child.parent.removeFromIcons(child);
-      
-      for(var i = 0; i < child.parent.icons.length; ++i){
-        var icon = child.parent.icons[i];
-        var pos = child.parent.gridIndexes[i];
-        icon.setPosition(pos.x, pos.y, pos.z);
-      }
     }
     child.parent = this;
     this.children.push(child);
@@ -2102,6 +2070,19 @@ WIDGET3D.GridWindow.prototype.removeFromIcons = function(child){
     }
   }
   return false;
+};
+
+//removes object in place 'index' from object list
+WIDGET3D.GridWindow.prototype.removeFromObjects = function(child){
+  WIDGET3D.Group.prototype.removeFromObjects.call(this, child);
+  this.removeFromIcons(child);
+  
+  for(var i = 0; i < this.icons.length; ++i){
+    var icon = this.icons[i];
+    var pos = this.gridIndexes[i];
+    icon.setPosition(pos.x, pos.y, pos.z);
+  }
+  
 };
 
 
@@ -2148,7 +2129,7 @@ WIDGET3D.GridWindow.prototype.calculateGrid = function(){
 //---------------------------------------------------
 WIDGET3D.GridIcon = function(parameters){
   
-  WIDGET3D.Basic.call( this );
+  WIDGET3D.Widget.call( this );
   
   var parameters = parameters || {};
   
@@ -2190,7 +2171,7 @@ WIDGET3D.GridIcon = function(parameters){
   parent.add(this);
 };
 
-WIDGET3D.GridIcon.prototype = WIDGET3D.Basic.prototype.inheritance();
+WIDGET3D.GridIcon.prototype = WIDGET3D.Widget.prototype.inheritance();
 
 WIDGET3D.GridIcon.prototype.setNewSize = function(){
   this.width = this.parent.width/(this.parent.density + 3.3);
@@ -3006,8 +2987,8 @@ WIDGET3D.DragControl = function(component, parameters){
           offset.copy( intersects[ 0 ].point ).sub( that.plane.position );
         }
         
-        WIDGET3D.getApplication().addEventListener("mousemove", mousemoveHandler, false);
-        WIDGET3D.getApplication().addEventListener("mouseup", that.mouseupHandler, false);
+        WIDGET3D.getApplication().addEventListener("mousemove", mousemoveHandler);
+        WIDGET3D.getApplication().addEventListener("mouseup", that.mouseupHandler);
         
         that.component.focus();
         that.drag = true;
@@ -3050,7 +3031,7 @@ WIDGET3D.DragControl = function(component, parameters){
   setPlaneRotation();
   WIDGET3D.getScene().add( this.plane );
   
-  this.component.addEventListener("mousedown", this.mousedownHandler, false);
+  this.component.addEventListener("mousedown", this.mousedownHandler);
 };
 
 

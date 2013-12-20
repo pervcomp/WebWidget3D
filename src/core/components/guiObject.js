@@ -26,13 +26,13 @@ WIDGET3D.GuiObject = function(){
       }
     },
     
-    addCallback : function(name, callback, bubbles, index){
+    addCallback : function(name, callback, index){
       if(!this.hasOwnProperty(name.toString()) ||
       (this.hasOwnProperty(name.toString()) && this[name.toString()] === false))
       {
         this[name.toString()] = [];  
       }
-      this[name.toString()].push({callback : callback, bubbles: bubbles, index : index});
+      this[name.toString()].push({callback : callback, index : index});
     },
     
     removeCallback : function(name, callback){
@@ -106,9 +106,8 @@ WIDGET3D.GuiObject.prototype.unfocus = function(){
 
 // Adds event listner to object
 // callback: callback function that is called when the event is triggered to object
-// bubbles: preventing event from bubbling to other widgets set bubbles to false
 //
-WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, bubbles){
+WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback){
 
   if(!WIDGET3D.getEvents().enabled[name.toString()]){
     WIDGET3D.getEvents().enableEvent(name);
@@ -120,10 +119,7 @@ WIDGET3D.GuiObject.prototype.addEventListener = function(name, callback, bubbles
     var index = this.events[name.toString()][0].index;
   }
   
-  if(bubbles == undefined){
-    bubbles = true;
-  }
-  this.events.addCallback(name, callback, bubbles, index);
+  this.events.addCallback(name, callback, index);
   
   return this;
 };

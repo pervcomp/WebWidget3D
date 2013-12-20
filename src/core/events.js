@@ -70,8 +70,6 @@ WIDGET3D.DomEvents = function(collisionCallback){
     var name = domEvent.type;
     var mainWindow = WIDGET3D.getApplication();
     
-    var bubbles = true;
-    
     //Widget event listeners
     for(var i = 0; i < found.length; ++i){
       
@@ -81,37 +79,18 @@ WIDGET3D.DomEvents = function(collisionCallback){
       if(hit && hit.events.hasOwnProperty(name.toString())){
         for(var k = 0; k < hit.events[name.toString()].length; ++k){
           
-          //All the event handlers of the current object is to be called but
-          //bubbling to other widgets is prevented.
-          if(!hit.events[name.toString()][k].bubbles){
-            bubbles = false;
-          }
-          
           hit.events[name.toString()][k].callback(domEvent);
         }
       }
-      
-      if(!bubbles){
-        break;
-      }
     }
-    
-    //if mainwindow has eventlistener it is executed also if bubbling is not prevented
-    if(bubbles && mainWindow.events.hasOwnProperty(name.toString())){
-      for(var j = 0; j < mainWindow.events[name.toString()].length; ++j){
-      
-        if(!mainWindow.events[name.toString()][j].bubbles){
-          bubbles = false;
-        }
-        
+
+    if(mainWindow.events.hasOwnProperty(name.toString())){
+      for(var j = 0; j < mainWindow.events[name.toString()].length; ++j){  
         mainWindow.events[name.toString()][j].callback(domEvent);
       }
     }
-    
-    return bubbles;
   };
   
-  //NOTICE KEYBOARD EVENTS DOESN'T CARE ON BUBBLES PARAMETER!
   that.keyboardEvent = function(domEvent){
     
     var name = domEvent.type;

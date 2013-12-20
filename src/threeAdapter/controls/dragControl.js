@@ -62,8 +62,8 @@ WIDGET3D.DragControl = function(component, parameters){
           offset.copy( intersects[ 0 ].point ).sub( that.plane.position );
         }
         
-        WIDGET3D.getApplication().addEventListener("mousemove", mousemoveHandler, false);
-        WIDGET3D.getApplication().addEventListener("mouseup", that.mouseupHandler, false);
+        WIDGET3D.getApplication().addEventListener("mousemove", mousemoveHandler);
+        WIDGET3D.getApplication().addEventListener("mouseup", that.mouseupHandler);
         
         that.component.focus();
         that.drag = true;
@@ -106,7 +106,7 @@ WIDGET3D.DragControl = function(component, parameters){
   setPlaneRotation();
   WIDGET3D.getScene().add( this.plane );
   
-  this.component.addEventListener("mousedown", this.mousedownHandler, false);
+  this.component.addEventListener("mousedown", this.mousedownHandler);
 };
 
 

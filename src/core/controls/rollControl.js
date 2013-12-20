@@ -58,8 +58,8 @@ WIDGET3D.RollControl = function(component, parameters){
         rotationOnMousedownX = modelRotationX;
         
         var mainWindow = WIDGET3D.getApplication();
-        mainWindow.addEventListener("mousemove", mousemoveHandler, false);
-        mainWindow.addEventListener("mouseup", that.mouseupHandler, false);
+        mainWindow.addEventListener("mousemove", mousemoveHandler);
+        mainWindow.addEventListener("mouseup", that.mouseupHandler);
       }
     }
   };
@@ -76,7 +76,7 @@ WIDGET3D.RollControl = function(component, parameters){
     }
   };
   
-  this.component.addEventListener("mousedown", this.mousedownHandler, false);
+  this.component.addEventListener("mousedown", this.mousedownHandler);
   
   //Animate must be called before the component is rendered to apply
   //the change in components rotation

@@ -112,13 +112,6 @@ WIDGET3D.GridWindow.prototype.add = function(child){
         child.parent.removeRelatedEventListeners(child);
       }
       child.parent.removeFromObjects(child);
-      child.parent.removeFromIcons(child);
-      
-      for(var i = 0; i < child.parent.icons.length; ++i){
-        var icon = child.parent.icons[i];
-        var pos = child.parent.gridIndexes[i];
-        icon.setPosition(pos.x, pos.y, pos.z);
-      }
     }
     child.parent = this;
     this.children.push(child);
@@ -155,6 +148,19 @@ WIDGET3D.GridWindow.prototype.removeFromIcons = function(child){
     }
   }
   return false;
+};
+
+//removes object in place 'index' from object list
+WIDGET3D.GridWindow.prototype.removeFromObjects = function(child){
+  WIDGET3D.Group.prototype.removeFromObjects.call(this, child);
+  this.removeFromIcons(child);
+  
+  for(var i = 0; i < this.icons.length; ++i){
+    var icon = this.icons[i];
+    var pos = this.gridIndexes[i];
+    icon.setPosition(pos.x, pos.y, pos.z);
+  }
+  
 };
 
 
@@ -201,7 +207,7 @@ WIDGET3D.GridWindow.prototype.calculateGrid = function(){
 //---------------------------------------------------
 WIDGET3D.GridIcon = function(parameters){
   
-  WIDGET3D.Basic.call( this );
+  WIDGET3D.Widget.call( this );
   
   var parameters = parameters || {};
   
@@ -243,7 +249,7 @@ WIDGET3D.GridIcon = function(parameters){
   parent.add(this);
 };
 
-WIDGET3D.GridIcon.prototype = WIDGET3D.Basic.prototype.inheritance();
+WIDGET3D.GridIcon.prototype = WIDGET3D.Widget.prototype.inheritance();
 
 WIDGET3D.GridIcon.prototype.setNewSize = function(){
   this.width = this.parent.width/(this.parent.density + 3.3);

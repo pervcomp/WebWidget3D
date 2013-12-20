@@ -846,8 +846,6 @@ WIDGET3D.GroupBase.prototype.add = function(child){
       if(child.parent != WIDGET3D.getApplication()){
         child.parent.removeRelatedEventListeners(child);
       }
-    
-      child.parent.object3D.remove(child.object3D);
       child.parent.removeFromObjects(child);
     }
     child.parent = this;
@@ -1961,6 +1959,7 @@ WIDGET3D.Group.prototype.getBoundingSphere = function(){
 //              height = height in world coordinates
 //              color = hexadecimal
 //
+
 WIDGET3D.GridWindow = function(parameters){
   
   var that = this;
@@ -2000,6 +1999,7 @@ WIDGET3D.GridWindow = function(parameters){
   this.add(this.grid);
   
   this.icons = new Array();
+  this.gridIndexes = new Array();
   
   //default mouse controls in use
   this.defaultControls = parameters.defaultControls !== undefined ? parameters.defaultControls : false;
@@ -2011,9 +2011,14 @@ WIDGET3D.GridWindow = function(parameters){
     
     var control = new WIDGET3D.RollControl(this, {mouseButton : button, shiftKey : shift});
   }
+  
+  this.calculateGrid();
+  console.log(this);
 };
 
+
 WIDGET3D.GridWindow.prototype = WIDGET3D.Group.prototype.inheritance();
+
 
 WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
   this.density = newDensity;
@@ -2023,6 +2028,9 @@ WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
   var grid = new THREE.CubeGeometry( this.width, this.height, this.depth, this.density, this.density, 1 );
   var gridMesh =  new THREE.Mesh(grid, this.material);
   this.grid.setObject3D(gridMesh);
+  
+  //calculating the new indexes
+  this.calculateGrid();
   
   var tmpChilds = this.icons;
   this.icons = new Array();
@@ -2039,7 +2047,8 @@ WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
     var mesh = new THREE.Mesh( geometry, icon.material);
     icon.setObject3D(mesh);
     
-    icon.setToPlace();
+    var pos = this.gridIndexes[i];
+    icon.setPosition(pos.x, pos.y, pos.z);
   }
   
   return this;
@@ -2054,13 +2063,13 @@ WIDGET3D.GridWindow.prototype.add = function(child){
       if(child.parent != WIDGET3D.getApplication()){
         child.parent.removeRelatedEventListeners(child);
       }
-    
-      child.parent.object3D.remove(child.object3D);
       child.parent.removeFromObjects(child);
       child.parent.removeFromIcons(child);
       
       for(var i = 0; i < child.parent.icons.length; ++i){
-        child.parent.icons[i].setToPlace();
+        var icon = child.parent.icons[i];
+        var pos = child.parent.gridIndexes[i];
+        icon.setPosition(pos.x, pos.y, pos.z);
       }
     }
     child.parent = this;
@@ -2074,7 +2083,8 @@ WIDGET3D.GridWindow.prototype.add = function(child){
         this.addSlots(Math.ceil(this.density * 1.5));
       }
       else{
-        child.setToPlace();
+        pos = this.gridIndexes[this.icons.length-1];
+        child.setPosition(pos.x, pos.y, pos.z);
       }
     }
     
@@ -2087,18 +2097,55 @@ WIDGET3D.GridWindow.prototype.add = function(child){
   
 };
 
+
 WIDGET3D.GridWindow.prototype.removeFromIcons = function(child){
   for(var k = 0; k < this.icons.length; ++k){
     if(this.icons[k] === child){
       var removedObj = this.icons.splice(k, 1);
-      
-      this.object3D.remove(child.object3D);
-      
       return removedObj[0];
     }
   }
   return false;
-}
+};
+
+
+WIDGET3D.GridWindow.prototype.calculateGrid = function(){
+  this.gridIndexes = new Array();
+  var pos = this.getPosition();
+  
+  var left = -this.width/2.0 + pos.x/this.width;
+  var top =  this.height/2.0 + pos.y/this.height;
+  
+  var stepX = this.width/this.density;
+  var stepY = this.height/this.density;
+  
+  var slotCenterX = stepX/2;
+  var slotCenterY = stepY/2;
+  
+  var lastX = left + slotCenterX;
+  var lastY = top - slotCenterY;
+  
+  for(var i = 0; i < this.maxChildren; ++i){
+    if(i == 0){
+      var x = lastX;
+      var y = lastY;
+    }
+    else if((i%this.density) == 0){
+      //changing a row
+      var x = left + slotCenterX;
+      var y = lastY - stepY;
+    }
+    else{
+      //going onwords normally
+      var x = lastX + stepY;
+      var y = lastY;
+    }
+    
+    lastX = x;
+    lastY = y;
+    this.gridIndexes.push({x: x, y: y, z: pos.z/this.height});
+  }
+};
 
 //---------------------------------------------------
 // ICONS FOR GRIDWINDOW
@@ -2148,46 +2195,6 @@ WIDGET3D.GridIcon = function(parameters){
 };
 
 WIDGET3D.GridIcon.prototype = WIDGET3D.Basic.prototype.inheritance();
-
-WIDGET3D.GridIcon.prototype.setToPlace = function(){
-
-  var parentLoc = this.parent.getPosition();
-  
-  var parentLeft = -this.parent.width/2.0 + parentLoc.x/this.parent.width;
-  var parentTop =  this.parent.height/2.0 + parentLoc.y/this.parent.height;
-  
-  var stepX = this.parent.width/this.parent.density;
-  var stepY = this.parent.height/this.parent.density;
-  
-  var slotCenterX = stepX/2;
-  var slotCenterY = stepY/2;
-  
-  if(this.parent.icons.length-1 > 0){
-  
-    var lastIcon = this.parent.icons[this.parent.icons.length-2];
-    var lastIconLoc = lastIcon.getPosition();
-    
-    if(((this.parent.icons.length-1) % this.parent.density) == 0)
-    {  
-      var x = parentLeft + slotCenterX;
-      var y = lastIconLoc.y - stepY;
-    }
-    else{
-      var x = lastIconLoc.x + stepX;
-      var y = lastIconLoc.y;
-    
-    }
-  }
-  else{
-    
-    var x = parentLeft + slotCenterX;
-    var y = parentTop - slotCenterY; 
-  }
-  this.setPosition(x, y, parentLoc.z/this.parent.height);
-  
-  return this;
-};
-
 //---------------------------------------------------
 //
 // STYLED WIDGETS THAT CAN BE USED WITH THREEJS PLUGIN

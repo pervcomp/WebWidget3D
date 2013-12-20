@@ -22,8 +22,6 @@ WIDGET3D.GroupBase.prototype.add = function(child){
       if(child.parent != WIDGET3D.getApplication()){
         child.parent.removeRelatedEventListeners(child);
       }
-    
-      child.parent.object3D.remove(child.object3D);
       child.parent.removeFromObjects(child);
     }
     child.parent = this;

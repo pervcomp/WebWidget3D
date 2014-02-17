@@ -326,11 +326,11 @@ WIDGET3D.DomEvents = function(collisionCallback){
     //support for touch events is needed!
     
     if(proto.hasOwnProperty(String("initMouseEvent"))){
-      return that.mouseEvent(domEvent);
+      that.mouseEvent(domEvent);
       
     }
     else if(proto.hasOwnProperty(String("initKeyboardEvent"))){
-      return that.keyboardEvent(domEvent);
+      that.keyboardEvent(domEvent);
     }
     else{
       that.triggerEvent(domEvent);
@@ -338,26 +338,31 @@ WIDGET3D.DomEvents = function(collisionCallback){
     
   };
   
+  //Mouse event calls the event handler of the closest intersected 3D object.
+  //MainWindow event handlers are called each time.
   that.mouseEvent = function(domEvent){
     
     var found = collisions_.callback(domEvent, collisions_.args);
+    
     var name = domEvent.type;
     var mainWindow = WIDGET3D.getApplication();
-    
-    //Widget event listeners
-    for(var i = 0; i < found.length; ++i){
+
+    if(found.length > 0){
       
-      var hit = found[i];
-    
-      //hit can't be mainWindow because mainWindow doesn't have mesh
+      var hit = found[0].widget;
+      
+      domEvent["mousePositionIn3D"] = found[0].mousePositionIn3D;   
+      
+      //One widget can have multiple listeners for one event.
+      //All the listeners are called.
       if(hit && hit.events.hasOwnProperty(name.toString())){
         for(var k = 0; k < hit.events[name.toString()].length; ++k){
-          
           hit.events[name.toString()][k].callback(domEvent);
         }
       }
     }
-
+    
+    //hit can't be mainWindow because mainWindow doesn't have mesh
     if(mainWindow.events.hasOwnProperty(name.toString())){
       for(var j = 0; j < mainWindow.events[name.toString()].length; ++j){  
         mainWindow.events[name.toString()][j].callback(domEvent);
@@ -428,7 +433,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
   
 };
 
-//Adds event listener to dom element
+//Adds event listener to Window
 WIDGET3D.DomEvents.prototype.enableEvent = function(name){
   //if there is no property or if the property is false
   if(!this.enabled.hasOwnProperty(name.toString()) || 
@@ -439,7 +444,7 @@ WIDGET3D.DomEvents.prototype.enableEvent = function(name){
   }
 };
 
-//Removes event listener from dom element
+//Removes event listener from Window
 WIDGET3D.DomEvents.prototype.disableEvent = function(name){
 
   if(this.enabled.hasOwnProperty(name.toString()) && this.enabled[name.toString()] === true){
@@ -699,15 +704,16 @@ WIDGET3D.GuiObject.prototype.inheritance = function(){
 //So this Object describes all properties and methods that are
 //for all types of objects
 
-WIDGET3D.Widget = function(){
+WIDGET3D.Widget = function(mesh){
 
   WIDGET3D.GuiObject.call( this );
   
   this.parent = false;
-  this.object3D = false;
+  this.object3D = mesh !== undefined ? mesh : false;
   this.isVisible = true;
   
   this.controls = new Array();
+
 };
 
 WIDGET3D.Widget.prototype = WIDGET3D.GuiObject.prototype.inheritance();
@@ -808,6 +814,7 @@ WIDGET3D.Widget.prototype.inheritance = function(){
 WIDGET3D.GroupBase = function(){
   this.children = [];
   this.object3D = new WIDGET3D.Container();
+  
   this.isVisible = true;
 };
 
@@ -888,104 +895,23 @@ WIDGET3D.GroupBase.prototype.removeFromObjects = function(child){
   return false;
 };
 
-//------------------------------------------------
-// MAIN WINDOW: Singleton root window
-//
-// The Main Window is inited by widget3d by default.
-//
-// Extends WIDGET3D.GuiObject object.
-//---------------------------------------------------
-
-WIDGET3D.Application = function(){
-  
-  WIDGET3D.GuiObject.call( this );
-  WIDGET3D.GroupBase.call( this );
-  
-  this.childEvents = {
-    
-    addObject : function(name, child){
-      if(!this.hasOwnProperty(name.toString()) ||
-        (this.hasOwnProperty(name.toString()) && this[name.toString()] == false))
-      {
-        this[name.toString()] = [];
-      }
-      this[name.toString()].push(child);
-      var index = this[name.toString()].length-1;
-      return index;
-    },
-
-    removeEvent : function(name){
-      if(this.hasOwnProperty(name.toString()) && this[name.toString()].length == 0){
-        this[name.toString()] = false;
-        WIDGET3D.getEvents().disableEvent(name);
-        return true;
-      }
-      return false;
-    }
-  };
-};
-
-
-//-----------------------------------------------------------------------------------------
-// inheriting Application from GuiObject
-WIDGET3D.Application.prototype = WIDGET3D.GuiObject.prototype.inheritance();
-
-
-//inheriting some methods from WindowInterface
-// adds new child to window
-WIDGET3D.Application.prototype.add = WIDGET3D.GroupBase.prototype.add;
-// hides unfocused objects in window
-WIDGET3D.Application.prototype.hideNotFocused = WIDGET3D.GroupBase.prototype.hideNotFocused;
-// removes object from window
-WIDGET3D.Application.prototype.removeFromObjects = WIDGET3D.GroupBase.prototype.removeFromObjects;
-
-WIDGET3D.Application.prototype.show = WIDGET3D.GroupBase.prototype.show;
-
-WIDGET3D.Application.prototype.hide = WIDGET3D.GroupBase.prototype.hide;
-
 //---------------------------------------------
-// GUI OBJECT: BASIC
-//---------------------------------------------
-//
-// The basic guiObject that can be moved or hidden and so on.
-//
-WIDGET3D.Basic = function(){  
-  WIDGET3D.Widget.call( this );
-};
-
-
-// inheriting basic from GuiObject
-//WIDGET3D.Basic.prototype = WIDGET3D.GuiObject.prototype.inheritance();
-WIDGET3D.Basic.prototype = WIDGET3D.Widget.prototype.inheritance();
-
-//--------------------------------------------------
-// PROTOTYPAL INHERITANCE FUNCTION FOR BASIC OBJECT
-//--------------------------------------------------
-WIDGET3D.Basic.prototype.inheritance = function(){
-  function WIDGET3DBasicPrototype(){};
-  WIDGET3DBasicPrototype.prototype = this;
-  var created = new WIDGET3DBasicPrototype();
-  return created;
-};//---------------------------------------------
 // GUI OBJECT: Group
 //---------------------------------------------
-// Basic Group that can has children.
-// Extends WIDGET3D.Basic object.
+// Group object that can has children.
+// Extends WIDGET3D.Widget object.
 //---------------------------------------------
 WIDGET3D.Group = function(){
 
   WIDGET3D.Widget.call( this );
   WIDGET3D.GroupBase.call( this );
-  
-  this.parent;
-  //this.isVisible = true;
+
+  this.parent = false;
 };
 
 
 //-----------------------------------------------------------------------------------------
-// inheriting Group from Basic object
-//WIDGET3D.Group.prototype = WIDGET3D.Basic.prototype.inheritance();
-
+// inheriting Group from Widget object
 WIDGET3D.Group.prototype = WIDGET3D.Widget.prototype.inheritance();
 
 //inheriting some methods from WindowInterface
@@ -1121,7 +1047,6 @@ WIDGET3D.Group.prototype.addRelatedEventListeners = function(child){
   return this;
 };
 
-
 //--------------------------------------------------
 // PROTOTYPAL INHERITANCE FUNCTION FOR Group OBJECT
 //--------------------------------------------------
@@ -1132,6 +1057,61 @@ WIDGET3D.Group.prototype.inheritance = function(){
   return created;
 };
 
+
+//------------------------------------------------
+// MAIN WINDOW: Singleton root window
+//
+// The Main Window is inited by widget3d by default.
+//
+// Extends WIDGET3D.GuiObject object.
+//---------------------------------------------------
+
+WIDGET3D.Application = function(){
+  
+  WIDGET3D.GuiObject.call( this );
+  WIDGET3D.GroupBase.call( this );
+  
+  this.childEvents = {
+    
+    addObject : function(name, child){
+      if(!this.hasOwnProperty(name.toString()) ||
+        (this.hasOwnProperty(name.toString()) && this[name.toString()] == false))
+      {
+        this[name.toString()] = [];
+      }
+      this[name.toString()].push(child);
+      var index = this[name.toString()].length-1;
+      return index;
+    },
+
+    removeEvent : function(name){
+      if(this.hasOwnProperty(name.toString()) && this[name.toString()].length == 0){
+        this[name.toString()] = false;
+        WIDGET3D.getEvents().disableEvent(name);
+        return true;
+      }
+      return false;
+    }
+  };
+};
+
+
+//-----------------------------------------------------------------------------------------
+// inheriting Application from GuiObject
+WIDGET3D.Application.prototype = WIDGET3D.GuiObject.prototype.inheritance();
+
+
+//inheriting some methods from WindowInterface
+// adds new child to window
+WIDGET3D.Application.prototype.add = WIDGET3D.GroupBase.prototype.add;
+// hides unfocused objects in window
+WIDGET3D.Application.prototype.hideNotFocused = WIDGET3D.GroupBase.prototype.hideNotFocused;
+// removes object from window
+WIDGET3D.Application.prototype.removeFromObjects = WIDGET3D.GroupBase.prototype.removeFromObjects;
+
+WIDGET3D.Application.prototype.show = WIDGET3D.GroupBase.prototype.show;
+
+WIDGET3D.Application.prototype.hide = WIDGET3D.GroupBase.prototype.hide;
 
 //---------------------------------------------
 // GUI OBJECT: TEXT
@@ -1146,9 +1126,9 @@ WIDGET3D.Group.prototype.inheritance = function(){
 //TODO: REFACTOR SO THAT THE COMPONENT WOULD BE MORE USEFULL OR
 // REMOVE AT THE ADAPTER SIDE
 
-WIDGET3D.Text = function(parameters){
+WIDGET3D.Text = function(mesh, parameters){
   
-  WIDGET3D.Basic.call( this );
+  WIDGET3D.Widget.call( this, mesh );
   
   var parameters = parameters || {};
   
@@ -1179,8 +1159,8 @@ WIDGET3D.Text = function(parameters){
 };
 
 
-// inheriting Text from Basic
-WIDGET3D.Text.prototype = WIDGET3D.Basic.prototype.inheritance();
+// inheriting Text from Widget
+WIDGET3D.Text.prototype = WIDGET3D.Widget.prototype.inheritance();
 
 WIDGET3D.Text.prototype.setText = function(text){
   if(this.mutable){
@@ -1270,7 +1250,7 @@ WIDGET3D.Text.prototype.focus = function(){
   if(this.mutable && !this.inFocus){
     this.textHandle = this.text + this.cursor;
   }
-  WIDGET3D.Basic.prototype.focus.call(this);
+  WIDGET3D.Widget.prototype.focus.call(this);
   this.update();
   
   return this;
@@ -1281,7 +1261,7 @@ WIDGET3D.Text.prototype.unfocus = function(){
   if(this.inFocus && this.mutable){
     this.textHandle = this.text;
   }
-  WIDGET3D.Basic.prototype.unfocus.call(this);
+  WIDGET3D.Widget.prototype.unfocus.call(this);
   this.update();
   
   return this;
@@ -1389,7 +1369,7 @@ WIDGET3D.RollControl = function(component, parameters){
       event.stopPropagation();
       event.preventDefault();
       
-      that.component.focus();
+      //that.component.focus();
       if(!that.rotate){
         that.rotate = true;
         
@@ -1415,6 +1395,17 @@ WIDGET3D.RollControl = function(component, parameters){
       modelRotationX = rotationOnMousedownX + ( mouse.y - clickLocation.y );
     }
   };
+  
+  
+  //If left button is used for drag we want to disable context menu poping out
+  if(this.mouseButton == 2){
+    WIDGET3D.getApplication().addEventListener("contextmenu",
+      function(e){
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    );
+  }
   
   this.component.addEventListener("mousedown", this.mousedownHandler);
   
@@ -1540,6 +1531,14 @@ var THREEJS_WIDGET3D = {
       return plugin_initialized_;
     };
     
+    //Returns array of JSON-objects in format:
+    //{
+    //  widget: widget that was hit,
+    //  mousePositionIn3D: {
+    //    world: mouse position in 3D scene,
+    //    object: mouse position in widget's object coordinates
+    //  }
+    //}
     WIDGET3D.checkIfHits = function(event){
     
       var mouse = WIDGET3D.mouseCoordinates(event);
@@ -1565,18 +1564,14 @@ var THREEJS_WIDGET3D = {
             //position where the click happened in object coordinates
             //what should be done to this?
             var objPos = intersects[m].point.clone().applyProjection(inv);
+            var worldPos = intersects[m].point.clone();
             
             var hit = WIDGET3D.findObject(obj, event.type);
             
             if(hit){
+              var positionData = {obj : objPos, world : worldPos};
               
-              //event.objectCoordinates = objPos;
-              //event.worldCoordinates = intersects[m].point;
-              //var data = {widget : hit, eventObject : event};
-              
-              //TODO: we might want to give some info where the object was hit.
-              found.push(hit);
-              
+              found.push({widget : hit, mousePositionIn3D : positionData});
             }
           }
         }
@@ -1609,7 +1604,7 @@ var THREEJS_WIDGET3D = {
   
   
     //parameters:
-    //    rensrer: THREE renderer object
+    //    renderer: THREE renderer object
     //      if renderer no specified width, height, antialias, domParent, clearColor and opacity can be given
     //
     //    camera: THREE camera object
@@ -1964,7 +1959,7 @@ WIDGET3D.GridWindow = function(parameters){
   
   var geometry = new THREE.CubeGeometry( this.width, this.height, this.depth, this.density, this.density, 1 );
   var mesh =  new THREE.Mesh(geometry, this.material);
-  this.grid = new WIDGET3D.Basic();
+  this.grid = new WIDGET3D.Widget();
   this.grid.setObject3D(mesh);
   
   var hideGrid = parameters.hideGrid !== undefined ? parameters.hideGrid : false;
@@ -1992,7 +1987,6 @@ WIDGET3D.GridWindow = function(parameters){
 
 
 WIDGET3D.GridWindow.prototype = WIDGET3D.Group.prototype.inheritance();
-
 
 WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
   this.density = newDensity;
@@ -2223,7 +2217,7 @@ WIDGET3D.TitledWindow = function(parameters){
   //---------------------------------------------------
   //TITLEBAR, ACTS AS THE BODY FOR THE WINDOW
   //---------------------------------------------------
-  this.title = new WIDGET3D.Basic();
+  this.title = new WIDGET3D.Widget();
   var mainMesh = this.createTitle(text, material.side);
   this.title.setObject3D(mainMesh);
   this.add(this.title);
@@ -2231,7 +2225,7 @@ WIDGET3D.TitledWindow = function(parameters){
   //---------------------------------------------------
   //CONTENT
   //---------------------------------------------------
-  this.content =  new WIDGET3D.Basic();
+  this.content =  new WIDGET3D.Widget();
   var mesh =  new THREE.Mesh( new THREE.PlaneGeometry( this.width, this.height ), material);
   this.content.setObject3D(mesh);
   this.add(this.content);
@@ -2240,7 +2234,7 @@ WIDGET3D.TitledWindow = function(parameters){
   //---------------------------------------------------
   //CLOSE BUTTON
   //---------------------------------------------------
-  this.closeButton = new WIDGET3D.Basic();
+  this.closeButton = new WIDGET3D.Widget();
   
   var buttonMesh = new THREE.Mesh( new THREE.PlaneGeometry( this.width/10.0, this.height/10.0 ),
     new THREE.MeshBasicMaterial( { color: 0xAA0000, side : material.side} ) );
@@ -2435,16 +2429,16 @@ WIDGET3D.Dialog.prototype.createDialogTitle = function(){
   for (var j = 0; j < geometry.faces.length; j ++ ){
     var face = geometry.faces[ j ];
     if(j === 4 || j == 5){
-      face.materialIndex = 1;
+      face.materialIndex = 0;
     }
     else{
-      face.materialIndex = 0;
+      face.materialIndex = 1;
     }
   }
   geometry.materials = materials;
   var material = new THREE.MeshFaceMaterial(materials);
   var mesh = new THREE.Mesh(geometry, material);
-  var title = new WIDGET3D.Basic();
+  var title = new WIDGET3D.Widget();
   title.setObject3D(mesh);
   this.add(title);
 }
@@ -2491,7 +2485,7 @@ WIDGET3D.Dialog.prototype.createButtons = function(){
     var geometry = new THREE.CubeGeometry(buttonWidth, buttonHeight, this.depth);
     var mesh = this.createFaceMaterialsMesh(material, geometry);
     
-    var button = new WIDGET3D.Basic();
+    var button = new WIDGET3D.Widget();
     button.setObject3D(mesh);
     button.addEventListener("click", this.buttons[i].onclick, false);
     this.add(button);
@@ -2626,7 +2620,7 @@ WIDGET3D.Dialog.prototype.createTextfields = function(){
     var geometry2 = new THREE.CubeGeometry(fieldWidth, fieldHeight, this.depth);
     var mesh2 = this.createFaceMaterialsMesh(material2, geometry2);
     
-    var description = new WIDGET3D.Basic();
+    var description = new WIDGET3D.Widget();
     description.setObject3D(mesh2);
     this.add(description);
     
@@ -2654,10 +2648,10 @@ WIDGET3D.Dialog.prototype.createFaceMaterialsMesh = function(frontMaterial, geom
   for (var j = 0; j < geometry.faces.length; j ++ ){
     var face = geometry.faces[ j ];
     if(j === 4 || j == 5){
-      face.materialIndex = 1;
+      face.materialIndex = 0;
     }
     else{
-      face.materialIndex = 0;
+      face.materialIndex = 1;
     }
   }
   geometry.materials = materials;
@@ -2754,7 +2748,7 @@ WIDGET3D.SelectDialog.prototype.createText = function(){
   var mesh = this.createTitle(this.text, context, this.textCanvas);
   mesh.position.y = this.height*0.5 - this.choiceHeight*0.5;
   
-  var title = new WIDGET3D.Basic();
+  var title = new WIDGET3D.Widget();
   title.setObject3D(mesh);
   
   this.add(title);
@@ -2772,7 +2766,7 @@ WIDGET3D.SelectDialog.prototype.createChoises = function(){
   var lastY = 0;
   
   for(var i = 0; i < this.choices.length; ++i){
-    var choice = new WIDGET3D.Basic();
+    var choice = new WIDGET3D.Widget();
     var choiceCanvas = document.createElement('canvas');
     this.choiceCanvases.push(choiceCanvas);
     choiceCanvas.width = 512;
@@ -2790,10 +2784,10 @@ WIDGET3D.SelectDialog.prototype.createChoises = function(){
     for (var j = 0; j < geometry.faces.length; j ++ ){
       var face = geometry.faces[ j ];
       if(j === 4 || j == 5){
-        face.materialIndex = 1;
+        face.materialIndex = 0;
       }
       else{
-        face.materialIndex = 0;
+        face.materialIndex = 1;
       }
     }
     geometry.materials = materials;
@@ -2871,10 +2865,10 @@ WIDGET3D.SelectDialog.prototype.createTitle = function(string, context, canvas){
   for( var i = 0; i < geometry.faces.length; i ++ ){
     var face = geometry.faces[ i ];
     if(i === 4 || i === 5){
-      face.materialIndex = 1;
+      face.materialIndex = 0;
     }
     else{
-      face.materialIndex = 0;
+      face.materialIndex = 1;
     }
   }
   
@@ -2960,6 +2954,10 @@ WIDGET3D.DragControl = function(component, parameters){
   
   this.mouseupHandler = function(event){
     if(that.drag){
+      
+      event.stopPropagation();
+      event.preventDefault();
+      
       that.drag = false;
       
       that.plane.position.copy(that.component.parent.object3D.localToWorld(that.component.getPosition().clone()));
@@ -2972,6 +2970,9 @@ WIDGET3D.DragControl = function(component, parameters){
   this.mousedownHandler = function(event){
     if(event.button === that.mouseButton && event.shiftKey === that.shiftKey){
       if(!that.drag){
+      
+        event.stopPropagation();
+        event.preventDefault();
         
         setPlaneRotation();
         that.plane.position.copy(that.component.parent.object3D.localToWorld(that.component.getPosition().clone()));
@@ -2990,7 +2991,7 @@ WIDGET3D.DragControl = function(component, parameters){
         WIDGET3D.getApplication().addEventListener("mousemove", mousemoveHandler);
         WIDGET3D.getApplication().addEventListener("mouseup", that.mouseupHandler);
         
-        that.component.focus();
+        //that.component.focus();
         that.drag = true;
       }
     }
@@ -2998,7 +2999,10 @@ WIDGET3D.DragControl = function(component, parameters){
   
   var mousemoveHandler = function(event){
     if(that.drag){
-
+      
+      event.stopPropagation();
+      event.preventDefault();
+      
       var mouse = WIDGET3D.mouseCoordinates(event);
       var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
       var ray = WIDGET3D.getProjector().pickingRay(vector, camera);
@@ -3030,6 +3034,16 @@ WIDGET3D.DragControl = function(component, parameters){
   
   setPlaneRotation();
   WIDGET3D.getScene().add( this.plane );
+  
+  //If left button is used for drag we want to disable context menu poping out
+  if(this.mouseButton == 2){
+    WIDGET3D.getApplication().addEventListener("contextmenu",
+      function(e){
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    );
+  }
   
   this.component.addEventListener("mousedown", this.mousedownHandler);
 };

@@ -35,6 +35,10 @@ WIDGET3D.DragControl = function(component, parameters){
   
   this.mouseupHandler = function(event){
     if(that.drag){
+      
+      event.stopPropagation();
+      event.preventDefault();
+      
       that.drag = false;
       
       that.plane.position.copy(that.component.parent.object3D.localToWorld(that.component.getPosition().clone()));
@@ -47,6 +51,9 @@ WIDGET3D.DragControl = function(component, parameters){
   this.mousedownHandler = function(event){
     if(event.button === that.mouseButton && event.shiftKey === that.shiftKey){
       if(!that.drag){
+      
+        event.stopPropagation();
+        event.preventDefault();
         
         setPlaneRotation();
         that.plane.position.copy(that.component.parent.object3D.localToWorld(that.component.getPosition().clone()));
@@ -65,7 +72,7 @@ WIDGET3D.DragControl = function(component, parameters){
         WIDGET3D.getApplication().addEventListener("mousemove", mousemoveHandler);
         WIDGET3D.getApplication().addEventListener("mouseup", that.mouseupHandler);
         
-        that.component.focus();
+        //that.component.focus();
         that.drag = true;
       }
     }
@@ -73,7 +80,10 @@ WIDGET3D.DragControl = function(component, parameters){
   
   var mousemoveHandler = function(event){
     if(that.drag){
-
+      
+      event.stopPropagation();
+      event.preventDefault();
+      
       var mouse = WIDGET3D.mouseCoordinates(event);
       var vector	= new THREE.Vector3(mouse.x, mouse.y, 1);
       var ray = WIDGET3D.getProjector().pickingRay(vector, camera);
@@ -105,6 +115,16 @@ WIDGET3D.DragControl = function(component, parameters){
   
   setPlaneRotation();
   WIDGET3D.getScene().add( this.plane );
+  
+  //If left button is used for drag we want to disable context menu poping out
+  if(this.mouseButton == 2){
+    WIDGET3D.getApplication().addEventListener("contextmenu",
+      function(e){
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    );
+  }
   
   this.component.addEventListener("mousedown", this.mousedownHandler);
 };

@@ -49,7 +49,7 @@ WIDGET3D.RollControl = function(component, parameters){
       event.stopPropagation();
       event.preventDefault();
       
-      that.component.focus();
+      //that.component.focus();
       if(!that.rotate){
         that.rotate = true;
         
@@ -75,6 +75,17 @@ WIDGET3D.RollControl = function(component, parameters){
       modelRotationX = rotationOnMousedownX + ( mouse.y - clickLocation.y );
     }
   };
+  
+  
+  //If left button is used for drag we want to disable context menu poping out
+  if(this.mouseButton == 2){
+    WIDGET3D.getApplication().addEventListener("contextmenu",
+      function(e){
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    );
+  }
   
   this.component.addEventListener("mousedown", this.mousedownHandler);
   

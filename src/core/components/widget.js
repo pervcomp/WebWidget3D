@@ -7,15 +7,16 @@
 //So this Object describes all properties and methods that are
 //for all types of objects
 
-WIDGET3D.Widget = function(){
+WIDGET3D.Widget = function(mesh){
 
   WIDGET3D.GuiObject.call( this );
   
   this.parent = false;
-  this.object3D = false;
+  this.object3D = mesh !== undefined ? mesh : false;
   this.isVisible = true;
   
   this.controls = new Array();
+
 };
 
 WIDGET3D.Widget.prototype = WIDGET3D.GuiObject.prototype.inheritance();

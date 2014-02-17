@@ -9,6 +9,7 @@
 WIDGET3D.GroupBase = function(){
   this.children = [];
   this.object3D = new WIDGET3D.Container();
+  
   this.isVisible = true;
 };
 

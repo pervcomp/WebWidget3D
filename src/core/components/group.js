@@ -1,23 +1,20 @@
 //---------------------------------------------
 // GUI OBJECT: Group
 //---------------------------------------------
-// Basic Group that can has children.
-// Extends WIDGET3D.Basic object.
+// Group object that can has children.
+// Extends WIDGET3D.Widget object.
 //---------------------------------------------
 WIDGET3D.Group = function(){
 
   WIDGET3D.Widget.call( this );
   WIDGET3D.GroupBase.call( this );
-  
-  this.parent;
-  //this.isVisible = true;
+
+  this.parent = false;
 };
 
 
 //-----------------------------------------------------------------------------------------
-// inheriting Group from Basic object
-//WIDGET3D.Group.prototype = WIDGET3D.Basic.prototype.inheritance();
-
+// inheriting Group from Widget object
 WIDGET3D.Group.prototype = WIDGET3D.Widget.prototype.inheritance();
 
 //inheriting some methods from WindowInterface
@@ -152,7 +149,6 @@ WIDGET3D.Group.prototype.addRelatedEventListeners = function(child){
   }
   return this;
 };
-
 
 //--------------------------------------------------
 // PROTOTYPAL INHERITANCE FUNCTION FOR Group OBJECT

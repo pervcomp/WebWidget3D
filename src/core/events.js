@@ -52,11 +52,11 @@ WIDGET3D.DomEvents = function(collisionCallback){
     //support for touch events is needed!
     
     if(proto.hasOwnProperty(String("initMouseEvent"))){
-      return that.mouseEvent(domEvent);
+      that.mouseEvent(domEvent);
       
     }
     else if(proto.hasOwnProperty(String("initKeyboardEvent"))){
-      return that.keyboardEvent(domEvent);
+      that.keyboardEvent(domEvent);
     }
     else{
       that.triggerEvent(domEvent);
@@ -64,26 +64,31 @@ WIDGET3D.DomEvents = function(collisionCallback){
     
   };
   
+  //Mouse event calls the event handler of the closest intersected 3D object.
+  //MainWindow event handlers are called each time.
   that.mouseEvent = function(domEvent){
     
     var found = collisions_.callback(domEvent, collisions_.args);
+    
     var name = domEvent.type;
     var mainWindow = WIDGET3D.getApplication();
-    
-    //Widget event listeners
-    for(var i = 0; i < found.length; ++i){
+
+    if(found.length > 0){
       
-      var hit = found[i];
-    
-      //hit can't be mainWindow because mainWindow doesn't have mesh
+      var hit = found[0].widget;
+      
+      domEvent["mousePositionIn3D"] = found[0].mousePositionIn3D;   
+      
+      //One widget can have multiple listeners for one event.
+      //All the listeners are called.
       if(hit && hit.events.hasOwnProperty(name.toString())){
         for(var k = 0; k < hit.events[name.toString()].length; ++k){
-          
           hit.events[name.toString()][k].callback(domEvent);
         }
       }
     }
-
+    
+    //hit can't be mainWindow because mainWindow doesn't have mesh
     if(mainWindow.events.hasOwnProperty(name.toString())){
       for(var j = 0; j < mainWindow.events[name.toString()].length; ++j){  
         mainWindow.events[name.toString()][j].callback(domEvent);
@@ -154,7 +159,7 @@ WIDGET3D.DomEvents = function(collisionCallback){
   
 };
 
-//Adds event listener to dom element
+//Adds event listener to Window
 WIDGET3D.DomEvents.prototype.enableEvent = function(name){
   //if there is no property or if the property is false
   if(!this.enabled.hasOwnProperty(name.toString()) || 
@@ -165,7 +170,7 @@ WIDGET3D.DomEvents.prototype.enableEvent = function(name){
   }
 };
 
-//Removes event listener from dom element
+//Removes event listener from Window
 WIDGET3D.DomEvents.prototype.disableEvent = function(name){
 
   if(this.enabled.hasOwnProperty(name.toString()) && this.enabled[name.toString()] === true){

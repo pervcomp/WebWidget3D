@@ -87,16 +87,16 @@ WIDGET3D.Dialog.prototype.createDialogTitle = function(){
   for (var j = 0; j < geometry.faces.length; j ++ ){
     var face = geometry.faces[ j ];
     if(j === 4 || j == 5){
-      face.materialIndex = 1;
+      face.materialIndex = 0;
     }
     else{
-      face.materialIndex = 0;
+      face.materialIndex = 1;
     }
   }
   geometry.materials = materials;
   var material = new THREE.MeshFaceMaterial(materials);
   var mesh = new THREE.Mesh(geometry, material);
-  var title = new WIDGET3D.Basic();
+  var title = new WIDGET3D.Widget();
   title.setObject3D(mesh);
   this.add(title);
 }
@@ -143,7 +143,7 @@ WIDGET3D.Dialog.prototype.createButtons = function(){
     var geometry = new THREE.CubeGeometry(buttonWidth, buttonHeight, this.depth);
     var mesh = this.createFaceMaterialsMesh(material, geometry);
     
-    var button = new WIDGET3D.Basic();
+    var button = new WIDGET3D.Widget();
     button.setObject3D(mesh);
     button.addEventListener("click", this.buttons[i].onclick, false);
     this.add(button);
@@ -278,7 +278,7 @@ WIDGET3D.Dialog.prototype.createTextfields = function(){
     var geometry2 = new THREE.CubeGeometry(fieldWidth, fieldHeight, this.depth);
     var mesh2 = this.createFaceMaterialsMesh(material2, geometry2);
     
-    var description = new WIDGET3D.Basic();
+    var description = new WIDGET3D.Widget();
     description.setObject3D(mesh2);
     this.add(description);
     
@@ -306,10 +306,10 @@ WIDGET3D.Dialog.prototype.createFaceMaterialsMesh = function(frontMaterial, geom
   for (var j = 0; j < geometry.faces.length; j ++ ){
     var face = geometry.faces[ j ];
     if(j === 4 || j == 5){
-      face.materialIndex = 1;
+      face.materialIndex = 0;
     }
     else{
-      face.materialIndex = 0;
+      face.materialIndex = 1;
     }
   }
   geometry.materials = materials;

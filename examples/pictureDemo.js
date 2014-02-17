@@ -53,8 +53,8 @@ var init = function(){
   var display = new THREE.Mesh(new THREE.PlaneGeometry(250, 250, 10, 10),
     new THREE.MeshBasicMaterial({color: 0xFFFFFF}));
   
-  var pictureDisplay = new WIDGET3D.Basic();
-  pictureDisplay.setObject3D(display);
+  var pictureDisplay = new WIDGET3D.Widget(display);
+  //pictureDisplay.setObject3D(display);
   mainWindow.add(pictureDisplay);
   
   var pictureclick = createPictureclickHandler(pictureDisplay);
@@ -209,5 +209,5 @@ var displayPicture = function(subWindow, pictureDisplay, img){
   var button = new WIDGET3D.GridIcon({parent: subWindow, img : img});
   
   var onclick = createMouseclickHandler({button: button, pictureDisplay : pictureDisplay});
-  button.addEventListener("click", onclick, false);
+  button.addEventListener("click", onclick);
 };

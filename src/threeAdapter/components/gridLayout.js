@@ -42,7 +42,7 @@ WIDGET3D.GridWindow = function(parameters){
   
   var geometry = new THREE.CubeGeometry( this.width, this.height, this.depth, this.density, this.density, 1 );
   var mesh =  new THREE.Mesh(geometry, this.material);
-  this.grid = new WIDGET3D.Basic();
+  this.grid = new WIDGET3D.Widget();
   this.grid.setObject3D(mesh);
   
   var hideGrid = parameters.hideGrid !== undefined ? parameters.hideGrid : false;
@@ -70,7 +70,6 @@ WIDGET3D.GridWindow = function(parameters){
 
 
 WIDGET3D.GridWindow.prototype = WIDGET3D.Group.prototype.inheritance();
-
 
 WIDGET3D.GridWindow.prototype.addSlots = function(newDensity){
   this.density = newDensity;

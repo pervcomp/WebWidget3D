@@ -11,9 +11,9 @@
 //TODO: REFACTOR SO THAT THE COMPONENT WOULD BE MORE USEFULL OR
 // REMOVE AT THE ADAPTER SIDE
 
-WIDGET3D.Text = function(parameters){
+WIDGET3D.Text = function(mesh, parameters){
   
-  WIDGET3D.Basic.call( this );
+  WIDGET3D.Widget.call( this, mesh );
   
   var parameters = parameters || {};
   
@@ -44,8 +44,8 @@ WIDGET3D.Text = function(parameters){
 };
 
 
-// inheriting Text from Basic
-WIDGET3D.Text.prototype = WIDGET3D.Basic.prototype.inheritance();
+// inheriting Text from Widget
+WIDGET3D.Text.prototype = WIDGET3D.Widget.prototype.inheritance();
 
 WIDGET3D.Text.prototype.setText = function(text){
   if(this.mutable){
@@ -135,7 +135,7 @@ WIDGET3D.Text.prototype.focus = function(){
   if(this.mutable && !this.inFocus){
     this.textHandle = this.text + this.cursor;
   }
-  WIDGET3D.Basic.prototype.focus.call(this);
+  WIDGET3D.Widget.prototype.focus.call(this);
   this.update();
   
   return this;
@@ -146,7 +146,7 @@ WIDGET3D.Text.prototype.unfocus = function(){
   if(this.inFocus && this.mutable){
     this.textHandle = this.text;
   }
-  WIDGET3D.Basic.prototype.unfocus.call(this);
+  WIDGET3D.Widget.prototype.unfocus.call(this);
   this.update();
   
   return this;

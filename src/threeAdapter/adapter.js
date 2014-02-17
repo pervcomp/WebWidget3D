@@ -92,6 +92,14 @@ var THREEJS_WIDGET3D = {
       return plugin_initialized_;
     };
     
+    //Returns array of JSON-objects in format:
+    //{
+    //  widget: widget that was hit,
+    //  mousePositionIn3D: {
+    //    world: mouse position in 3D scene,
+    //    object: mouse position in widget's object coordinates
+    //  }
+    //}
     WIDGET3D.checkIfHits = function(event){
     
       var mouse = WIDGET3D.mouseCoordinates(event);
@@ -117,18 +125,14 @@ var THREEJS_WIDGET3D = {
             //position where the click happened in object coordinates
             //what should be done to this?
             var objPos = intersects[m].point.clone().applyProjection(inv);
+            var worldPos = intersects[m].point.clone();
             
             var hit = WIDGET3D.findObject(obj, event.type);
             
             if(hit){
+              var positionData = {obj : objPos, world : worldPos};
               
-              //event.objectCoordinates = objPos;
-              //event.worldCoordinates = intersects[m].point;
-              //var data = {widget : hit, eventObject : event};
-              
-              //TODO: we might want to give some info where the object was hit.
-              found.push(hit);
-              
+              found.push({widget : hit, mousePositionIn3D : positionData});
             }
           }
         }
@@ -161,7 +165,7 @@ var THREEJS_WIDGET3D = {
   
   
     //parameters:
-    //    rensrer: THREE renderer object
+    //    renderer: THREE renderer object
     //      if renderer no specified width, height, antialias, domParent, clearColor and opacity can be given
     //
     //    camera: THREE camera object

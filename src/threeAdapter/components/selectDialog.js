@@ -68,7 +68,7 @@ WIDGET3D.SelectDialog.prototype.createText = function(){
   var mesh = this.createTitle(this.text, context, this.textCanvas);
   mesh.position.y = this.height*0.5 - this.choiceHeight*0.5;
   
-  var title = new WIDGET3D.Basic();
+  var title = new WIDGET3D.Widget();
   title.setObject3D(mesh);
   
   this.add(title);
@@ -86,7 +86,7 @@ WIDGET3D.SelectDialog.prototype.createChoises = function(){
   var lastY = 0;
   
   for(var i = 0; i < this.choices.length; ++i){
-    var choice = new WIDGET3D.Basic();
+    var choice = new WIDGET3D.Widget();
     var choiceCanvas = document.createElement('canvas');
     this.choiceCanvases.push(choiceCanvas);
     choiceCanvas.width = 512;
@@ -104,10 +104,10 @@ WIDGET3D.SelectDialog.prototype.createChoises = function(){
     for (var j = 0; j < geometry.faces.length; j ++ ){
       var face = geometry.faces[ j ];
       if(j === 4 || j == 5){
-        face.materialIndex = 1;
+        face.materialIndex = 0;
       }
       else{
-        face.materialIndex = 0;
+        face.materialIndex = 1;
       }
     }
     geometry.materials = materials;
@@ -185,10 +185,10 @@ WIDGET3D.SelectDialog.prototype.createTitle = function(string, context, canvas){
   for( var i = 0; i < geometry.faces.length; i ++ ){
     var face = geometry.faces[ i ];
     if(i === 4 || i === 5){
-      face.materialIndex = 1;
+      face.materialIndex = 0;
     }
     else{
-      face.materialIndex = 0;
+      face.materialIndex = 1;
     }
   }
   

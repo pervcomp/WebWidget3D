@@ -6,10 +6,14 @@
 //
 // PARAMETERS:  width = width in world coordinates
 //              height = height in world coordinates
+//              deoth = depth in world coordinates
 //              color = hexadecimal string
-//              text = string
-//              submitText = string
-//              maxTextLength = integer
+//              opacity = float 0...1
+//              title = string presented as a title of the dialog
+//              buttons = Array of objects {text: string displayed on button, onclick: onclick handler function}
+//              fields = Array of objcets {description: descriptive text of text field, maxLength: maximum text length}
+//              hasCancel = boolean,tells if the dialog has cancel button
+//              cancelText = string displayed on cancel button
 //
 
 
@@ -145,7 +149,7 @@ WIDGET3D.Dialog.prototype.createButtons = function(){
     
     var button = new WIDGET3D.Widget();
     button.setObject3D(mesh);
-    button.addEventListener("click", this.buttons[i].onclick, false);
+    button.addEventListener("click", this.buttons[i].onclick);
     this.add(button);
     
     if(i == 0){
@@ -241,10 +245,12 @@ WIDGET3D.Dialog.prototype.createTextfields = function(){
     textfield.setText("");
     textfield.setObject3D(mesh);
     
-    textfield.addEventListener("click", textBoxClickFactory(textfield), false);
+    textfield.addEventListener("click", textBoxClickFactory(textfield));
     textfield.addEventListener("keypress", textBoxKeyFactory(textfield));
     textfield.addEventListener("keydown", textBoxKeyFactory(textfield));
     textfield.addUpdateCallback(textBoxUpdateFactory(canvas1, textfield, texture));
+    
+    this.fields[i].input = textfield;
     
     this.add(textfield);
     

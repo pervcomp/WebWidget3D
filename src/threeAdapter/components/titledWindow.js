@@ -32,6 +32,8 @@ WIDGET3D.TitledWindow = function(parameters){
   
   var text = parameters.title !== undefined ? parameters.title : "title";
   
+  var override = parameters.override !== undefined ? parameters.override : false;
+  
   var color = parameters.color !== undefined ? parameters.color : 0x808080;
   var texture = parameters.texture;
   var material = parameters.material !== undefined ? parameters.material :  new THREE.MeshBasicMaterial({color : color, map : texture, side : THREE.DoubleSide});
@@ -67,12 +69,14 @@ WIDGET3D.TitledWindow = function(parameters){
   
   this.add(this.closeButton);
   
-  var createCloseFunction = function(p){
-    return function(){
-      p.remove();
-    };
+  if(!this.override){
+    var createCloseFunction = function(p){
+      return function(){
+        p.remove();
+      };
+    }
+    this.closeButton.addEventListener("click", createCloseFunction(this));
   }
-  this.closeButton.addEventListener("click", createCloseFunction(this));
   
   //---------------------------------------------------
   //CONTROLS

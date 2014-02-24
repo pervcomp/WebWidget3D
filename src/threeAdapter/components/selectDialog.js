@@ -77,8 +77,8 @@ WIDGET3D.SelectDialog.prototype.createText = function(){
     function(event){
       event.stopPropagation();
       event.preventDefault();
-    }, 
-  false);
+    }
+  );
 }
 
 WIDGET3D.SelectDialog.prototype.createChoises = function(){
@@ -133,7 +133,7 @@ WIDGET3D.SelectDialog.prototype.createChoises = function(){
     
     choice.setPosition(parentLoc.x, y ,parentLoc.z);
     
-    choice.addEventListener("click", this.choices[i].onclick.handler, false);
+    choice.addEventListener("click", this.choices[i].onclick.handler);
     choice.menuID = i;
     this.add(choice);
   }

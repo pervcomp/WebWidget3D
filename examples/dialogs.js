@@ -74,6 +74,7 @@ var init = function(){
   };
   mainWindow.addEventListener("resize", onResize);
   
+  console.log(dialog);
   
   var mainLoop = function(){
     requestAnimationFrame( mainLoop );

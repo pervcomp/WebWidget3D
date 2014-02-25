@@ -85,6 +85,7 @@ WIDGET3D = {
       for(var i = 0; i < focused_.length; ++i){
         if(focused_[i] === object){
           focused_.splice(i, 1);
+          
           return true;
         }
       }

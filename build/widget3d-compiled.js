@@ -85,6 +85,7 @@ WIDGET3D = {
       for(var i = 0; i < focused_.length; ++i){
         if(focused_[i] === object){
           focused_.splice(i, 1);
+          
           return true;
         }
       }
@@ -384,18 +385,14 @@ WIDGET3D.DomEvents = function(collisionCallback){
         
         for(var m = 0; m < object.events[name.toString()].length; ++m){
           object.events[name.toString()][m].callback(domEvent);
-          
         }
       }
     }
     
-    //TODO REFACTOR
-    //If main window handler wasn't called yet it will be called now.
-    if(!mainWindow.inFocus){
-      if(mainWindow.events.hasOwnProperty(name.toString())){      
-        for(var l = 0; l < mainWindow.events[name.toString()].length; ++l){
-          mainWindow.events[name.toString()][l].callback(domEvent);
-        }
+    //Main window listener will be called now.
+    if(mainWindow.events.hasOwnProperty(name.toString())){      
+      for(var l = 0; l < mainWindow.events[name.toString()].length; ++l){
+        mainWindow.events[name.toString()][l].callback(domEvent);
       }
     }
   };
@@ -551,6 +548,7 @@ WIDGET3D.GuiObject.prototype.focus = function(){
     this.inFocus = true;
     WIDGET3D.addFocus(this);
   }
+  
   return this;
 };
 
@@ -721,21 +719,28 @@ WIDGET3D.Widget.prototype = WIDGET3D.GuiObject.prototype.inheritance();
 //Sets/changes the 3D object for a widget
 WIDGET3D.Widget.prototype.setObject3D = function(obj){
 
-  obj.visible = this.isVisible;
+  //obj.visible = this.isVisible;
   
-  if(this.object3D && this.parent){
-    //removes the old obj from the scene    
-    this.parent.object3D.remove(this.object3D);
-    this.object3D = obj;
-    this.parent.object3D.add(this.object3D);
-  }
-  else if(this.parent){
-    this.object3D = obj;
-    this.parent.object3D.add(this.object3D);
+  if(this.parent){
+    if(this.object3D){
+      //removes the old obj from the scene    
+      this.parent.object3D.remove(this.object3D);
+      this.object3D = obj;
+      this.parent.object3D.add(this.object3D);
+    }
+    else{
+      this.object3D = obj;
+      this.parent.object3D.add(this.object3D);
+    }
+    
+    if(!this.parent.isVisible){
+      this.hide();
+    }
   }
   else{
     this.object3D = obj;
   }
+
   return this;
 };
 
@@ -950,12 +955,12 @@ WIDGET3D.Group.prototype.remove = function(){
   WIDGET3D.Widget.prototype.remove.call(this);
 };
 
-WIDGET3D.Group.prototype.addEventListener = function(name, callback, bubbles){
+WIDGET3D.Group.prototype.addEventListener = function(name, callback){
   
-  WIDGET3D.GuiObject.prototype.addEventListener.call(this, name, callback, bubbles);
+  WIDGET3D.GuiObject.prototype.addEventListener.call(this, name, callback);
 
   for(var i = 0; i < this.children.length; ++i){
-    this.children[i].addEventListener(name, callback, bubbles);
+    this.children[i].addEventListener(name, callback);
   }
   
   return this;
@@ -2227,29 +2232,26 @@ WIDGET3D.TitledWindow = function(parameters){
   //---------------------------------------------------
   //CONTENT
   //---------------------------------------------------
-  this.content =  new WIDGET3D.Widget();
   var mesh =  new THREE.Mesh( new THREE.PlaneGeometry( this.width, this.height ), material);
-  this.content.setObject3D(mesh);
+  this.content =  new WIDGET3D.Widget(mesh);
   this.add(this.content);
   
   
   //---------------------------------------------------
   //CLOSE BUTTON
   //---------------------------------------------------
-  this.closeButton = new WIDGET3D.Widget();
-  
   var buttonMesh = new THREE.Mesh( new THREE.PlaneGeometry( this.width/10.0, this.height/10.0 ),
     new THREE.MeshBasicMaterial( { color: 0xAA0000, side : material.side} ) );
-  
-  this.closeButton.setObject3D(buttonMesh);
+  this.closeButton = new WIDGET3D.Widget(buttonMesh);
   this.closeButton.setPosition(((this.width/2.0)-(this.width/20.0)), ((this.height/2.0)+(this.height/20.0)), 0);
   
   this.add(this.closeButton);
   
-  if(!this.override){
+  if(!override){
     var createCloseFunction = function(p){
       return function(){
         p.remove();
+        console.log("removed!");
       };
     }
     this.closeButton.addEventListener("click", createCloseFunction(this));

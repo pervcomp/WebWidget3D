@@ -24,21 +24,28 @@ WIDGET3D.Widget.prototype = WIDGET3D.GuiObject.prototype.inheritance();
 //Sets/changes the 3D object for a widget
 WIDGET3D.Widget.prototype.setObject3D = function(obj){
 
-  obj.visible = this.isVisible;
+  //obj.visible = this.isVisible;
   
-  if(this.object3D && this.parent){
-    //removes the old obj from the scene    
-    this.parent.object3D.remove(this.object3D);
-    this.object3D = obj;
-    this.parent.object3D.add(this.object3D);
-  }
-  else if(this.parent){
-    this.object3D = obj;
-    this.parent.object3D.add(this.object3D);
+  if(this.parent){
+    if(this.object3D){
+      //removes the old obj from the scene    
+      this.parent.object3D.remove(this.object3D);
+      this.object3D = obj;
+      this.parent.object3D.add(this.object3D);
+    }
+    else{
+      this.object3D = obj;
+      this.parent.object3D.add(this.object3D);
+    }
+    
+    if(!this.parent.isVisible){
+      this.hide();
+    }
   }
   else{
     this.object3D = obj;
   }
+
   return this;
 };
 

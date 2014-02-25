@@ -53,12 +53,12 @@ WIDGET3D.Group.prototype.remove = function(){
   WIDGET3D.Widget.prototype.remove.call(this);
 };
 
-WIDGET3D.Group.prototype.addEventListener = function(name, callback, bubbles){
+WIDGET3D.Group.prototype.addEventListener = function(name, callback){
   
-  WIDGET3D.GuiObject.prototype.addEventListener.call(this, name, callback, bubbles);
+  WIDGET3D.GuiObject.prototype.addEventListener.call(this, name, callback);
 
   for(var i = 0; i < this.children.length; ++i){
-    this.children[i].addEventListener(name, callback, bubbles);
+    this.children[i].addEventListener(name, callback);
   }
   
   return this;

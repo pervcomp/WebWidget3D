@@ -50,29 +50,26 @@ WIDGET3D.TitledWindow = function(parameters){
   //---------------------------------------------------
   //CONTENT
   //---------------------------------------------------
-  this.content =  new WIDGET3D.Widget();
   var mesh =  new THREE.Mesh( new THREE.PlaneGeometry( this.width, this.height ), material);
-  this.content.setObject3D(mesh);
+  this.content =  new WIDGET3D.Widget(mesh);
   this.add(this.content);
   
   
   //---------------------------------------------------
   //CLOSE BUTTON
   //---------------------------------------------------
-  this.closeButton = new WIDGET3D.Widget();
-  
   var buttonMesh = new THREE.Mesh( new THREE.PlaneGeometry( this.width/10.0, this.height/10.0 ),
     new THREE.MeshBasicMaterial( { color: 0xAA0000, side : material.side} ) );
-  
-  this.closeButton.setObject3D(buttonMesh);
+  this.closeButton = new WIDGET3D.Widget(buttonMesh);
   this.closeButton.setPosition(((this.width/2.0)-(this.width/20.0)), ((this.height/2.0)+(this.height/20.0)), 0);
   
   this.add(this.closeButton);
   
-  if(!this.override){
+  if(!override){
     var createCloseFunction = function(p){
       return function(){
         p.remove();
+        console.log("removed!");
       };
     }
     this.closeButton.addEventListener("click", createCloseFunction(this));

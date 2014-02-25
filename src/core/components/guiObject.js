@@ -92,6 +92,7 @@ WIDGET3D.GuiObject.prototype.focus = function(){
     this.inFocus = true;
     WIDGET3D.addFocus(this);
   }
+  
   return this;
 };
 

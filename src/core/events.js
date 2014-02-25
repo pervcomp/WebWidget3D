@@ -110,18 +110,14 @@ WIDGET3D.DomEvents = function(collisionCallback){
         
         for(var m = 0; m < object.events[name.toString()].length; ++m){
           object.events[name.toString()][m].callback(domEvent);
-          
         }
       }
     }
     
-    //TODO REFACTOR
-    //If main window handler wasn't called yet it will be called now.
-    if(!mainWindow.inFocus){
-      if(mainWindow.events.hasOwnProperty(name.toString())){      
-        for(var l = 0; l < mainWindow.events[name.toString()].length; ++l){
-          mainWindow.events[name.toString()][l].callback(domEvent);
-        }
+    //Main window listener will be called now.
+    if(mainWindow.events.hasOwnProperty(name.toString())){      
+      for(var l = 0; l < mainWindow.events[name.toString()].length; ++l){
+        mainWindow.events[name.toString()][l].callback(domEvent);
       }
     }
   };

@@ -54,7 +54,6 @@ var init = function(){
     new THREE.MeshBasicMaterial({color: 0xFFFFFF}));
   
   var pictureDisplay = new WIDGET3D.Widget(display);
-  //pictureDisplay.setObject3D(display);
   mainWindow.add(pictureDisplay);
   
   var pictureclick = createPictureclickHandler(pictureDisplay);

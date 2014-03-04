@@ -68,8 +68,8 @@ WIDGET3D.SelectDialog.prototype.createText = function(){
   var mesh = this.createTitle(this.text, context, this.textCanvas);
   mesh.position.y = this.height*0.5 - this.choiceHeight*0.5;
   
-  var title = new WIDGET3D.Widget();
-  title.setObject3D(mesh);
+  var title = new WIDGET3D.Widget(mesh);
+  //title.setObject3D(mesh);
   
   this.add(title);
   

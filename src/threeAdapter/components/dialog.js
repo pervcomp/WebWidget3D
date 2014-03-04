@@ -100,8 +100,8 @@ WIDGET3D.Dialog.prototype.createDialogTitle = function(){
   geometry.materials = materials;
   var material = new THREE.MeshFaceMaterial(materials);
   var mesh = new THREE.Mesh(geometry, material);
-  var title = new WIDGET3D.Widget();
-  title.setObject3D(mesh);
+  var title = new WIDGET3D.Widget(mesh);
+  //title.setObject3D(mesh);
   this.add(title);
 }
 
@@ -147,8 +147,8 @@ WIDGET3D.Dialog.prototype.createButtons = function(){
     var geometry = new THREE.CubeGeometry(buttonWidth, buttonHeight, this.depth);
     var mesh = this.createFaceMaterialsMesh(material, geometry);
     
-    var button = new WIDGET3D.Widget();
-    button.setObject3D(mesh);
+    var button = new WIDGET3D.Widget(mesh);
+    //button.setObject3D(mesh);
     button.addEventListener("click", this.buttons[i].onclick);
     this.add(button);
     
@@ -240,10 +240,10 @@ WIDGET3D.Dialog.prototype.createTextfields = function(){
     var geometry = new THREE.CubeGeometry(fieldWidth, fieldHeight, this.depth);
     var mesh = this.createFaceMaterialsMesh(material, geometry);
     
-    var textfield = new WIDGET3D.Text({maxLength : this.fields[i].maxLength});
+    var textfield = new WIDGET3D.Text({maxLength : this.fields[i].maxLength}, mesh);
     
     textfield.setText("");
-    textfield.setObject3D(mesh);
+    //textfield.setObject3D(mesh);
     
     textfield.addEventListener("click", textBoxClickFactory(textfield));
     textfield.addEventListener("keypress", textBoxKeyFactory(textfield));
@@ -284,8 +284,8 @@ WIDGET3D.Dialog.prototype.createTextfields = function(){
     var geometry2 = new THREE.CubeGeometry(fieldWidth, fieldHeight, this.depth);
     var mesh2 = this.createFaceMaterialsMesh(material2, geometry2);
     
-    var description = new WIDGET3D.Widget();
-    description.setObject3D(mesh2);
+    var description = new WIDGET3D.Widget(mesh2);
+    //description.setObject3D(mesh2);
     this.add(description);
     
     //positioning

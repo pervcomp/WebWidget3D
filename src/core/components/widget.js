@@ -23,8 +23,6 @@ WIDGET3D.Widget.prototype = WIDGET3D.GuiObject.prototype.inheritance();
 
 //Sets/changes the 3D object for a widget
 WIDGET3D.Widget.prototype.setObject3D = function(obj){
-
-  //obj.visible = this.isVisible;
   
   if(this.parent){
     if(this.object3D){
@@ -37,13 +35,13 @@ WIDGET3D.Widget.prototype.setObject3D = function(obj){
       this.object3D = obj;
       this.parent.object3D.add(this.object3D);
     }
-    
-    if(!this.parent.isVisible){
-      this.hide();
-    }
   }
   else{
     this.object3D = obj;
+  }
+  
+  if(!this.isVisible){
+    this.object3D.visible = false;
   }
 
   return this;

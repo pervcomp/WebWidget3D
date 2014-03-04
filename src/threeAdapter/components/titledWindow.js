@@ -42,9 +42,9 @@ WIDGET3D.TitledWindow = function(parameters){
   //---------------------------------------------------
   //TITLEBAR, ACTS AS THE BODY FOR THE WINDOW
   //---------------------------------------------------
-  this.title = new WIDGET3D.Widget();
-  var mainMesh = this.createTitle(text, material.side);
-  this.title.setObject3D(mainMesh);
+  var titleMesh = this.createTitle(text, material.side);
+  this.title = new WIDGET3D.Widget(titleMesh);
+  //this.title.setObject3D(titleMesh);
   this.add(this.title);
   
   //---------------------------------------------------
@@ -62,7 +62,6 @@ WIDGET3D.TitledWindow = function(parameters){
     new THREE.MeshBasicMaterial( { color: 0xAA0000, side : material.side} ) );
   this.closeButton = new WIDGET3D.Widget(buttonMesh);
   this.closeButton.setPosition(((this.width/2.0)-(this.width/20.0)), ((this.height/2.0)+(this.height/20.0)), 0);
-  
   this.add(this.closeButton);
   
   if(!override){

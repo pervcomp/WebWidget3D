@@ -6,9 +6,9 @@
 // inherited to all kind of windows but not to any other objects.
 //
 
-WIDGET3D.GroupBase = function(){
+WIDGET3D.GroupBase = function(mesh){
   this.children = [];
-  this.object3D = new WIDGET3D.Container();
+  this.object3D = mesh !== undefined ? mesh : new WIDGET3D.Container();
   
   this.isVisible = true;
 };

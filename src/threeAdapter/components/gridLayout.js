@@ -42,8 +42,7 @@ WIDGET3D.GridWindow = function(parameters){
   
   var geometry = new THREE.CubeGeometry( this.width, this.height, this.depth, this.density, this.density, 1 );
   var mesh =  new THREE.Mesh(geometry, this.material);
-  this.grid = new WIDGET3D.Widget();
-  this.grid.setObject3D(mesh);
+  this.grid = new WIDGET3D.Widget(mesh);
   
   var hideGrid = parameters.hideGrid !== undefined ? parameters.hideGrid : false;
   if(hideGrid){

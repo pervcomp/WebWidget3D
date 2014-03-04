@@ -718,8 +718,6 @@ WIDGET3D.Widget.prototype = WIDGET3D.GuiObject.prototype.inheritance();
 
 //Sets/changes the 3D object for a widget
 WIDGET3D.Widget.prototype.setObject3D = function(obj){
-
-  //obj.visible = this.isVisible;
   
   if(this.parent){
     if(this.object3D){
@@ -732,13 +730,13 @@ WIDGET3D.Widget.prototype.setObject3D = function(obj){
       this.object3D = obj;
       this.parent.object3D.add(this.object3D);
     }
-    
-    if(!this.parent.isVisible){
-      this.hide();
-    }
   }
   else{
     this.object3D = obj;
+  }
+  
+  if(!this.isVisible){
+    this.object3D.visible = false;
   }
 
   return this;
@@ -816,9 +814,9 @@ WIDGET3D.Widget.prototype.inheritance = function(){
 // inherited to all kind of windows but not to any other objects.
 //
 
-WIDGET3D.GroupBase = function(){
+WIDGET3D.GroupBase = function(mesh){
   this.children = [];
-  this.object3D = new WIDGET3D.Container();
+  this.object3D = mesh !== undefined ? mesh : new WIDGET3D.Container();
   
   this.isVisible = true;
 };
@@ -906,10 +904,10 @@ WIDGET3D.GroupBase.prototype.removeFromObjects = function(child){
 // Group object that can has children.
 // Extends WIDGET3D.Widget object.
 //---------------------------------------------
-WIDGET3D.Group = function(){
+WIDGET3D.Group = function(mesh){
 
   WIDGET3D.Widget.call( this );
-  WIDGET3D.GroupBase.call( this );
+  WIDGET3D.GroupBase.call( this, mesh );
 
   this.parent = false;
 };
@@ -931,6 +929,20 @@ WIDGET3D.Group.prototype.removeFromObjects = WIDGET3D.GroupBase.prototype.remove
 WIDGET3D.Group.prototype.show = WIDGET3D.GroupBase.prototype.show;
 
 WIDGET3D.Group.prototype.hide = WIDGET3D.GroupBase.prototype.hide;
+
+//Sets/changes the 3D object for a widget
+WIDGET3D.Group.prototype.setObject3D = function(obj){
+
+  for(var i = 0; i < this.children.length; ++i){
+    this.object3D.remove(this.children[i]);
+    obj.add(this.children[i]);
+  }
+  
+  WIDGET3D.Widget.prototype.setObject3D.call(this, obj);
+
+  return this;
+};
+
 
 WIDGET3D.Group.prototype.add = function(child){
 
@@ -1964,8 +1976,7 @@ WIDGET3D.GridWindow = function(parameters){
   
   var geometry = new THREE.CubeGeometry( this.width, this.height, this.depth, this.density, this.density, 1 );
   var mesh =  new THREE.Mesh(geometry, this.material);
-  this.grid = new WIDGET3D.Widget();
-  this.grid.setObject3D(mesh);
+  this.grid = new WIDGET3D.Widget(mesh);
   
   var hideGrid = parameters.hideGrid !== undefined ? parameters.hideGrid : false;
   if(hideGrid){
@@ -2224,9 +2235,9 @@ WIDGET3D.TitledWindow = function(parameters){
   //---------------------------------------------------
   //TITLEBAR, ACTS AS THE BODY FOR THE WINDOW
   //---------------------------------------------------
-  this.title = new WIDGET3D.Widget();
-  var mainMesh = this.createTitle(text, material.side);
-  this.title.setObject3D(mainMesh);
+  var titleMesh = this.createTitle(text, material.side);
+  this.title = new WIDGET3D.Widget(titleMesh);
+  //this.title.setObject3D(titleMesh);
   this.add(this.title);
   
   //---------------------------------------------------
@@ -2244,7 +2255,6 @@ WIDGET3D.TitledWindow = function(parameters){
     new THREE.MeshBasicMaterial( { color: 0xAA0000, side : material.side} ) );
   this.closeButton = new WIDGET3D.Widget(buttonMesh);
   this.closeButton.setPosition(((this.width/2.0)-(this.width/20.0)), ((this.height/2.0)+(this.height/20.0)), 0);
-  
   this.add(this.closeButton);
   
   if(!override){
@@ -2448,8 +2458,8 @@ WIDGET3D.Dialog.prototype.createDialogTitle = function(){
   geometry.materials = materials;
   var material = new THREE.MeshFaceMaterial(materials);
   var mesh = new THREE.Mesh(geometry, material);
-  var title = new WIDGET3D.Widget();
-  title.setObject3D(mesh);
+  var title = new WIDGET3D.Widget(mesh);
+  //title.setObject3D(mesh);
   this.add(title);
 }
 
@@ -2495,8 +2505,8 @@ WIDGET3D.Dialog.prototype.createButtons = function(){
     var geometry = new THREE.CubeGeometry(buttonWidth, buttonHeight, this.depth);
     var mesh = this.createFaceMaterialsMesh(material, geometry);
     
-    var button = new WIDGET3D.Widget();
-    button.setObject3D(mesh);
+    var button = new WIDGET3D.Widget(mesh);
+    //button.setObject3D(mesh);
     button.addEventListener("click", this.buttons[i].onclick);
     this.add(button);
     
@@ -2588,10 +2598,10 @@ WIDGET3D.Dialog.prototype.createTextfields = function(){
     var geometry = new THREE.CubeGeometry(fieldWidth, fieldHeight, this.depth);
     var mesh = this.createFaceMaterialsMesh(material, geometry);
     
-    var textfield = new WIDGET3D.Text({maxLength : this.fields[i].maxLength});
+    var textfield = new WIDGET3D.Text({maxLength : this.fields[i].maxLength}, mesh);
     
     textfield.setText("");
-    textfield.setObject3D(mesh);
+    //textfield.setObject3D(mesh);
     
     textfield.addEventListener("click", textBoxClickFactory(textfield));
     textfield.addEventListener("keypress", textBoxKeyFactory(textfield));
@@ -2632,8 +2642,8 @@ WIDGET3D.Dialog.prototype.createTextfields = function(){
     var geometry2 = new THREE.CubeGeometry(fieldWidth, fieldHeight, this.depth);
     var mesh2 = this.createFaceMaterialsMesh(material2, geometry2);
     
-    var description = new WIDGET3D.Widget();
-    description.setObject3D(mesh2);
+    var description = new WIDGET3D.Widget(mesh2);
+    //description.setObject3D(mesh2);
     this.add(description);
     
     //positioning
@@ -2760,8 +2770,8 @@ WIDGET3D.SelectDialog.prototype.createText = function(){
   var mesh = this.createTitle(this.text, context, this.textCanvas);
   mesh.position.y = this.height*0.5 - this.choiceHeight*0.5;
   
-  var title = new WIDGET3D.Widget();
-  title.setObject3D(mesh);
+  var title = new WIDGET3D.Widget(mesh);
+  //title.setObject3D(mesh);
   
   this.add(title);
   

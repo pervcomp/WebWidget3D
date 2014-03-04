@@ -4,10 +4,10 @@
 // Group object that can has children.
 // Extends WIDGET3D.Widget object.
 //---------------------------------------------
-WIDGET3D.Group = function(){
+WIDGET3D.Group = function(mesh){
 
   WIDGET3D.Widget.call( this );
-  WIDGET3D.GroupBase.call( this );
+  WIDGET3D.GroupBase.call( this, mesh );
 
   this.parent = false;
 };
@@ -29,6 +29,20 @@ WIDGET3D.Group.prototype.removeFromObjects = WIDGET3D.GroupBase.prototype.remove
 WIDGET3D.Group.prototype.show = WIDGET3D.GroupBase.prototype.show;
 
 WIDGET3D.Group.prototype.hide = WIDGET3D.GroupBase.prototype.hide;
+
+//Sets/changes the 3D object for a widget
+WIDGET3D.Group.prototype.setObject3D = function(obj){
+
+  for(var i = 0; i < this.children.length; ++i){
+    this.object3D.remove(this.children[i]);
+    obj.add(this.children[i]);
+  }
+  
+  WIDGET3D.Widget.prototype.setObject3D.call(this, obj);
+
+  return this;
+};
+
 
 WIDGET3D.Group.prototype.add = function(child){
 

@@ -46,7 +46,6 @@ var init = function(){
     var mesh= new THREE.Mesh(geometry, material);
     
     var cube = new WIDGET3D.Widget(mesh);
-    //cube.setObject3D(mesh);
     
     cube.setPositionX(-((cubeSize+(cubeSize/4.0))*CUBES/2.0)+(i*(cubeSize+(cubeSize/2.0))));
     

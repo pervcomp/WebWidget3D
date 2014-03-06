@@ -42,9 +42,9 @@ WIDGET3D.TitledWindow = function(parameters){
   //---------------------------------------------------
   //TITLEBAR, ACTS AS THE BODY FOR THE WINDOW
   //---------------------------------------------------
+  this.title = new WIDGET3D.Widget();
   var titleMesh = this.createTitle(text, material.side);
-  this.title = new WIDGET3D.Widget(titleMesh);
-  //this.title.setObject3D(titleMesh);
+  this.title.setObject3D(titleMesh);
   this.add(this.title);
   
   //---------------------------------------------------

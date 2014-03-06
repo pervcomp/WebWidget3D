@@ -240,10 +240,9 @@ WIDGET3D.Dialog.prototype.createTextfields = function(){
     var geometry = new THREE.CubeGeometry(fieldWidth, fieldHeight, this.depth);
     var mesh = this.createFaceMaterialsMesh(material, geometry);
     
-    var textfield = new WIDGET3D.Text({maxLength : this.fields[i].maxLength}, mesh);
+    var textfield = new WIDGET3D.Text(mesh, {maxLength : this.fields[i].maxLength});
     
     textfield.setText("");
-    //textfield.setObject3D(mesh);
     
     textfield.addEventListener("click", textBoxClickFactory(textfield));
     textfield.addEventListener("keypress", textBoxKeyFactory(textfield));

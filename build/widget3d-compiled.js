@@ -910,6 +910,8 @@ WIDGET3D.Group = function(mesh){
   WIDGET3D.GroupBase.call( this, mesh );
 
   this.parent = false;
+  
+  console.log(this);
 };
 
 
@@ -2235,9 +2237,9 @@ WIDGET3D.TitledWindow = function(parameters){
   //---------------------------------------------------
   //TITLEBAR, ACTS AS THE BODY FOR THE WINDOW
   //---------------------------------------------------
+  this.title = new WIDGET3D.Widget();
   var titleMesh = this.createTitle(text, material.side);
-  this.title = new WIDGET3D.Widget(titleMesh);
-  //this.title.setObject3D(titleMesh);
+  this.title.setObject3D(titleMesh);
   this.add(this.title);
   
   //---------------------------------------------------
@@ -2598,10 +2600,9 @@ WIDGET3D.Dialog.prototype.createTextfields = function(){
     var geometry = new THREE.CubeGeometry(fieldWidth, fieldHeight, this.depth);
     var mesh = this.createFaceMaterialsMesh(material, geometry);
     
-    var textfield = new WIDGET3D.Text({maxLength : this.fields[i].maxLength}, mesh);
+    var textfield = new WIDGET3D.Text(mesh, {maxLength : this.fields[i].maxLength});
     
     textfield.setText("");
-    //textfield.setObject3D(mesh);
     
     textfield.addEventListener("click", textBoxClickFactory(textfield));
     textfield.addEventListener("keypress", textBoxKeyFactory(textfield));

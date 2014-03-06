@@ -10,6 +10,8 @@ WIDGET3D.Group = function(mesh){
   WIDGET3D.GroupBase.call( this, mesh );
 
   this.parent = false;
+  
+  console.log(this);
 };
 
 
